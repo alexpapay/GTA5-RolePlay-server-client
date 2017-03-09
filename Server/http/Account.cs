@@ -11,6 +11,7 @@ namespace TheGodfatherGM.Server.http
 {
     public class Account
     {
+        // Метод по работе с регистрацией и авторизацией. Парсит входящую json на сервер
         public static void Listener(string server, string url, string post)
         {
             if (url == server + "LoginAccount")
@@ -33,16 +34,18 @@ namespace TheGodfatherGM.Server.http
                 Global.CEFController.Close(player);
             }
 
+            // Создание нового персонажа внутри одного аккаунта
             else if (url == server + "CreateCharacter")
             {
                 var Args = JObject.Parse(post);
                 var UserName = Args.SelectToken("UserName").ToString();
                 var SocialClub = Args.SelectToken("SocialClub").ToString();
                 var CharacterName = Args.SelectToken("CharacterName").ToString();
+                var modelName = Args.SelectToken("CharacterModel").ToString();
 
                 Client player = AccountController.GetClientFromSocialClub(SocialClub);
                 // Check null!
-                Commands.CreateCharacter(player, CharacterName);
+                Commands.CreateCharacter(player, CharacterName, modelName);
                 Global.CEFController.Close(player);
             }
 

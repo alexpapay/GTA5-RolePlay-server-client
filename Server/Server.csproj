@@ -40,11 +40,11 @@
     </Reference>
     <Reference Include="GTANetworkServer, Version=0.1.386.270, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\GTANetworkServer.exe</HintPath>
+      <HintPath>..\..\..\GTANetwork\server\GTANetworkServer.exe</HintPath>
     </Reference>
     <Reference Include="GTANetworkShared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=60c67de1b3b675de, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\GTANetworkShared.dll</HintPath>
+      <HintPath>..\..\..\GTANetwork\bin\scripts\GTANetworkShared.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>

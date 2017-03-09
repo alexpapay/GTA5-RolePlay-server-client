@@ -34,7 +34,7 @@
                             <div class="input-field col s12">
 
                                 <div>
-                                    <label asp-for="EmailAddress" for="email">Enter your email</label>
+                                    <label asp-for="EmailAddress" for="email">Введите e-mail</label>
                                     <input asp-for="EmailAddress" class="validate" type="email" id="email" />
                                 </div>
                             </div>
@@ -42,24 +42,24 @@
 
                         <div class="row">
                             <div class="input-field col s12">
-                                <label asp-for="Password" for="password">Enter your password</label>
+                                <label asp-for="Password" for="password">Введите пароль</label>
                                 <input asp-for="Password" class="validate" type="password" id="password" />
                             </div>
                         </div>
                         <div class="row">
                             <div class="input-field col s12">
-                                <label asp-for="ConfirmPassword" for="password">Enter your password</label>
+                                <label asp-for="ConfirmPassword" for="password">Введите повторно пароль</label>
                                 <input asp-for="ConfirmPassword" class="validate" type="password" id="password" />
                             </div>
                             <label style="float: right;">
-                                <a asp-controller="Game" asp-action="ForgotPassword" class="red-text"><b>Forgot Password?</b></a>
+                                <a asp-controller="Game" asp-action="ForgotPassword" class="red-text"><b>Забыли пароль?</b></a>
                             </label>
 
                         </div>
                         <br />
                         <center>
                             <div class="row">
-                                <button asp-controller="Account" asp-action="GameRegister" type="submit" name="btn_login" class="col s12 btn btn-large waves-effect blue">Register</button>
+                                <button asp-controller="Account" asp-action="GameRegister" type="submit" name="btn_login" class="col s12 btn btn-large waves-effect blue">Зарегистрироваться</button>
                             </div>
 
                             <br />

@@ -5,6 +5,18 @@ namespace TheGodfatherGM.Server.Global
 {
     public class UtilCMD : Script
     {
+        // Команда для получения текущих координат и вектора направления вращения
+        [Command("gp")]
+        public void GetPosition(Client player)
+        {
+            var posX = player.position.X;
+            var posY = player.position.Y;
+            var posZ = player.position.Z;
+            var rot = player.rotation.Z;
+
+            API.shared.sendChatMessageToPlayer(player, string.Format("~g~Server: ~w~PosX = {0}; PosY = {1}; PosZ={2}; Rot={3}", posX, posY, posZ, rot));
+        }
+
         [Command("save", GreedyArg = true)]
         public void Command_Save(Client sender)
         {

@@ -8,7 +8,7 @@ namespace TheGodfatherGM.Server
     public class SpawnManager : Script
     {
 
-        private static readonly Vector3 _newPlayerPosition = new Vector3(-1034.794, -2727.422, 13.75663);
+        private static readonly Vector3 _newPlayerPosition = new Vector3(-1034.794, -2727.422, 13.75663); //
         private static readonly Vector3 _newPlayerRotation = new Vector3(0.0, 0.0, -34.4588);
         private static readonly int _newPlayerDimension = 0;
 

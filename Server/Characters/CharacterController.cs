@@ -48,14 +48,17 @@ namespace TheGodfatherGM.Server.Characters
             ContextFactory.Instance.SaveChanges();
         }
 
-        public CharacterController(AccountController accountController, string name)
+        public CharacterController(AccountController accountController, string name, string modelName)
         {
+            PedHash CharacterModel = (PedHash)Enum.Parse(typeof(PedHash), modelName);
+
             accountController.CharacterController = this;
             Character.AccountId = accountController.Account.Id;
             Character.Name = name;
             Character.RegisterDate = DateTime.Now;
-            Character.Model = PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
-            Character.ModelName = "DrFriedlander";
+            Character.Model = Convert.ToInt32(CharacterModel); // PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
+            Character.ModelName = modelName; // "DrFriedlander";
+            Character.Cash = 300;
             ContextFactory.Instance.Character.Add(Character);
             ContextFactory.Instance.SaveChanges();
         }
