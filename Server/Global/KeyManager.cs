@@ -1,4 +1,5 @@
 ﻿using GTANetworkServer;
+using GTANetworkShared;
 using TheGodfatherGM.Server.Characters;
 using TheGodfatherGM.Server.Property;
 
@@ -55,6 +56,13 @@ namespace TheGodfatherGM.Server.Global
                 else if ((int)args[0] == 8)
                 {
                     CharacterController.StopAnimation(player);
+                }
+            }
+            if (eventName == "BuyScooter")
+            {
+                if ((int)args[0] == 77)
+                {
+                    API.createVehicle(VehicleHash.Faggio2, new Vector3(-989.4827, -2706.635, 13.3), new Vector3(0.0, 0.0, 62.19496), 0, 0);
                 }
             }
         }

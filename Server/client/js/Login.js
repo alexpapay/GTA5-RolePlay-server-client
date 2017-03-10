@@ -3,13 +3,13 @@ var width = 380;
 var height = 550;
 var charSelectMenu = null;
 
-charSelectMenu = API.createMenu("SELECT CHARACTER", 0, 0, 6);
+charSelectMenu = API.createMenu("Выберите персонажа", 0, 0, 6);
 charSelectMenu.ResetKey(menuControl.Back);
 
 charSelectMenu.OnItemSelect.connect(function(sender, item, index)
 {
     API.triggerServerEvent("account_selected", index + 1);
-    API.sendNotification("You have selected your character ~b~" + item.Text + "~w~.");
+    API.sendNotification("Вы выбрали персонажа по имени ~b~" + item.Text + "~w~.");
     charSelectMenu.Visible = false;
 });
 
@@ -26,12 +26,12 @@ API.onServerEventTrigger.connect(function(eventName, args)
         {
             var charname = args[i + 1];
             var charItem = API.createMenuItem(charname,
-                "You should select which of your characters you wish to use here.");
+                "Вы должны выбрать каким персонажем вы бы хотели играть.");
             charSelectMenu.AddItem(charItem);
         }
 
         charSelectMenu.Visible = true;
-        API.sendNotification("~r~Please select your character.");
+        API.sendNotification("~r~Пожалуйства выберите своего персонажа");
     }
 });
 

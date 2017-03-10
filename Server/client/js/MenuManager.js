@@ -2,8 +2,8 @@
 var draw = false;
 
 
-API.onResourceStart.connect(function() {
-    
+API.onResourceStart.connect(function () {
+
 });
 
 API.onServerEventTrigger.connect(function (name, args) {
@@ -49,5 +49,5 @@ API.onServerEventTrigger.connect(function (name, args) {
 
 API.onUpdate.connect(function (sender, args) {
 
-    if(menuPool != null) menuPool.ProcessMenus();
+    if (menuPool != null) menuPool.ProcessMenus();
 });

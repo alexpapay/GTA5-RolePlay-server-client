@@ -1,5 +1,4 @@
-﻿
-API.onKeyDown.connect(function (sender, args) {
+﻿API.onKeyDown.connect(function (sender, args) {
 
     if (args.KeyCode == Keys.F1) {
         API.triggerServerEvent("onKeyDown", 0);
@@ -11,7 +10,7 @@ API.onKeyDown.connect(function (sender, args) {
         }
         else API.showCursor(true);
     }
-    else if (args.KeyCode == Keys.N) {  
+    else if (args.KeyCode == Keys.N) {
         API.triggerServerEvent("onKeyDown", 2);
     }
     else if (args.KeyCode == Keys.Q) {
@@ -28,6 +27,9 @@ API.onKeyDown.connect(function (sender, args) {
     }
     else if (args.KeyCode == Keys.L) {
         API.triggerServerEvent("onKeyDown", 7);
+    }
+    else if (args.KeyCode == Keys.E) {
+        API.triggerServerEvent("BuyScooter", 77);
     }
     else if (args.KeyCode == Keys.F) {
         if (resource.hud.drawAnimationHUD) {
