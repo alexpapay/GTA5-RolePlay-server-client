@@ -27,7 +27,7 @@ namespace TheGodfatherGM.Server.User
 
             client.setData("ACCOUNT", this);
 
-            API.shared.sendNotificationToPlayer(client, string.Format("~w~Welcome {0} to {1}. Your last login was at {2}",
+            API.shared.sendNotificationToPlayer(client, string.Format("~w~Добро пожаловать {0} с {1}. Ваш последних вход был {2}",
                 Account.UserName, Global.GlobalVars.ServerName, Account.LastLoginDate));
 
             Account.LastLoginDate = DateTime.Now;

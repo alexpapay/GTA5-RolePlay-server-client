@@ -57,12 +57,11 @@ namespace TheGodfatherGM.Server.Global
                 {
                     CharacterController.StopAnimation(player);
                 }
-            }
-            if (eventName == "BuyScooter")
-            {
-                if ((int)args[0] == 77)
+
+                // Try to test on_key_down trigger with argument 9:
+                else if ((int)args[0] == 9)
                 {
-                    API.createVehicle(VehicleHash.Faggio2, new Vector3(-989.4827, -2706.635, 13.3), new Vector3(0.0, 0.0, 62.19496), 0, 0);
+                    //API.createVehicle(VehicleHash.Faggio2, new Vector3(-989.4827, -2706.635, 13.3), new Vector3(0.0, 0.0, 62.19496), 0, 0);
                 }
             }
         }

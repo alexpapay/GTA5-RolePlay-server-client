@@ -27,13 +27,13 @@
     }
     else if (args.KeyCode == Keys.L) {
         API.triggerServerEvent("onKeyDown", 7);
-    }
-    else if (args.KeyCode == Keys.E) {
-        API.triggerServerEvent("BuyScooter", 77);
-    }
+    }    
     else if (args.KeyCode == Keys.F) {
         if (resource.hud.drawAnimationHUD) {
             API.triggerServerEvent("onKeyDown", 8);
         }
+    }
+    else if (args.KeyCode == Keys.E) {
+        API.triggerServerEvent("onKeyDown", 9);
     }
 });

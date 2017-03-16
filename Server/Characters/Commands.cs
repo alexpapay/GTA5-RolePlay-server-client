@@ -44,6 +44,12 @@ namespace TheGodfatherGM.Server.Characters
             }
         }
 
+        [Command("gettime")]
+        public void GetTimeCommand(Client sender)
+        {
+            sender.sendChatMessage("Time: " + API.getTime());
+        }
+
         [Command("logout")]
         public void LogOut(Client player)
         {

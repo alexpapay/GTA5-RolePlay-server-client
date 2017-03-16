@@ -16,6 +16,9 @@ namespace TheGodfatherGM.Data.Enums
         Door = 2,
 
         [Display(Name = "Building")]
-        Building = 3
+        Building = 3,
+
+        [Display(Name = "Rent")]
+        Rent = 4
     }
 }

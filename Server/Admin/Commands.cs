@@ -166,6 +166,10 @@ namespace TheGodfatherGM.Server.Admin
                 else if (id == 63) API.setEntityPosition(player, new Vector3(3430.155, 5174.196, 41.280));
                 else if (id == 64) API.setEntityPosition(player, new Vector3(3464.689, 5252.736, 20.29798));
                 else if (id == 65) API.setEntityPosition(player, new Vector3(1675.97961, 2585.18457, 45.92)); // Prison
+
+                else if (id == 70) API.setEntityPosition(player, new Vector3(107.4711, -1942.032, 20.3)); // Ballas
+                else if (id == 71) API.setEntityPosition(player, new Vector3(-1081.233, -1259.916, 5.3)); // AutoSchool
+                else if (id == 72) API.setEntityPosition(player, new Vector3(106.7145, -933.4711, 29.3)); // Goverment
             }
         }
 
@@ -370,7 +374,7 @@ namespace TheGodfatherGM.Server.Admin
             else player.sendChatMessage("~r~ERROR: ~w~You are not in a vehicle.");
         }
 
-        [Command("createproperty", "~y~Usage: ~w~/createproperty [player/group] [type] [ID/Part of Name]\nTypes: House (0), Door (1), Building (2)")]
+        [Command("createproperty", "~y~Usage: ~w~/createproperty [player/group] [type] [ID/Part of Name]\nTypes: House (0), Door (1), Building (2), Rent(4)")]
         public void createproperty(Client player, string OwnerType, PropertyType type, string IDOrName)
         {
             AccountController account = player.getData("ACCOUNT");

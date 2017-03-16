@@ -57,7 +57,7 @@ namespace TheGodfatherGM.Server.Characters
             Character.Name = name;
             Character.RegisterDate = DateTime.Now;
             Character.Model = Convert.ToInt32(CharacterModel); // PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
-            Character.ModelName = modelName; // "DrFriedlander";
+            Character.ModelName = "DrFriedlander"; // "DrFriedlander";
             Character.Cash = 300;
             ContextFactory.Instance.Character.Add(Character);
             ContextFactory.Instance.SaveChanges();
