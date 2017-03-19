@@ -84,14 +84,14 @@ namespace TheGodfatherGM.Server
             return true;
 		}
 
-		public static bool RegisterCharacter(AccountController account, string name, string modelName)
-		{
-			if (!DoesCharacterExist(name) && HasCharacterSlot(account))
-			{
-                new CharacterController(account, name, modelName);
+        public static bool RegisterCharacter(AccountController account, string name)
+        {
+            if (!DoesCharacterExist(name) && HasCharacterSlot(account))
+            {
+                new CharacterController(account, name);
                 return true;
             }
-			return false;
-		}
+            return false;
+        }
     }
 }

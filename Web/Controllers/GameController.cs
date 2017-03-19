@@ -21,7 +21,7 @@ namespace TheGodfatherGM.Web.Controllers
             public string SocialClub;
             public string CharacterName;
             public string Token;
-            public string CharacterModel;
+            //public string CharacterModel;
         }
 
         public IActionResult CreateCharacter()
@@ -45,7 +45,6 @@ namespace TheGodfatherGM.Web.Controllers
             jsonData.UserName = user?.UserName;
             jsonData.SocialClub = socialClub;
             jsonData.CharacterName = model.Name;
-            jsonData.CharacterModel = model.ModelHash;
 
             // Send POST to GameServer's listening port:
             using (var client = new HttpClient())

@@ -46,11 +46,11 @@ namespace TheGodfatherGM.Server.Vehicles
             {
                 if (_VehicleController.VehicleData.Character == account.CharacterController.Character)
                 {
-                    API.sendNotificationToPlayer(player, "You have entered your car.");
+                    API.sendNotificationToPlayer(player, "Вы сели в свой транспорт");
                 }
                 else if (account.CharacterController.IsInGroup(_VehicleController.Group.Group.Id))
                 {
-                    API.sendNotificationToPlayer(player, "You have entered a vehicle of your organization.");
+                    API.sendNotificationToPlayer(player, "Вы сели в транспорт вашей организации");
 
                 }
             }
@@ -78,7 +78,7 @@ namespace TheGodfatherGM.Server.Vehicles
 
         public static void LoadVehicles()
         {
-            foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Group != null).ToList())
+            foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Respawnable == true).ToList())
             {
                 VehicleController VehicleController = new VehicleController(vehicle, API.shared.createVehicle((VehicleHash)vehicle.Model, new Vector3(vehicle.PosX, vehicle.PosY, vehicle.PosZ), new Vector3(0.0f, 0.0f, vehicle.Rot), vehicle.Color1, vehicle.Color2));
                 if (vehicle.Group != null) // -1 is reserved for non-group job vehicles.
@@ -86,7 +86,7 @@ namespace TheGodfatherGM.Server.Vehicles
                     VehicleController.Group = EntityManager.GetGroup(vehicle.Group.Id);
                 }
             }
-            API.shared.consoleOutput("[GM] Loaded vehicles: " + ContextFactory.Instance.Vehicle.Count());
+            API.shared.consoleOutput("[GM] Загружено транспорта: " + ContextFactory.Instance.Vehicle.Count() +" ед.");
         }
 
         public static List<Data.Vehicle> GetVehicles(AccountController account)
@@ -184,12 +184,12 @@ namespace TheGodfatherGM.Server.Vehicles
         {
             if (player.velocity != new Vector3(0.0f, 0.0f, 0.0f))
             {
-                API.sendNotificationToPlayer(player, "You must not be moving to park your vehicle.");
+                API.sendNotificationToPlayer(player, "Вы не должны двигаться пока транспорт паркуется");
                 return;
             }
 
             Vector3 firstPos = player.vehicle.position;
-            API.sendNotificationToPlayer(player, "Don't move while parking your vehicle.");
+            API.sendNotificationToPlayer(player, "Не двигайтесь пока ваш транспорт паркуется.");
             Global.Util.delay(2500, () =>
             {
                 if (player.vehicle != null)
@@ -197,15 +197,17 @@ namespace TheGodfatherGM.Server.Vehicles
                     if (firstPos.DistanceTo(player.vehicle.position) <= 5.0f)
                     {
                         VehicleController _VehicleController = EntityManager.GetVehicle(player.vehicle);
-                        Vector3 newPos = player.vehicle.position + new Vector3(0.0f, 0.0f, 0.5f);
+                        Vector3 newPos = player.vehicle.position;// + new Vector3(0.0f, 0.0f, 0.5f);
                         _VehicleController.VehicleData.PosX = newPos.X;
-                        _VehicleController.VehicleData.PosX = newPos.Y;
-                        _VehicleController.VehicleData.PosX = newPos.Z;
+                        _VehicleController.VehicleData.PosY = newPos.Y;
+                        _VehicleController.VehicleData.PosZ = newPos.Z;
+                        
+                        ContextFactory.Instance.SaveChanges();
 
-                        API.sendNotificationToPlayer(player, "~g~Server: ~w~Your vehicle is parked!");
-
+                        API.sendNotificationToPlayer(player, "~g~Сервер: ~w~Ваш траспорт припаркован!");
+                        API.sendNotificationToPlayer(player, "~y~Сервер: ~w~ Х= " + newPos.X + " Y= " + newPos.Y);
                     }
-                    else API.sendNotificationToPlayer(player, "~y~You moved the car while trying to park your vehicle.");
+                    else API.sendNotificationToPlayer(player, "~y~Вы двигали транспорт пока парковались.");
                 }
             });
 

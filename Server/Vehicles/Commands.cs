@@ -8,7 +8,7 @@ namespace TheGodfatherGM.Server.Vehicles
     {
         public Commands() { }
 
-        [Command("car", "~y~USAGE: ~w~/car [engine/hood/trunk]")]
+        [Command("car", "~y~USAGE: ~w~/car [engine/park/hood/trunk]")]
         public void car(Client player, string Choice)
         {
             AccountController account = player.getData("ACCOUNT");
@@ -19,13 +19,13 @@ namespace TheGodfatherGM.Server.Vehicles
                 VehicleController VehicleController = EntityManager.GetVehicle(player.vehicle);
                 if (VehicleController == null || player.vehicleSeat != -1)
                 {
-                    API.sendChatMessageToPlayer(player, "~r~ERROR: ~w~You are not in a vehicle or on the driver's seat.");
+                    API.sendChatMessageToPlayer(player, "~r~ERROR: ~w~¬ы не в транспорте или не на сидении водител€");
                     return;
                 }
 
                 if (!VehicleController.CheckAccess(account))
                 {
-                    API.sendNotificationToPlayer(player, "You cannot operate this vehicle.");
+                    API.sendNotificationToPlayer(player, "¬ы не можете использовать данный транспорт.");
                     return;
                 }
                 else
@@ -48,7 +48,7 @@ namespace TheGodfatherGM.Server.Vehicles
                 Data.Vehicle VM = VehicleController.VehicleData;
                 if (VM == null || player.vehicleSeat != -1)
                 {
-                    API.sendNotificationToPlayer(player, "~r~ERROR: ~w~You are not in a vehicle or on the driver's seat.");
+                    API.sendNotificationToPlayer(player, "~r~ERROR: ~w~¬ы не в транспорте или не на сидении водител€.");
                     return;
                 }
 
@@ -56,7 +56,7 @@ namespace TheGodfatherGM.Server.Vehicles
                 {
                     VehicleController.ParkVehicle(player);
                 }
-                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~You cannot park this car.");
+                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~¬ы не можете парковать данный транспорт");
             }
 
             else if (Choice == "hood" || Choice == "trunk")
@@ -67,7 +67,7 @@ namespace TheGodfatherGM.Server.Vehicles
 
                 if(VehicleController == null)
                 {
-                    API.sendNotificationToPlayer(player, "You are not near a vehicle.");
+                    API.sendNotificationToPlayer(player, "¬ы находитесь далеко от транспорта.");
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace TheGodfatherGM.Server.Vehicles
                     if (Choice == "hood") VehicleController.TriggerDoor(VehicleController.Vehicle, 4);
                     else VehicleController.TriggerDoor(VehicleController.Vehicle, 5);
                 }
-                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~You cannot park this car.");
+                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~¬ы не можете парковать данный транспорт.");
             }
         }
     }

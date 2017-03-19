@@ -35,19 +35,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <h5>Выберите модель персонажа</h5>
-                        <hr />
-                        <div asp-validation-summary="ModelOnly"></div>
-                        <div class='row'>
-                            <div class='input-field col s12'>
-                                <div>
-                                    <label asp-for="ModelHash" for='email'>Введите имя модели</label>
-                                    <input asp-for="ModelHash" class='validate' type='text' id='name' autofocus />
-                                </div>
-                            </div>
-                        </div>
-
                         <center>
                             <div class="row">
                                 <button asp-controller="Game" asp-action="CreateCharacter" type="submit" name="btn_login" class="col s12 btn btn-large waves-effect blue">Создать</button>

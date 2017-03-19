@@ -73,16 +73,22 @@ namespace TheGodfatherGM.Server.Property
 
         public void CreateWorldEntity()
         {
-            ExteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+            if (PropertyData.Type == PropertyType.Invalid)
+                ExteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
-            InteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+            if (PropertyData.Type == PropertyType.Invalid)
+                InteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
-            RentPlaceMarker = API.shared.createMarker(1, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+            if (PropertyData.Type == PropertyType.Rent)
+                RentPlaceMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                new Vector3(2f, 2f, 2f), 150, 0, 255, 0);
 
-            ExteriorTextLabel = API.createTextLabel("~g~[Property (ID: " + PropertyData.PropertyID + ")]\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nOwner: " + ownername, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-            InteriorTextLabel = API.createTextLabel("~w~[Property Exit (ID: " + PropertyData.PropertyID + ")]\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nOwner: " + ownername, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-            RentPlaceTextLabel = API.createTextLabel("~w~[Прокат мопеда.\nВсего 30$ за час", new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+            if (PropertyData.Type == PropertyType.Invalid)
+                ExteriorTextLabel = API.createTextLabel("~g~Вход (в: " + PropertyData.PropertyID + ")\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+            if (PropertyData.Type == PropertyType.Invalid)
+                InteriorTextLabel = API.createTextLabel("~w~Выход (из: " + PropertyData.PropertyID + ")\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+            if (PropertyData.Type == PropertyType.Rent)
+                RentPlaceTextLabel = API.createTextLabel("~w~Прокат мопеда.\nВсего 30$ за полчаса", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
 
             if (PropertyData.Type == PropertyType.Building)
             {
@@ -145,7 +151,7 @@ namespace TheGodfatherGM.Server.Property
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    if (PropertyData.Enterable)
+                    if (PropertyData.Type == PropertyType.Rent)
                     {
                         //API.shared.sendNotificationToPlayer(player, "This is a " + Type() + ".\nPress N to enter.");
                         API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 1, "Прокат мопеда", "Возьмите на час мопед всего за 30$", false, "Оплатить и поехать");
@@ -158,8 +164,8 @@ namespace TheGodfatherGM.Server.Property
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    if (PropertyData.Enterable)
-                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 0, "", "", false, ""); 
+                    if (PropertyData.Type == PropertyType.Rent)
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 0, "Прокат мопеда", "Возьмите на час мопед всего за 30$", false, "Оплатить и поехать"); 
                 }
             };
         }

@@ -11,7 +11,7 @@ namespace TheGodfatherGM.Web.Models.GameViewModel
         [Required]
         public string socialclub { get; set; }
 
-        [Required]
-        public string ModelHash { get; set; }
+        //[Required]
+        //public string ModelHash { get; set; }
     }
 }

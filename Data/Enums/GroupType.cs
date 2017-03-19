@@ -5,13 +5,13 @@ namespace TheGodfatherGM.Data.Enums
 {
     public enum GroupType
     {
+        [Display(Name = "Homeless")]
+        [BlipType(496)]
+        Homeless = 0,
+
         [Display(Name = "Police Department")]
         [BlipType(60)]
-        PoliceDepartment = 0,
-
-        [Display(Name = "FBI")]
-        [BlipType(60)]
-        FBI = 1,
+        PoliceDepartment = 1,        
 
         [Display(Name = "National Guard")]
         [BlipType(60)]
@@ -42,6 +42,10 @@ namespace TheGodfatherGM.Data.Enums
 
         [Display(Name = "Business")]
         [BlipType(50)]
-        Business = 9
+        Business = 9,
+
+        [Display(Name = "FBI")]
+        [BlipType(60)]
+        FBI = 10
     }
 }

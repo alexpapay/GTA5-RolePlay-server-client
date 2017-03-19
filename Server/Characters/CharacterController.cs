@@ -48,15 +48,14 @@ namespace TheGodfatherGM.Server.Characters
             ContextFactory.Instance.SaveChanges();
         }
 
-        public CharacterController(AccountController accountController, string name, string modelName)
+        public CharacterController(AccountController accountController, string name)
         {
-            PedHash CharacterModel = (PedHash)Enum.Parse(typeof(PedHash), modelName);
-
             accountController.CharacterController = this;
             Character.AccountId = accountController.Account.Id;
+            Character.ActiveGroupID = 1;    // Homeless from start
             Character.Name = name;
             Character.RegisterDate = DateTime.Now;
-            Character.Model = Convert.ToInt32(CharacterModel); // PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
+            Character.Model = PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
             Character.ModelName = "DrFriedlander"; // "DrFriedlander";
             Character.Cash = 300;
             ContextFactory.Instance.Character.Add(Character);
@@ -106,19 +105,26 @@ namespace TheGodfatherGM.Server.Characters
         {
             var CharacterMenuEntries = new List<string>();
             var Characters = AccountController.Account.Character.ToList();
+            API.shared.sendChatMessageToPlayer(AccountController.Client, "Char: " + Characters.Count.ToString());
+
             if (Characters == null || Characters.Count == 0)
-            {
+            {              
                 CharacterMenuEntries.Add("Create Character");
-                API.shared.triggerClientEvent(AccountController.Client, "create_menu", 0, null, "Characters", true, CharacterMenuEntries.ToArray());
+                API.shared.triggerClientEvent(AccountController.Client, "create_menu", 0, null, "Characters", true, CharacterMenuEntries.ToArray());               
             }
             else
             {
+                /*
                 foreach (var character in Characters)
                 {
                     CharacterMenuEntries.Add(character.Name.Replace("_", " "));
                 }
                 CharacterMenuEntries.Add("Create new character");
                 API.shared.triggerClientEvent(AccountController.Client, "create_menu", 0, null, "Characters", true, CharacterMenuEntries.ToArray());
+                */
+
+                // Открытие персонажа если он уже был создан
+                SelectCharacter(AccountController.Client, 1);
             }
         }
 

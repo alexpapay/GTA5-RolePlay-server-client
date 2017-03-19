@@ -48,6 +48,7 @@ namespace TheGodfatherGM.Data
         public virtual Group Group { get; set; }
         public int? JobId { get; set; }
         public virtual Job Job { get; set; }
+        public int Fuel { get; set; }
 
         public Vehicle()
         {

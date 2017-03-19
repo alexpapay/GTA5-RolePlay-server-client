@@ -41,11 +41,11 @@ namespace TheGodfatherGM.Server.http
                 var UserName = Args.SelectToken("UserName").ToString();
                 var SocialClub = Args.SelectToken("SocialClub").ToString();
                 var CharacterName = Args.SelectToken("CharacterName").ToString();
-                var modelName = Args.SelectToken("CharacterModel").ToString();
+                //var modelName = Args.SelectToken("CharacterModel").ToString();
 
                 Client player = AccountController.GetClientFromSocialClub(SocialClub);
                 // Check null!
-                Commands.CreateCharacter(player, CharacterName, modelName);
+                Commands.CreateCharacter(player, CharacterName/*, modelName*/);
                 Global.CEFController.Close(player);
             }
 

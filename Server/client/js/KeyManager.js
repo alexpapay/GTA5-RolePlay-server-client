@@ -33,7 +33,10 @@
             API.triggerServerEvent("onKeyDown", 8);
         }
     }
-    else if (args.KeyCode == Keys.E) {
+    else if (args.KeyCode == Keys.D1) {
         API.triggerServerEvent("onKeyDown", 9);
+    }
+    else if (args.KeyCode == Keys.D2) {
+        API.triggerServerEvent("onKeyDown", 10);
     }
 });
