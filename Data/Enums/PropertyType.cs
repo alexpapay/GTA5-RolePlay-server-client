@@ -8,17 +8,23 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Invalid")]
         Invalid = 0,
 
-        [BlipType(60)]
-        [Display(Name = "House")]
+        [BlipType(40)]
+        [Display(Name = "Жилой дом")]
         House = 1,
 
-        [Display(Name = "Door")]
+        [Display(Name = "Дверь")]
         Door = 2,
 
-        [Display(Name = "Building")]
+        [BlipType(40)]
+        [Display(Name = "Строение")]
         Building = 3,
 
-        [Display(Name = "Rent")]
-        Rent = 4
+        [BlipType(512)]
+        [Display(Name = "Прокат")]
+        Rent = 4,
+
+        [BlipType(277)]
+        [Display(Name = "Работа грузчиком")]
+        WorkLoader = 5
     }
 }

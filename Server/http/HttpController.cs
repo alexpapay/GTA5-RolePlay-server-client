@@ -57,6 +57,7 @@ namespace TheGodfatherGM.Server.http
                 Account.Listener(server, ctx.Request.Url.ToString(), post);
                 Property.Listener(server, ctx.Request.Url.ToString(), post);
                 Vehicle.Listener(server, ctx.Request.Url.ToString(), post);
+                //Group.Listener(server, ctx.Request.Url.ToString(), post);
 
                 byte[] buf = Encoding.UTF8.GetBytes("");
                 ctx.Response.ContentEncoding = Encoding.UTF8;

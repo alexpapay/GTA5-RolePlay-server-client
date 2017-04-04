@@ -118,7 +118,7 @@ namespace TheGodfatherGM.Server.Vehicles
 
         public void UnloadVehicle(AccountController account)
         {
-            API.sendNotificationToPlayer(account.Client, "You stored your " + API.getVehicleDisplayName((VehicleHash)Vehicle.model));
+            //API.sendNotificationToPlayer(account.Client, "You stored your " + API.getVehicleDisplayName((VehicleHash)Vehicle.model));
             EntityManager.Remove(this);
             Vehicle.delete();
         }
@@ -158,6 +158,40 @@ namespace TheGodfatherGM.Server.Vehicles
 
                 player.setData("VSTORAGE", VehicleIDs);
                 API.shared.triggerClientEvent(account.Client, "create_menu", 1, null, "Vehicles", false, VehicleNames.ToArray());
+            }
+        }
+                
+        public static void RentVehicle()
+        {            
+            foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Type == 1).ToList())
+            {
+                if (vehicle.Fuel != 0)
+                {
+                    vehicle.Fuel = vehicle.Fuel - 1;
+                    ContextFactory.Instance.SaveChanges();
+                }
+                else
+                {
+                    AccountController accountController = AccountController.GetAccountControllerFromId(vehicle.CharacterId);
+                    VehicleController VehicleController = EntityManager.GetVehicle(vehicle);
+
+                    if (accountController.Client.isInVehicle)
+                    {
+                        VehicleController.Vehicle.engineStatus = false;
+
+                        API.shared.triggerClientEvent(accountController.Client, "rent_finish_menu",
+                            1, //0
+                            "Время проката мопеда вышло",
+                            "Продлите ваш мопед на полчаса всего за 30$");
+                    }
+                    else
+                    {
+                        EntityManager.Remove(VehicleController);
+                        VehicleController.Vehicle.delete();
+                        ContextFactory.Instance.Vehicle.Remove(vehicle);
+                        ContextFactory.Instance.SaveChanges();
+                    }
+                }
             }
         }
 

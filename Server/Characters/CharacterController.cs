@@ -9,6 +9,7 @@ using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.User;
 using TheGodfatherGM.Data;
 using Data.Interfaces;
+using TheGodfatherGM.Server.Groups;
 
 namespace TheGodfatherGM.Server.Characters
 {
@@ -51,13 +52,21 @@ namespace TheGodfatherGM.Server.Characters
         public CharacterController(AccountController accountController, string name)
         {
             accountController.CharacterController = this;
-            Character.AccountId = accountController.Account.Id;
-            Character.ActiveGroupID = 1;    // Homeless from start
+            Character.AccountId = accountController.Account.Id;  
             Character.Name = name;
             Character.RegisterDate = DateTime.Now;
             Character.Model = PedHash.DrFriedlander.GetHashCode(); //Global.GlobalVars._defaultPedModel.GetHashCode();
-            Character.ModelName = "DrFriedlander"; // "DrFriedlander";
+            Character.ModelName = "DrFriedlander";
             Character.Cash = 300;
+            Character.PlayMinutes = 0;
+            Character.Level = 1;
+            //Character.SocialClub = accountController.Account.SocialClub;
+
+            GroupController groupController = EntityManager.GetGroup(1);
+            
+            //accountController.CharacterController.AddGroup(groupController.Group, false);
+            //accountController.CharacterController.SetActiveGroup(groupController.Group);            
+
             ContextFactory.Instance.Character.Add(Character);
             ContextFactory.Instance.SaveChanges();
         }
@@ -140,7 +149,7 @@ namespace TheGodfatherGM.Server.Characters
             else
             {
                 int characterid = account.Account.Character.ToList()[selectId - 1].Id;
-                Data.Character characterData = ContextFactory.Instance.Character.FirstOrDefault(x => x.Id == characterid);
+                Character characterData = ContextFactory.Instance.Character.FirstOrDefault(x => x.Id == characterid);
                 CharacterController characterController = new CharacterController(account, characterData);
                 characterController.LoginCharacter(account);
             }
@@ -187,7 +196,7 @@ namespace TheGodfatherGM.Server.Characters
         }
 
         public void AddGroup(Data.Group group, bool leader)
-        {
+        {            
             GroupMember memberEntry = new GroupMember();
             memberEntry.Character = Character;
             memberEntry.Group = group;
@@ -199,21 +208,23 @@ namespace TheGodfatherGM.Server.Characters
         public void SetActiveGroup(Data.Group group)
         {
             if (group == null) return;
+            
             GroupMember GroupInfo = GetGroupInfo(group.Id);
             if (GroupInfo != null)
             {
                 ActiveGroup = new GroupMember();
                 ActiveGroup.Group = group;
-                ActiveGroup.Group = group;
                 ActiveGroup.Leader = GroupInfo.Leader;
                 Character.ActiveGroupID = GroupInfo.Group.Id;
-                API.shared.consoleOutput("Set active group to: " + ActiveGroup.Group.Name);
+                API.shared.consoleOutput("Вы переведены в группу: " + ActiveGroup.Group.Name);
             }
+            
+            //API.shared.consoleOutput("Вы переведены в группу: " + group.Name + "На должность: " + Enum.GetName(typeof(Data.Enums.GroupExtraType), group.Id));
         }
 
         public string ListGroups()
         {
-            string returnstring = "Groups: ";
+            string returnstring = "Группы: ";
             int count = 0;
             foreach (var group in Character.GroupMember)
             {

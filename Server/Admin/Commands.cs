@@ -66,7 +66,19 @@ namespace TheGodfatherGM.Server.Admin
             target.Client.dimension = player.dimension;
         }
 
-        [Command("goto", "/goto [type (property/job/place)] [id]")]
+        [Command("gocoo", "/gocoo [PosX, PosY, PosZ]")]
+        public void goCoord(Client player, double PosX, double PosY, double PosZ)
+        {
+            AccountController account = player.getData("ACCOUNT");
+            if (account == null) return;
+
+            if (!AdminController.AdminRankCheck("goto", account)) return;
+
+            player.dimension = 0;
+            API.setEntityPosition(player, new Vector3(PosX, PosY, PosZ));
+        }
+
+        [Command("goto", "/goto [type (property/job/place/coord)] [id]")]
         public void go(Client player, string type, int id)
         {
             AccountController account = player.getData("ACCOUNT");
@@ -170,7 +182,14 @@ namespace TheGodfatherGM.Server.Admin
                 else if (id == 70) API.setEntityPosition(player, new Vector3(107.4711, -1942.032, 20.3)); // Ballas
                 else if (id == 71) API.setEntityPosition(player, new Vector3(-1081.233, -1259.916, 5.3)); // AutoSchool
                 else if (id == 72) API.setEntityPosition(player, new Vector3(106.7145, -933.4711, 29.3)); // Goverment
+                else if (id == 73) API.setEntityPosition(player, new Vector3(110.4, -744.2, 45.7496)); // FBI LOBBY
             }
+        }
+
+        [Command("gipl")]
+        public void GetIPL(Client player, string IplName)
+        {
+            API.requestIpl(IplName);            
         }
 
         [Command("makeadmin")]
@@ -195,7 +214,7 @@ namespace TheGodfatherGM.Server.Admin
             }
         }
 
-        [Command]
+        [Command("invincible")]
         public void invincible(Client player)
         {
             AccountController account = player.getData("ACCOUNT");
@@ -203,8 +222,12 @@ namespace TheGodfatherGM.Server.Admin
             if (!AdminController.AdminRankCheck("makeadmin", account)) return;
 
             player.invincible = !player.invincible;
+            player.collisionless = !player.collisionless;
+            player.spectate(player);
             if (player.invincible) API.sendNotificationToPlayer(player, "You are now invincible.");
             else API.sendNotificationToPlayer(player, "You are no longer invincible.");
+            if (player.collisionless) API.sendNotificationToPlayer(player, "You are now no collision.");
+            else API.sendNotificationToPlayer(player, "You are no longer colission.");
         }
 
         [Command]

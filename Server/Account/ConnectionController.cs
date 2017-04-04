@@ -1,7 +1,14 @@
 ﻿using GTANetworkServer;
 using GTANetworkShared;
+using System;
+using System.Linq;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.User;
+using TheGodfatherGM.Server.Characters;
+using Newtonsoft.Json;
+using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text;
 
 namespace TheGodfatherGM.Server
 {
@@ -10,18 +17,19 @@ namespace TheGodfatherGM.Server
         public static readonly Vector3 _startPos = new Vector3(3433.339f, 5177.579f, 39.79541f);
         public static readonly Vector3 _startCamPos = new Vector3(3476.85f, 5228.022f, 9.453369f);
 
+
         public ConnectionController()
         {
             API.onPlayerConnected += OnPlayerConnectedHandler;
             API.onPlayerFinishedDownload += onPlayerFinishedDownloadHandler;
-            API.onPlayerDisconnected += onPlayerDisconnectedHandler;
+            API.onPlayerDisconnected += onPlayerDisconnectedHandler;            
         }
 
         public void OnPlayerConnectedHandler(Client player)
         {
             if(AccountController.IsAccountBanned(player))
             {
-                player.kick("~r~You are banned from this server.");
+                player.kick("~r~Вы забанены на данном сервере.");
             }
         }
 
@@ -32,10 +40,12 @@ namespace TheGodfatherGM.Server
         }
 
         public void onPlayerDisconnectedHandler(Client player, string reason)
-        {
+        {            
             AccountController account = player.getData("ACCOUNT");
             if (account == null) return;
-            LogOut(account);
+            account.CharacterController.Character.Online = false;
+            ContextFactory.Instance.SaveChanges();
+            LogOut(account);            
         }
 
         public static void LoginMenu(Client player)
@@ -44,11 +54,12 @@ namespace TheGodfatherGM.Server
             player.position = _startPos;
             player.freeze(true);
             player.transparency = 0;
-            PromptLoginScreen(player);
+            PromptLoginScreenAsync(player);
         }
 
         public static void LogOut(AccountController account, int type = 0)
         {
+            account.CharacterController.Character.LastLogoutDate = DateTime.Now;            
             account.Save();
             account.Account.Online = false;
             if (type != 0)
@@ -57,17 +68,31 @@ namespace TheGodfatherGM.Server
             }
 
             account.Account.SessionID = null;
+            account.CharacterController.Character.Online = false;
             ContextFactory.Instance.SaveChanges();
-            Vehicles.VehicleController.UnloadVehicles(account);
+            //Vehicles.VehicleController.UnloadVehicles(account);
             account.Client.resetData("ACCOUNT");
         }
 
-        public static void PromptLoginScreen(Client player)
+        // Инициализация окна регистрации или авторизации
+        public static void PromptLoginScreenAsync(Client player)
         {
+
+            //CharacterController.SelectCharacter(player, 1);
+            
             string url = Global.GlobalVars.WebServerConnectionString + "Game/Login?socialclub=" + player.socialClubName + "&token=" + Global.Util.GenerateToken();
             API.shared.triggerClientEvent(player, "CEFController", url);
             API.shared.sendChatMessageToPlayer(player, "URL: " + url);
-        }
+            /*
+            AccountController account = player.getData("ACCOUNT");
+            var test = ContextFactory.Instance.Character.FirstOrDefault(x => x.Name == player.socialClubName);
+
+            if (test != null)
+            {
+                CharacterController.SelectCharacter(player, 0);
+            }
+            else LogOut(account);*/
+        }        
 
         /*
         [Command]
@@ -79,7 +104,7 @@ namespace TheGodfatherGM.Server
                 return;
             }
 
-            var accountData = ContextFactory.Instance.Accounts.Where(x => x.UserName == name).FirstOrDefault();
+            var accountData = ContextFactory.Instance.Account.Where(x => x.UserName == name).FirstOrDefault();
             if (accountData != null && BCr.BCrypt.Verify(password, accountData.PasswordHash))
             {
                 if (AccountController.IsAccountBanned(accountData))
@@ -96,4 +121,4 @@ namespace TheGodfatherGM.Server
         }
         */
     }
-}
+    }

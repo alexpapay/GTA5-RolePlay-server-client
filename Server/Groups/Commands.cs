@@ -8,7 +8,7 @@ namespace TheGodfatherGM.Server.Groups
 {
     public class Commands : Script
     {
-        [Command]
+        [Command("creategroup")]
         public void creategroup(Client player)
         {
             AccountController account = player.getData("ACCOUNT");
@@ -43,7 +43,7 @@ namespace TheGodfatherGM.Server.Groups
             }
         }
 
-        [Command]
+        [Command("listgroups")]
         public void listgroups(Client player)
         {
             AccountController account = player.getData("ACCOUNT");
@@ -56,7 +56,7 @@ namespace TheGodfatherGM.Server.Groups
             player.sendChatMessage("_______________");
         }
 
-        [Command]
+        [Command("switchgroup")]
         public void switchgroup(Client player, int id)
         {
             if (id > 0)
@@ -74,7 +74,7 @@ namespace TheGodfatherGM.Server.Groups
                 {
                     account.CharacterController.AddGroup(GroupController.Group, true);
                     account.CharacterController.SetActiveGroup(GroupController.Group);
-                    API.shared.sendChatMessageToPlayer(player, "You joined: " + GroupController.Group.Name);
+                    API.shared.sendChatMessageToPlayer(player, "Вы добавлены в группу: " + GroupController.Group.Name);
                 }
             }
         }

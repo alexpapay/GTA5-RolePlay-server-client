@@ -29,6 +29,10 @@ namespace TheGodfatherGM.Server.Property
         public Marker RentPlaceMarker { get; private set; }
         public TextLabel RentPlaceTextLabel { get; private set; }
         public ColShape RentPlaceColshape { get; private set; }
+        //WorkLoader place fileds
+        public Marker WorkLoaderMarker { get; private set; }
+        public TextLabel WorkLoaderTextLabel { get; private set; }
+        public ColShape WorkLoaderColshape { get; private set; }
 
         public PropertyController() { }
 
@@ -68,33 +72,59 @@ namespace TheGodfatherGM.Server.Property
                 EntityManager.Add(propertyController);
 
             }
-            API.shared.consoleOutput("[GM] Loaded properties: " + ContextFactory.Instance.Property.Count());
+            API.shared.consoleOutput("[GM] Загружено маркеров: " + ContextFactory.Instance.Property.Count() + " шт.");
         }
 
         public void CreateWorldEntity()
         {
             if (PropertyData.Type == PropertyType.Invalid)
+            {                
                 ExteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-               new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
-            if (PropertyData.Type == PropertyType.Invalid)
+                               new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
+                ExteriorTextLabel = API.createTextLabel("~g~Вход (в: " + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+
                 InteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
-            if (PropertyData.Type == PropertyType.Rent)
-                RentPlaceMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-               new Vector3(2f, 2f, 2f), 150, 0, 255, 0);
-
-            if (PropertyData.Type == PropertyType.Invalid)
-                ExteriorTextLabel = API.createTextLabel("~g~Вход (в: " + PropertyData.PropertyID + ")\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-            if (PropertyData.Type == PropertyType.Invalid)
-                InteriorTextLabel = API.createTextLabel("~w~Выход (из: " + PropertyData.PropertyID + ")\n~w~" + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-            if (PropertyData.Type == PropertyType.Rent)
-                RentPlaceTextLabel = API.createTextLabel("~w~Прокат мопеда.\nВсего 30$ за полчаса", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                InteriorTextLabel = API.createTextLabel("~w~Выход (из: " + PropertyData.Name + "\n~c~Type: " + Type() + "\nВладелец: " + ownername, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+            }
 
             if (PropertyData.Type == PropertyType.Building)
             {
+                
                 Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
                 Blip.sprite = GetBlip();
                 Blip.name = PropertyData.Name;
+            }
+
+            if (PropertyData.Type == PropertyType.House)
+            {
+                var owner = ContextFactory.Instance.Character.FirstOrDefault(x => x.Id == PropertyData.CharacterId);
+                ExteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                    new Vector3(1f, 1f, 1f), 150, 255, 255, 50);
+                ExteriorTextLabel = API.createTextLabel("~g~Вход в: " + PropertyData.Name + "\n~c~Тип: " + Type() + "\nВладелец: " + owner.Name, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                Blip.sprite = 40;
+                Blip.name = "Жилой дом";
+            }
+
+            if (PropertyData.Type == PropertyType.Rent)
+            {
+                RentPlaceMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                    new Vector3(2f, 2f, 2f), 150, 0, 255, 0);
+                RentPlaceTextLabel = API.createTextLabel("~w~Прокат мопеда.\nВсего 30$ за полчаса", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                Blip.sprite = 512;
+                Blip.name = "Прокат";
+            }
+            
+            if (PropertyData.Type == PropertyType.WorkLoader)
+            {
+                WorkLoaderMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                    new Vector3(1f, 1f, 1f), 250, 25, 50, 200);
+                WorkLoaderTextLabel = API.createTextLabel("~w~Работа грузчиком.\nЦелых 3$ за один цикл", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                Blip.sprite = 277;
+                Blip.name = "Работа грузчиком";
             }
             CreateColShape();
         }
@@ -109,7 +139,7 @@ namespace TheGodfatherGM.Server.Property
                 {
                     if (PropertyData.Enterable)
                     {
-                        API.shared.sendNotificationToPlayer(player, "This is a " + Type() + ".\nPress N to enter.");
+                        API.shared.sendNotificationToPlayer(player, "Вы можете зайти." + Type() + ".\nНажмите N для входа.");
                         player.setData("AT_PROPERTY", this);
                     }
                 }
@@ -154,7 +184,7 @@ namespace TheGodfatherGM.Server.Property
                     if (PropertyData.Type == PropertyType.Rent)
                     {
                         //API.shared.sendNotificationToPlayer(player, "This is a " + Type() + ".\nPress N to enter.");
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 1, "Прокат мопеда", "Возьмите на час мопед всего за 30$", false, "Оплатить и поехать");
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 1, "Прокат мопеда", "Возьмите на полчаса мопед всего за 30$", false, "Оплатить и поехать");
                         //player.setData("AT_PROPERTY", this);
                     }
                 }
@@ -168,7 +198,29 @@ namespace TheGodfatherGM.Server.Property
                     API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 0, "Прокат мопеда", "Возьмите на час мопед всего за 30$", false, "Оплатить и поехать"); 
                 }
             };
-        }
+
+            WorkLoaderColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 3f);
+            WorkLoaderColshape.onEntityEnterColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    if (PropertyData.Type == PropertyType.WorkLoader)
+                    {
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 1, "Работа грузчиком", "Заработайте свои первые деньги!", PropertyData.PropertyID);
+                    }
+                }
+            };
+            WorkLoaderColshape.onEntityExitColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    if (PropertyData.Type == PropertyType.WorkLoader)
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 0, "Работа грузчиком", "Заработайте свои первые деньги!", PropertyData.PropertyID);
+                }
+            };
+        }        
 
         public static void CreateProperty(Client player, string ownerType, PropertyType type, string Name)
         {
@@ -201,6 +253,7 @@ namespace TheGodfatherGM.Server.Property
             propertyData.ExtPosX = player.position.X;
             propertyData.ExtPosY = player.position.Y;
             propertyData.ExtPosZ = player.position.Z;
+            propertyData.Enterable = true;
             PropertyController.ownername = ownerName;
 
             ContextFactory.Instance.Property.Add(propertyData);
@@ -235,7 +288,7 @@ namespace TheGodfatherGM.Server.Property
            
             if (!PropertyData.Enterable)
             {
-                API.shared.sendNotificationToPlayer(player, "~g~Server: ~w~You cannot enter this property.");
+                API.shared.sendNotificationToPlayer(player, "~g~Server: ~w~Вы не можете сюда войти.");
                 return;
             }
 

@@ -5,47 +5,82 @@ namespace TheGodfatherGM.Data.Enums
 {
     public enum GroupType
     {
-        [Display(Name = "Homeless")]
+        [Display(Name = "Бомжи")]
         [BlipType(496)]
         Homeless = 0,
 
-        [Display(Name = "Police Department")]
-        [BlipType(60)]
+        [Display(Name = "Полиция")]
+        [BlipType(188)]
         PoliceDepartment = 1,        
 
-        [Display(Name = "National Guard")]
+        [Display(Name = "Военные")]
         [BlipType(60)]
         NationalGuard = 2,
 
-        [Display(Name = "Medical Department")]
+        [Display(Name = "Медики")]
         [BlipType(61)]
         MedicalDepartment = 3,
 
-        [Display(Name = "Correctional Facitility")]
-        [BlipType(60)]
+        [Display(Name = "Азтэк")]
         CorrectionalFacility = 4,
 
-        [Display(Name = "Hitman Agency")]
+        [Display(Name = "Авианосец")]
         HitmanAgency = 5,
 
-        [Display(Name = "Taxi Cab Company")]
+        [Display(Name = "Таксисты")]
         [BlipType(198)]
         TaxiCabCompany = 6,
 
-        [Display(Name = "News Network")]
+        [Display(Name = "Новости")]
         [BlipType(50)]
         NewsNetwork = 7,
 
-        [Display(Name = "Criminal Organization")]
+        [Display(Name = "Якутза")]
         [BlipType(1)]
         CriminalOrganization = 8,
 
-        [Display(Name = "Business")]
+        [Display(Name = "Бизнес")]
         [BlipType(50)]
         Business = 9,
 
-        [Display(Name = "FBI")]
+        [Display(Name = "ФБР")]
         [BlipType(60)]
-        FBI = 10
+        FBI = 10,
+
+        [Display(Name = "Правительство")]
+        [BlipType(181)]
+        Goverment = 11,
+
+        [Display(Name = "Автошкола")]
+        [BlipType(315)]
+        AutoSchool = 12,
+
+        [Display(Name = "Балласы")]
+        [BlipType(106)]
+        Ballas = 13,
+
+        [Display(Name = "Вагосы")]
+        [BlipType(315)]
+        Vagos = 14,
+
+        [Display(Name = "La Costa Notsa")]
+        [BlipType(315)]
+        LaCostaNotsa = 15,
+
+        [Display(Name = "Русская мафия")]
+        [BlipType(315)]
+        RussianMafia = 16,
+
+        [Display(Name = "Грув")]
+        [BlipType(315)]
+        Groove = 17,
+
+        [Display(Name = "Зона 51")]
+        [BlipType(315)]
+        Zone51 = 18,
+
+        [Display(Name = "LVPD")]
+        [BlipType(315)]
+        LVPD = 19
     }
 }

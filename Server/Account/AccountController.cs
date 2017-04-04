@@ -89,6 +89,13 @@ namespace TheGodfatherGM.Server.User
             return null;
         }
 
+        public static AccountController GetAccountControllerFromId(int? Id)
+        {
+            Client client = API.shared.getAllPlayers().FirstOrDefault(x => x.GetAccountController().CharacterController.Character.Id == Id);
+            if (client != null) return client.GetAccountController();
+            return null;
+        }
+
         public void Save()
         {
             if (CharacterController != null)

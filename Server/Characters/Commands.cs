@@ -1,5 +1,6 @@
 ﻿using GTANetworkServer;
 using GTANetworkShared;
+using System;
 using TheGodfatherGM.Server.User;
 
 namespace TheGodfatherGM.Server.Characters
@@ -20,7 +21,7 @@ namespace TheGodfatherGM.Server.Characters
         }
 
         [Command("createcharacter")]
-        public static void CreateCharacter(Client player, string name/*, string modelName*/)
+        public static void CreateCharacter(Client player, string name)
         {
             if (!CharacterController.NameValidityCheck(player, name))
             {
@@ -58,6 +59,7 @@ namespace TheGodfatherGM.Server.Characters
             API.shared.sendNotificationToPlayer(player, "~y~Server: ~w~You will be logged out in 5 seconds.", true);
             Global.Util.delay(5000, () =>
             {
+                account.CharacterController.Character.LastLogoutDate = DateTime.Now;
                 ConnectionController.LogOut(account, 1);
             });
         }
@@ -74,6 +76,12 @@ namespace TheGodfatherGM.Server.Characters
                 account.CharacterController.Character.Level,
                 (account.CharacterController.job == null ? "None" : account.CharacterController.job.Type())) +
                 account.CharacterController.ListGroups());
+        }
+
+        [Command("setclothes")]
+        public void SetClothesCom(Client player, int slot, int drawable, int texture)
+        {
+            API.setPlayerClothes(player, slot, drawable, texture);
         }
     }
 }

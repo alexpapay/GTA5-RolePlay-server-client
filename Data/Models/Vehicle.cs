@@ -49,6 +49,8 @@ namespace TheGodfatherGM.Data
         public int? JobId { get; set; }
         public virtual Job Job { get; set; }
         public int Fuel { get; set; }
+        public int Type { get; set; }
+        // 0 - обычная,  1 - прокатная,
 
         public Vehicle()
         {

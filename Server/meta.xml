@@ -1,7 +1,7 @@
 ﻿<meta>
 
   <info name="The Godfather GM" author="Jingles" type="gamemode"/>
-  <script src="bin/Debug/The Godfather GM.dll" type="server" lang="compiled" />
+  <script src="The Godfather GM.dll" type="server" lang="compiled" />
   
   <settings>
     <setting name="web_server" value="localhost" default="localhost"/>

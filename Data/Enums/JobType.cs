@@ -28,5 +28,9 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Trucker")]
         [BlipType(85)]
         Trucker = 6,
+
+        [Display(Name = "Грузчик")]
+        [BlipType(277)]
+        Loader = 7
     }
 }

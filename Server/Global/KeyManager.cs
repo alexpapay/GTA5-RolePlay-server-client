@@ -64,33 +64,63 @@ namespace TheGodfatherGM.Server.Global
                 // Try to test on_key_down trigger with argument 9:
                 else if ((int)args[0] == 9)
                 {
-                    //API.createVehicle(VehicleHash.Faggio2, new Vector3(-989.4827, -2706.635, 13.3), new Vector3(0.0, 0.0, 62.19496), 0, 0);
+                    AccountController account = player.getData("ACCOUNT");
+                    if (account == null) return;
+                    var age = account.CharacterController.Character.LastLoginDate.ToString();
+                    var level = account.CharacterController.Character.Level.ToString();
+                    var job = account.CharacterController.Character.JobId.ToString();
+                    var bank = account.CharacterController.Character.Bank.ToString();
+                    var driverLicense = account.CharacterController.Character.DriverLicense == 1 ? "Да" : "Нет";
+
+                    API.shared.triggerClientEvent(player, "character_menu",
+                        2, // 0
+                        "Ваша статистика",
+                        "Ваше имя: " + account.CharacterController.FormatName,
+                        age, level, job, bank, driverLicense);
                 }
 
                 // GET info about car
                 else if ((int)args[0] == 10)
                 {
-                    VehicleController vehicleController = EntityManager.GetVehicle(player.vehicle);
+                    VehicleController vehicleController = null;
+                    bool inVehicleCheck;
 
-                    if (vehicleController == null || player.vehicleSeat != -1)
+                    if (player.isInVehicle)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~Ошибка: ~w~Вы не в транспорте или не на сидении водителя");
-                        return;
+                        vehicleController = EntityManager.GetVehicle(player.vehicle);
+                        inVehicleCheck = true;
                     }
-                    
+                    else
+                    {
+                        vehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
+                        inVehicleCheck = false;
+                    }                    
+
+                    if (vehicleController == null)
+                    {
+                        API.sendNotificationToPlayer(player, "Вы находитесь далеко от транспорта.");
+                        return;
+                    }                    
+
                     AccountController account = player.getData("ACCOUNT");
                     if (account == null) return;                    
                     string FormatName = account.CharacterController.Character.Name.Replace("_", " ");
 
                     int engineStatus = 0;
                     if (API.getVehicleEngineStatus(vehicleController.Vehicle)) engineStatus = 1;
-                    
+
+                    int driverDoorStatus = 1;
+                    if (API.getVehicleLocked(vehicleController.Vehicle)) driverDoorStatus = 0;
+                    var fuel = vehicleController.VehicleData.Fuel;
+
                     API.shared.triggerClientEvent(player, "vehicle_menu", 
                         2, // 0
-                        "Ваш транспорт", 
+                        "Меню транспорта", 
                         "Владелец: " + account.CharacterController.FormatName,
                         engineStatus,
-                        vehicleController.VehicleData.Fuel.ToString());                    
+                        fuel.ToString(), 
+                        inVehicleCheck, 
+                        driverDoorStatus);                    
                 }
             }
         }

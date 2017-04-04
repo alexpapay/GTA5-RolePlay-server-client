@@ -26,6 +26,7 @@ namespace TheGodfatherGM.Data
         public string Name { get; set; }
         public DateTime RegisterDate { get; set; }
         public DateTime LastLoginDate { get; set; }
+        public DateTime LastLogoutDate { get; set; }
         public int RegistrationStep { get; set; }
         public bool Online { get; set; }
         public float PosX { get; set; }
@@ -42,6 +43,9 @@ namespace TheGodfatherGM.Data
         public int ActiveGroupID { get; set; }
 
         public int JobId { get; set; }
+        public int PlayMinutes { get; set; }
+        public int DriverLicense { get; set; }
+        //public string SocialClub { get; set; }
 
         public virtual ICollection<GroupMember> GroupMember { get; set; }
         public virtual ICollection<Property> Property { get; set; }

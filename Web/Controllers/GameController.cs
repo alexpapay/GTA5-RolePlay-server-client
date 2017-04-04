@@ -21,7 +21,6 @@ namespace TheGodfatherGM.Web.Controllers
             public string SocialClub;
             public string CharacterName;
             public string Token;
-            //public string CharacterModel;
         }
 
         public IActionResult CreateCharacter()
@@ -40,7 +39,7 @@ namespace TheGodfatherGM.Web.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var user = DefaultDbContext.Instance.Users.FirstOrDefault(x => x.Id == userId);
 
-            
+
             var jsonData = new JSONData();
             jsonData.UserName = user?.UserName;
             jsonData.SocialClub = socialClub;

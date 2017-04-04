@@ -19,9 +19,9 @@ namespace TheGodfatherGM.Server.Groups
 
         public GroupController() { }
 
-        public GroupController(Data.Group GroupData)
+        public GroupController(Group GroupData)
         {
-            this.Group = GroupData;
+            Group = GroupData;
             EntityManager.Add(this);
         }
 
@@ -31,7 +31,7 @@ namespace TheGodfatherGM.Server.Groups
             {
                 new GroupController(group);
             }
-            API.shared.consoleOutput("[GM] Loaded groups: " + ContextFactory.Instance.Group.Count());
+            API.shared.consoleOutput("[GM] Загружено групп: " + ContextFactory.Instance.Group.Count() + " шт.");
         }
 
         public static string GetName(int groupId)
@@ -40,7 +40,7 @@ namespace TheGodfatherGM.Server.Groups
             {
                 return EntityManager.GetGroups()[groupId].Group.Name;
             }
-            return "Invalid GroupID";
+            return "Неверный ID группы!";
         }
 
         public string Type()

@@ -1,6 +1,7 @@
 ﻿using GTANetworkServer;
 using GTANetworkShared;
 using TheGodfatherGM.Server.Characters;
+using TheGodfatherGM.Server.Jobs;
 using System.Collections.Generic;
 using TheGodfatherGM.Server.Property;
 using TheGodfatherGM.Server.DBManager;
@@ -14,7 +15,7 @@ using TheGodfatherGM.Server.Vehicles;
 namespace TheGodfatherGM.Server.Menu
 {
     public class MenuManager : Script
-    {
+    {   
         public MenuManager()
         {
             API.onClientEventTrigger += onClientEventTrigger;
@@ -50,8 +51,45 @@ namespace TheGodfatherGM.Server.Menu
                 }
             }
 
+            if (eventName == "driver_door")
+            {
+                VehicleController VehicleController = null;
+                if (player.isInVehicle) VehicleController = EntityManager.GetVehicle(player.vehicle);
+                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
+
+                if (VehicleController == null)
+                {
+                    API.sendNotificationToPlayer(player, "Вы находитесь далеко от транспорта.");
+                    return;
+                }
+
+                if (VehicleController.CheckAccess(account))
+                {
+                    if ((int)args[0] == 1)
+                    {
+                        API.setVehicleLocked(VehicleController.Vehicle, false);
+                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " открыл водительскую дверь.");
+                    }
+                    else
+                    {
+                        API.setVehicleLocked(VehicleController.Vehicle, true);
+                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " закрыл водительскую дверь.");
+                    }
+                }
+                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~Вы не можете открыть данный транспорт!");
+            }
+
             if (eventName == "engine_on")
-            {                
+            {
+                VehicleController VehicleController = null;
+                if (player.isInVehicle) VehicleController = EntityManager.GetVehicle(player.vehicle);
+                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
+
+                if (account.CharacterController.Character.DriverLicense == 0 && vehicleController.VehicleData.Type != 1)
+                {
+                    API.sendNotificationToPlayer(player, "У вас нет прав на управление данным транспортом.");
+                    return;
+                }
                 if (!vehicleController.CheckAccess(account))
                 {
                     API.sendNotificationToPlayer(player, "Вы не можете использовать данный транспорт.");
@@ -59,8 +97,11 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 else
                 {
-                    vehicleController.Vehicle.engineStatus = true;
-                    ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " вставил ключ в зажигание и запустил мотор.");
+                    if (vehicleController.VehicleData.Fuel != 0)
+                    {
+                        vehicleController.Vehicle.engineStatus = true;
+                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " вставил ключ в зажигание и запустил мотор.");
+                    }                    
                 }                    
             }
             if (eventName == "engine_off")
@@ -76,6 +117,7 @@ namespace TheGodfatherGM.Server.Menu
                     ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " повернул ключ зажигания и заглушил мотор.");
                 }
             }
+
             if (eventName == "park_vehicle")
             {
                 if (vehicleController.CheckAccess(account, account.CharacterController))
@@ -84,11 +126,12 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~Вы не можете парковать данный транспорт");
             }
+
             if (eventName == "hood_trunk")
             {
                 VehicleController VehicleController = null;
                 if (player.isInVehicle) VehicleController = EntityManager.GetVehicle(player.vehicle);
-                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 3.0f);
+                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
 
                 if (VehicleController == null)
                 {
@@ -101,37 +144,34 @@ namespace TheGodfatherGM.Server.Menu
                     if ((int)args[0] == 1)
                     {
                         VehicleController.TriggerDoor(VehicleController.Vehicle, 4);
-                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " заблокировал двери своего транспорта.");
+                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " открыл/закрыл капот.");
                     }
                     else
                     {
                         VehicleController.TriggerDoor(VehicleController.Vehicle, 5);
-                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " разблокировал двери своего транспорта.");
+                        ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", account.CharacterController.FormatName + " открыл/закрыл багажник.");
                     }
                 }
-                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~Вы не можете открыть данный транспорт.");
+                else API.sendNotificationToPlayer(player, "~r~ERROR: ~w~Вы не можете открыть капот или багажник данного транспорта.");
             }
-            
+
             if (eventName == "rent_scooter")
             {
                 // Delete 30$ from cash
                 if (account == null) return;
                 if (account.CharacterController.Character.Cash - 30 < 0)
                 {
-                    API.shared.sendNotificationToPlayer(player, "У вас недостаточно средств для аренды мопеда!");
+                    API.shared.sendNotificationToPlayer(player, "У вас недостаточно средств для аренды!");
                     return;
                 }
                 else
                 {
-                    account.CharacterController.Character.Cash = account.CharacterController.Character.Cash - 30;
+                    account.CharacterController.Character.Cash -= 30;
                     API.shared.triggerClientEvent(player, "update_money_display", account.CharacterController.Character.Cash);
-                    // Create Faggio
-                    //API.createVehicle(VehicleHash.Faggio, new Vector3(-989.4827, -2706.635, 12.7), new Vector3(0.0, 0.0, 0.0), 0, 0);
-                    //Admin.Commands.createvehicle(player, "group", "Homeless", VehicleHash.Faggio, 0, 0);
-
+                    
                     Data.Vehicle VehicleData = new Data.Vehicle();
                     VehicleData.Character = account.CharacterController.Character;
-                    Vehicles.VehicleController VehicleController = new Vehicles.VehicleController(VehicleData, API.createVehicle(VehicleHash.Faggio, player.position, player.rotation, 0, 0, 0));
+                    VehicleController VehicleController = new VehicleController(VehicleData, API.createVehicle(VehicleHash.Faggio, player.position, player.rotation, 0, 0, 0));
 
                     VehicleData.Model = -1842748181;
                     VehicleData.PosX = player.position.X;
@@ -140,14 +180,65 @@ namespace TheGodfatherGM.Server.Menu
                     VehicleData.Rot = player.rotation.Z;
                     VehicleData.Color1 = 0;
                     VehicleData.Color2 = 0;
-                    VehicleData.Fuel = 3;
+                    VehicleData.Fuel = 30;
+                    VehicleData.Type = 1;
+                    VehicleData.GroupId = account.CharacterController.Character.ActiveGroupID;
 
                     ContextFactory.Instance.Vehicle.Add(VehicleData);
                     ContextFactory.Instance.SaveChanges();
                 }
                 ContextFactory.Instance.SaveChanges();
-                
-                // set 1 hour for rent
+            }
+
+            if (eventName == "rent_prolong")
+            {
+                if (account == null) return;
+                int callback = (int)args[0];
+                var vehicle = ContextFactory.Instance.Vehicle
+                        .Where(x => x.Type == 1)
+                        .FirstOrDefault(x => x.CharacterId == account.CharacterController.Character.Id);
+
+                if (callback == 1)
+                {
+                    vehicle.Fuel = 30;
+                    ContextFactory.Instance.SaveChanges();
+                }
+
+                if (callback == 0)
+                {
+                    VehicleController _VehicleController = EntityManager.GetVehicle(vehicle);
+                    _VehicleController.UnloadVehicle(account);
+                    ContextFactory.Instance.Vehicle.Remove(vehicle);
+                    ContextFactory.Instance.SaveChanges();
+                }
+
+            }                       
+
+            if (eventName == "work_loader")
+            {                
+                if (account == null) return;
+                int callback = (int)args[0];
+                int jobId = (int)args[1];
+
+                if (callback == 1)
+                {                    
+                    if (jobId == 1) JobController.JobWorkLoader(player,
+                                                          -1020.5, -2722.14, 13.8,
+                                                          -1035.88, -2735.7, 13.8,
+                                                          3, jobId);    // For Testing at start 
+                                                                        // Coords for job marker: -1030.91 ; -2722.16 ; 13.7624
+
+                    if (jobId == 2) JobController.JobWorkLoader(player,
+                                                        -155.5, -959.14, 269.2,
+                                                        -179.88, -1008.7, 254.1316,
+                                                        5, jobId);
+                }       
+
+                if (callback == 0)
+                {
+                    API.shared.triggerClientEvent(player, "update_money_display", account.CharacterController.Character.Cash);
+                    API.setPlayerClothes(player, 9, 10, 100);                    
+                }
             }
         }
     }

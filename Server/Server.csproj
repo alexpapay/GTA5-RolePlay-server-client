@@ -26,7 +26,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>C:\Users\alexpapay\Desktop\gta11\resources\gotfather\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -38,13 +38,16 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="GTANetwork">
+      <HintPath>..\..\..\..\GTANetwork\bin\scripts\GTANetwork.dll</HintPath>
+    </Reference>
     <Reference Include="GTANetworkServer, Version=0.1.386.270, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\GTANetwork\server\GTANetworkServer.exe</HintPath>
+      <HintPath>..\..\..\..\GTANetwork\server\GTANetworkServer.exe</HintPath>
     </Reference>
     <Reference Include="GTANetworkShared, Version=1.0.0.0, Culture=neutral, PublicKeyToken=60c67de1b3b675de, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\GTANetwork\bin\scripts\GTANetworkShared.dll</HintPath>
+      <HintPath>..\..\..\..\GTANetwork\bin\scripts\GTANetworkShared.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
@@ -106,11 +109,21 @@
     <Compile Include="Groups\GroupController.cs" />
     <Compile Include="Jobs\Job\Fisherman.cs" />
     <Compile Include="Jobs\JobController.cs" />
-    <Content Include="client\js\BlipManager.js" />
-    <Content Include="client\js\CEF\CEFController.js" />
-    <Content Include="client\js\HUD.js" />
-    <Content Include="client\js\KeyManager.js" />
-    <Content Include="client\js\Login.js" />
+    <Content Include="client\js\BlipManager.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\js\CEF\CEFController.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\js\HUD.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\js\KeyManager.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\js\Login.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Compile Include="Property\PropertyController.cs" />
     <Compile Include="SpawnManager.cs" />
     <Compile Include="Account\AccountController.cs" />
@@ -131,11 +144,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="client\js\MenuManager.js" />
+    <Content Include="client\js\MenuManager.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="meta.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="client\js\ServersideCamera.js" />
+    <Content Include="client\js\ServersideCamera.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
