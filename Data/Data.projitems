@@ -20,9 +20,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)MessagingModels\CreateGroupMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ban.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Character.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Clothes.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\ClothesTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Group.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GroupMember.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Job.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Const.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Property.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Vehicle.cs" />
   </ItemGroup>

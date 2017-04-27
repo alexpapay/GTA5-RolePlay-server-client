@@ -11,15 +11,15 @@ namespace TheGodfatherGM.Data.Enums
 
         [Display(Name = "Полиция")]
         [BlipType(188)]
-        PoliceDepartment = 1,        
+        PoliceDepartment = 1,
 
-        [Display(Name = "Военные")]
-        [BlipType(60)]
-        NationalGuard = 2,
+        [Display(Name = "МЧС")]
+        [BlipType(188)]
+        Emergency = 2,
 
-        [Display(Name = "Медики")]
+        [Display(Name = "ФБР")]
         [BlipType(61)]
-        MedicalDepartment = 3,
+        FBI = 3,
 
         [Display(Name = "Азтэк")]
         CorrectionalFacility = 4,
@@ -43,9 +43,9 @@ namespace TheGodfatherGM.Data.Enums
         [BlipType(50)]
         Business = 9,
 
-        [Display(Name = "ФБР")]
+        [Display(Name = "")]
         [BlipType(60)]
-        FBI = 10,
+        NULL = 10,
 
         [Display(Name = "Правительство")]
         [BlipType(181)]
@@ -55,25 +55,25 @@ namespace TheGodfatherGM.Data.Enums
         [BlipType(315)]
         AutoSchool = 12,
 
-        [Display(Name = "Балласы")]
+        [Display(Name = "The Ballas Gang")]
         [BlipType(106)]
         Ballas = 13,
 
-        [Display(Name = "Вагосы")]
+        [Display(Name = "Los Varios Azcas Gang")]
         [BlipType(315)]
         Vagos = 14,
 
-        [Display(Name = "La Costa Notsa")]
+        [Display(Name = "Los Santos Vagos Gang")]
         [BlipType(315)]
         LaCostaNotsa = 15,
 
-        [Display(Name = "Русская мафия")]
+        [Display(Name = "Grove Street Gang")]
         [BlipType(315)]
-        RussianMafia = 16,
+        GroveStreet = 16,
 
-        [Display(Name = "Грув")]
+        [Display(Name = "The Rifa Gang")]
         [BlipType(315)]
-        Groove = 17,
+        TheRifa = 17,
 
         [Display(Name = "Зона 51")]
         [BlipType(315)]
@@ -81,6 +81,22 @@ namespace TheGodfatherGM.Data.Enums
 
         [Display(Name = "LVPD")]
         [BlipType(315)]
-        LVPD = 19
+        LVPD = 19,
+
+        [Display(Name = "Военные 1")]
+        [BlipType(60)]
+        NationalGuardOne = 20,
+
+        [Display(Name = "Военные 2")]
+        [BlipType(60)]
+        NationalGuardTwo = 21,
+
+        [Display(Name = "Русская Мафия")]
+        [BlipType(60)]
+        MafiaRussianBase = 30,
+
+        [Display(Name = "Безработный")]
+        [BlipType(315)]
+        Unemployed = 100
     }
 }

@@ -8,9 +8,9 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Invalid")]
         Invalid = 0,
 
-        [BlipType(40)]
-        [Display(Name = "Жилой дом")]
-        House = 1,
+        [BlipType(188)]
+        [Display(Name = "Полиция")]
+        Police = 1,
 
         [Display(Name = "Дверь")]
         Door = 2,
@@ -25,6 +25,31 @@ namespace TheGodfatherGM.Data.Enums
 
         [BlipType(277)]
         [Display(Name = "Работа грузчиком")]
-        WorkLoader = 5
+        WorkLoader = 5,
+
+        [BlipType(76)]
+        [Display(Name = "Автошкола")]
+        Autoschool = 6,
+
+        [BlipType(181)]
+        [Display(Name = "Мэрия")]
+        Meria = 11,
+
+        [BlipType(106)]
+        [Display(Name = "Балласы")]
+        GangBallas = 13,
+
+        [BlipType(60)]
+        [Display(Name = "Военные 1")]
+        ArmyOne = 20,
+
+        [BlipType(60)]
+        [Display(Name = "Военные 2")]
+        ArmyTwo = 21,
+
+
+        [BlipType(40)]
+        [Display(Name = "Жилой дом")]
+        House = 100
     }
 }

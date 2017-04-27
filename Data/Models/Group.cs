@@ -14,6 +14,7 @@ namespace TheGodfatherGM.Data
 
         public GroupType Type { get; set; }
         public GroupExtraType ExtraType { get; set; }
+        public int Material { get; set; }
 
         public virtual ICollection<Vehicle> Vehicles { get; set; }
         public virtual ICollection<Property> Properties { get; set; }

@@ -19,6 +19,8 @@ namespace TheGodfatherGM.Data
         [Key]
         public int Id { get; set; }
 
+        public int OID { get; set; }
+
         public string AccountId { get; set; }
         public IAccountData Account { get; set; }
 
@@ -38,6 +40,7 @@ namespace TheGodfatherGM.Data
         public int Admin { get; set; }
         [DefaultValue(0)]
         public int Level { get; set; }
+        public int Age { get; set; }
         public int Cash { get; set; }
         public int Bank { get; set; }
         public int ActiveGroupID { get; set; }
@@ -45,7 +48,12 @@ namespace TheGodfatherGM.Data
         public int JobId { get; set; }
         public int PlayMinutes { get; set; }
         public int DriverLicense { get; set; }
-        //public string SocialClub { get; set; }
+        public string SocialClub { get; set; }
+        public int TempVar{ get; set; }
+        public int Material { get; set; }
+
+        public int ClothesTypes { get; set; }
+        public int ActiveClothes { get; set; }
 
         public virtual ICollection<GroupMember> GroupMember { get; set; }
         public virtual ICollection<Property> Property { get; set; }
