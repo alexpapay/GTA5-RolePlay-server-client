@@ -39,6 +39,8 @@ namespace TheGodfatherGM.Server
             CharacterController characterController = player.getData("CHARACTER");            
             if (characterController == null) return;
 
+            SpawnManager.SetPlayerWeapon(player, characterController.Character, 2);
+
             // Army change cloth after death
             if (CharacterController.IsCharacterInArmy(characterController))
             {
@@ -118,6 +120,7 @@ namespace TheGodfatherGM.Server
                 character.LastLogoutDate = DateTime.Now;
                 character.Online = false;
                 character.OID = 0;
+                SpawnManager.SetPlayerWeapon(player, character, 3);
                 ContextFactory.Instance.SaveChanges();
             }            
         }

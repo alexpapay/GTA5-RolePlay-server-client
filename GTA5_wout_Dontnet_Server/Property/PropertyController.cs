@@ -466,7 +466,7 @@ namespace TheGodfatherGM.Server.Property
                     {
                         CharacterController characterController = player.getData("CHARACTER");
                         API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 0);
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, "", "Воровство", PropertyData.Name);
+                        //API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, "", "Воровство", PropertyData.Name);
                     }
                 }
             };

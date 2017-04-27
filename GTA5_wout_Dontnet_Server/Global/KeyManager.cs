@@ -136,17 +136,19 @@ namespace TheGodfatherGM.Server.Global
                     var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
 
                     API.shared.triggerClientEvent(player, "workposs_menu",
-                         1,                                                                 // 0
-                         character.ActiveGroupID,                                           // 1
-                         character.JobId,                                                   // 2
-                         character.TempVar,                                                 // 3
-                         character.Admin,                                                   // 4
-                         EntityManager.GetDisplayName(groupType),                           // 5
-                         EntityManager.GetDisplayName(groupExtraType),                      // 6
-                         character.Material,                                                // 7
-                         CharacterController.IsCharacterInGang(characterController),        // 8
-                         CharacterController.IsCharacterGangBoss(characterController),    // 9
-                         CharacterController.IsCharacterInGhetto(player));                  // 10
+                         1,                                                                                  // 0
+                         character.ActiveGroupID,                                                            // 1
+                         character.JobId,                                                                    // 2
+                         character.TempVar,                                                                  // 3
+                         character.Admin,                                                                    // 4
+                         EntityManager.GetDisplayName(groupType),                                            // 5
+                         EntityManager.GetDisplayName(groupExtraType),                                       // 6
+                         character.Material,                                                                 // 7
+                         CharacterController.IsCharacterInGang(characterController),                         // 8
+                         CharacterController.IsCharacterGangBoss(characterController),                       // 9
+                         CharacterController.IsCharacterArmyHighOfficer(characterController.Character),      // 10
+                         CharacterController.IsCharacterInGhetto(player),                                    // 11
+                         CharacterController.IsCharacterArmyGeneral(characterController));                   // 12
                 }
             }
         }

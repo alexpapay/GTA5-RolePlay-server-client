@@ -301,6 +301,7 @@ namespace TheGodfatherGM.Server.Characters
             if (character.ActiveGroupID == 1710) return true;
             return false;
         }
+
         public static bool IsCharacterInActiveArmyCloth(Character character)
         {
             if (character.ActiveClothes == 2) return true;
@@ -327,7 +328,7 @@ namespace TheGodfatherGM.Server.Characters
         public static bool IsCharacterArmySoldier(CharacterController characterController)
         {
             if (characterController.Character.ActiveGroupID == 2001 || characterController.Character.ActiveGroupID == 2002) return true;
-            if (characterController.Character.ActiveGroupID >= 2101 || characterController.Character.ActiveGroupID <= 2102) return true;
+            if (characterController.Character.ActiveGroupID == 2101 || characterController.Character.ActiveGroupID == 2102) return true;
             return false;
         }
         public static bool IsCharacterArmyHighOfficer(Character character)
@@ -361,6 +362,30 @@ namespace TheGodfatherGM.Server.Characters
             return false;
         }
 
+        public static bool IsCharacterInPolice(CharacterController characterController)
+        {
+            if (characterController.Character.ActiveGroupID >= 100 &&
+                characterController.Character.ActiveGroupID <= 114) return true;
+            return false;
+        }
+        public static bool IsCharacterInPolice(Character character)
+        {
+            if (character.ActiveGroupID >= 100 &&
+                character.ActiveGroupID <= 114) return true;
+            return false;
+        }
+        public static bool IsCharacterInFBI(CharacterController characterController)
+        {
+            if (characterController.Character.ActiveGroupID >= 300 &&
+                characterController.Character.ActiveGroupID <= 310) return true;
+            return false;
+        }
+        public static bool IsCharacterInFBI(Character character)
+        {
+            if (character.ActiveGroupID >= 300 &&
+                character.ActiveGroupID <= 310) return true;
+            return false;
+        }
 
         // TODO: maybe do more universal method with x,y customs?
         public static bool IsCharacterInGhetto (Client player)//CharacterController characterController)

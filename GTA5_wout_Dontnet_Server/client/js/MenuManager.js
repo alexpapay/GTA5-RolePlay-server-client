@@ -231,7 +231,9 @@ API.onServerEventTrigger.connect(function (name, args) {
         var material = args[7];
         var isInGang = args[8];
         var isGangBoss = args[9];
-        var isInGhetto = args[10];
+        var isHighOfficer = args[10];
+        var isInGhetto = args[11];
+        var isArmyGeneral = args[12];
 
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
@@ -247,7 +249,7 @@ API.onServerEventTrigger.connect(function (name, args) {
             });
             mainWindow.AddItem(autoschool); 
         }
-        if (groupId >= 2012 && groupId <= 2015 || groupId >= 2112 && groupId <= 2115) {
+        if (isHighOfficer == true && isArmyGeneral == true) {
 
             var armyId = 0;
 
@@ -276,8 +278,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                     });
                     mainWindow2.AddItem(addToArmy);
                 }
-
-                if (groupId >= 2012 && groupId <= 2015 || groupId >= 2112 && groupId <= 2115) {
+                if (isHighOfficer == true && isArmyGeneral == true) {
 
                     var higherRank = API.createMenuItem("~y~Изменить звание пользователя", "");
                     higherRank.Activated.connect(function (menu, item) {
@@ -293,7 +294,6 @@ API.onServerEventTrigger.connect(function (name, args) {
                     });
                     mainWindow2.AddItem(higherRank);
                 }
-
                 if (groupId >= 2013 && groupId <= 2015 || groupId >= 2113 && groupId <= 2115) {
                     var goOutFrom = API.createMenuItem("~r~Выгнать пользователя из армии", "");
                     goOutFrom.Activated.connect(function (menu, item) {
@@ -337,49 +337,79 @@ API.onServerEventTrigger.connect(function (name, args) {
                 menuPool2.Add(mainWindow2);
                 mainWindow2.Visible = true;
 
-                    var pistol = API.createMenuItem("~s~ Создать APPistol : 50 мат.", "");
-                    pistol.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 1, 50);
-                    });
-                    mainWindow2.AddItem(pistol);
+                var Revolver = API.createMenuItem("~s~ Создать Revolver : 100 мат.", "");
+                Revolver.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 1, 100);
+                });
+                mainWindow2.AddItem(Revolver);
 
-                    var smg = API.createMenuItem("~s~ Создать SMG : 100 мат.", "");
-                    smg.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 2, 100);
-                    });
-                    mainWindow2.AddItem(smg);
+                var HeavyPistol = API.createMenuItem("~s~ Создать Heavy Pistol : 100 мат.", "");
+                HeavyPistol.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 11, 100);
+                });
+                mainWindow2.AddItem(HeavyPistol);
 
-                    var AdvancedRifle = API.createMenuItem("~s~ Создать AdvancedRifle : 250 мат.", "");
-                    AdvancedRifle.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 3, 250);
-                    });
-                    mainWindow2.AddItem(AdvancedRifle);
+                var CarbineRifle = API.createMenuItem("~s~ Создать Carbine Rifle : 250 мат.", "");
+                CarbineRifle.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 2, 250);
+                });
+                mainWindow2.AddItem(CarbineRifle);
 
-                    var HeavySniper = API.createMenuItem("~s~ Создать HeavySniper : 350 мат.", "");
-                    HeavySniper.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 4, 350);
-                    });
-                    mainWindow2.AddItem(HeavySniper);
+                var BullpupRifle = API.createMenuItem("~s~ Создать Bullpup Rifle : 250 мат.", "");
+                BullpupRifle.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 12, 250);
+                });
+                mainWindow2.AddItem(BullpupRifle);
 
-                    var GrenadeLauncher = API.createMenuItem("~s~ Создать GrenadeLauncher : 500 мат.", "");
-                    GrenadeLauncher.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 5, 500);
-                    });
-                    mainWindow2.AddItem(GrenadeLauncher);
+                var CompactRifle = API.createMenuItem("~s~ Создать Compact Rifle : 250 мат.", "");
+                CompactRifle.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 6, 250);
+                });
+                mainWindow2.AddItem(CompactRifle);
 
-                    var Grenade = API.createMenuItem("~s~ Создать Grenade : 100 мат.", "");
-                    Grenade.Activated.connect(function (menu, item) {
-                        API.triggerServerEvent("army_two_weapon", 6, 50);
-                    });
-                    mainWindow2.AddItem(Grenade);
+                var HeavyShotgun = API.createMenuItem("~s~ Создать Heavy Shotgun : 200 мат.", "");
+                HeavyShotgun.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 7, 200);
+                });
+                mainWindow2.AddItem(HeavyShotgun);
 
-                    var back = API.createMenuItem("~g~Назад", "");
-                    back.Activated.connect(function (menu, item) {
-                        mainWindow2.Visible = false;
-                        mainWindow.Visible = true;
-                    });
-                    mainWindow2.AddItem(back);
-                    mainWindow2.RefreshIndex();
+                var PumpShotgun = API.createMenuItem("~s~ Создать Pump Shotgun : 200 мат.", "");
+                PumpShotgun.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 7, 200);
+                });
+                mainWindow2.AddItem(PumpShotgun);   
+
+                var SniperRifle = API.createMenuItem("~s~ Создать Sniper Rifle : 300 мат.", "");
+                SniperRifle.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 3, 300);
+                });
+                mainWindow2.AddItem(SniperRifle);
+
+                var SmokeGrenade = API.createMenuItem("~s~ Создать Smoke Grenade : 150 мат.", "");
+                SmokeGrenade.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 4, 150);
+                });
+                mainWindow2.AddItem(SmokeGrenade);
+
+                var FlareGun = API.createMenuItem("~s~ Создать Flare Gun : 100 мат.", "");
+                FlareGun.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 5, 100);
+                });
+                mainWindow2.AddItem(FlareGun);                         
+
+                var StunGun = API.createMenuItem("~s~ Создать Stun Gun : 150 мат.", "");
+                StunGun.Activated.connect(function (menu, item) {
+                    API.triggerServerEvent("get_weapon", 10, 100);
+                });
+                mainWindow2.AddItem(StunGun); 
+
+                var back = API.createMenuItem("~g~Назад", "");
+                back.Activated.connect(function (menu, item) {
+                    mainWindow2.Visible = false;
+                    mainWindow.Visible = true;
+                });
+                mainWindow2.AddItem(back);
+                mainWindow2.RefreshIndex();
             });
             mainWindow.AddItem(gangWeaponMenu); 
         }
@@ -426,8 +456,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                 mainWindow2.RefreshIndex();
             });
             mainWindow.AddItem(gangMenu); 
-        }
-        
+        }        
 
         if (jobId == 777) {
             var taxiStart = API.createMenuItem("~g~Начать работу~s~ таксистом ~g~за 100$ в час", "");
@@ -922,7 +951,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         mainWindow.AddItem(steal);
         }   
 
-        if (propertyName == "Army2_stock" || propertyName == "Army1_gang") {
+        if (propertyName == "Army2_stock" || propertyName == "Army1_stock") {
             var steal = API.createMenuItem("~s~Украсть 1000 материалов", "");
             steal.Activated.connect(function (menu, item) {
                 mainWindow.Visible = false;
@@ -1017,6 +1046,148 @@ API.onServerEventTrigger.connect(function (name, args) {
         mainWindow.RefreshIndex();
     }
 
+    if (name == "police_menu") {
+        resetMainMenu();
+        var callbackId = args[0];
+        var banner = args[1];
+        var subtitle = args[2];
+        var propertyName = args[3];
+        var access = args[4];
+
+        if (propertyName == "Police_weapon") {
+            banner = "Взять оружие";
+            subtitle = "Выберите нужное вам оружие:";
+        }
+        if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
+        else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
+        menuPool.Add(mainWindow); 
+
+        if (propertyName == "Police_weapon") {
+            var pistol = API.createMenuItem("~s~ Взять Revolver : 100 мат.", "");
+            pistol.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 1, 100);
+            });
+            mainWindow.AddItem(pistol);
+
+            var CompactRifle = API.createMenuItem("~s~ Взять Compact Rifle : 250 мат.", "");
+            CompactRifle.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 6, 250);
+            });
+            mainWindow.AddItem(CompactRifle);
+
+            var PumpShotgun = API.createMenuItem("~s~ Взять Pump Shotgun : 200 мат.", "");
+            PumpShotgun.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 7, 200);
+            });
+            mainWindow.AddItem(PumpShotgun);
+
+            var BZGas = API.createMenuItem("~s~ Взять BZGas : 150 мат.", "");
+            BZGas.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 8, 150);
+            });
+            mainWindow.AddItem(BZGas);
+
+            var Nightstick = API.createMenuItem("~s~ Взять Nightstick : 100 мат.", "");
+            Nightstick.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 9, 100);
+            });
+            mainWindow.AddItem(Nightstick);
+
+            var StunGun = API.createMenuItem("~s~ Взять Stun Gun : 150 мат.", "");
+            StunGun.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 10, 100);
+            });
+            mainWindow.AddItem(StunGun);
+
+            var close = API.createMenuItem("~r~Закрыть", "");
+            close.Activated.connect(function (menu, item) {
+                mainWindow.Visible = false;
+            });
+            mainWindow.AddItem(close);
+
+            if (callbackId == 0) {
+                close.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                });
+            }
+            else mainWindow.Visible = true;
+            mainWindow.RefreshIndex();
+        }
+    }
+    if (name == "fbi_menu") {
+        resetMainMenu();
+        var callbackId = args[0];
+        var banner = args[1];
+        var subtitle = args[2];
+        var propertyName = args[3];
+        var access = args[4];
+
+        if (propertyName == "FBI_weapon") {
+            banner = "Взять оружие";
+            subtitle = "Выберите нужное вам оружие:";
+        }
+        if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
+        else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
+        menuPool.Add(mainWindow);
+
+        if (propertyName == "FBI_weapon") {
+            var HeavyPistol = API.createMenuItem("~s~ Взять Heavy Pistol : 100 мат.", "");
+            HeavyPistol.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 11, 100);
+            });
+            mainWindow.AddItem(HeavyPistol);
+
+            var BullpupRifle = API.createMenuItem("~s~ Взять Bullpup Rifle : 250 мат.", "");
+            BullpupRifle.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 12, 250);
+            });
+            mainWindow.AddItem(BullpupRifle);
+
+            var HeavyShotgun = API.createMenuItem("~s~ Взять Heavy Shotgun : 200 мат.", "");
+            HeavyShotgun.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 7, 200);
+            });
+            mainWindow.AddItem(HeavyShotgun);
+
+            var BZGas = API.createMenuItem("~s~ Взять BZGas : 150 мат.", "");
+            BZGas.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 8, 150);
+            });
+            mainWindow.AddItem(BZGas);
+
+            var SmokeGrenade = API.createMenuItem("~s~ Взять Smoke Grenade : 150 мат.", "");
+            SmokeGrenade.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 4, 150);
+            });
+            mainWindow.AddItem(SmokeGrenade);
+
+            var Nightstick = API.createMenuItem("~s~ Взять Nightstick : 100 мат.", "");
+            Nightstick.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 9, 100);
+            });
+            mainWindow.AddItem(Nightstick);
+
+            var StunGun = API.createMenuItem("~s~ Взять Stun Gun : 150 мат.", "");
+            StunGun.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 10, 100);
+            });
+            mainWindow.AddItem(StunGun);
+
+            var close = API.createMenuItem("~r~Закрыть", "");
+            close.Activated.connect(function (menu, item) {
+                mainWindow.Visible = false;
+            });
+            mainWindow.AddItem(close);
+
+            if (callbackId == 0) {
+                close.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                });
+            }
+            else mainWindow.Visible = true;
+            mainWindow.RefreshIndex();
+        }
+    }
     if (name == "army_menu") {
         resetMainMenu();
         var callbackId = args[0];
@@ -1110,42 +1281,36 @@ API.onServerEventTrigger.connect(function (name, args) {
         }
 
         if (propertyName == "Army2_weapon") {
-            var pistol = API.createMenuItem("~s~ Взять APPistol : 50 мат.", "");
-            pistol.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("army_two_weapon", 1, 50);
+            var Revolver = API.createMenuItem("~s~ Взять Revolver : 100 мат.", "");
+            Revolver.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 1, 100);
             });
-            mainWindow.AddItem(pistol);
+            mainWindow.AddItem(Revolver);
 
-            var smg = API.createMenuItem("~s~ Взять SMG : 100 мат.", "");
-            smg.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("army_two_weapon", 2, 100);
+            var CarbineRifle = API.createMenuItem("~s~ Взять Carbine Rifle : 250 мат.", "");
+            CarbineRifle.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 2, 250);
             });
-            mainWindow.AddItem(smg);
+            mainWindow.AddItem(CarbineRifle);
 
-            var AdvancedRifle = API.createMenuItem("~s~ Взять AdvancedRifle : 250 мат.", "");
-            AdvancedRifle.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("army_two_weapon", 3, 250);
+            var SniperRifle = API.createMenuItem("~s~ Взять Sniper Rifle : 300 мат.", "");
+            SniperRifle.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 3, 300);
             });
-            mainWindow.AddItem(AdvancedRifle);
+            mainWindow.AddItem(SniperRifle);
 
-            var HeavySniper = API.createMenuItem("~s~ Взять HeavySniper : 350 мат.", "");
-            HeavySniper.Activated.connect(function (menu, item) {                
-                API.triggerServerEvent("army_two_weapon", 4, 350);
+            var SmokeGrenade = API.createMenuItem("~s~ Взять Smoke Grenade : 150 мат.", "");
+            SmokeGrenade.Activated.connect(function (menu, item) {                
+                API.triggerServerEvent("get_weapon", 4, 150);
             });
-            mainWindow.AddItem(HeavySniper);
+            mainWindow.AddItem(SmokeGrenade);
 
-            var GrenadeLauncher = API.createMenuItem("~s~ Взять GrenadeLauncher : 500 мат.", "");
-            GrenadeLauncher.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("army_two_weapon", 5, 500);
+            var FlareGun = API.createMenuItem("~s~ Взять Flare Gun : 100 мат.", "");
+            FlareGun.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("get_weapon", 5, 100);
             });
-            mainWindow.AddItem(GrenadeLauncher);
-
-            var Grenade = API.createMenuItem("~s~ Взять Grenade : 100 мат.", "");
-            Grenade.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("army_two_weapon", 6, 50);
-            });
-            mainWindow.AddItem(Grenade);
-        }
+            mainWindow.AddItem(FlareGun);
+        }     
 
         var close = API.createMenuItem("~r~Закрыть", "");
         close.Activated.connect(function (menu, item) {

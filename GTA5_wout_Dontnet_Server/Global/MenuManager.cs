@@ -745,16 +745,24 @@ namespace TheGodfatherGM.Server.Menu
                     ContextFactory.Instance.SaveChanges();
                 }                
             }
-            if (eventName == "army_two_weapon")
+
+            if (eventName == "get_weapon")
             {
                 if (character == null) return;
                 int callback = (int)args[0];
                 int cost = (int)args[1];
 
+                WeaponTint weaponTint = new WeaponTint();
+                if (CharacterController.IsCharacterInArmy(character)) weaponTint = WeaponTint.Army;
+                if (CharacterController.IsCharacterInFBI(character) ||
+                    CharacterController.IsCharacterInPolice(character)) weaponTint = WeaponTint.LSPD;
+                if (CharacterController.IsCharacterInGang(character)) weaponTint = WeaponTint.Gold;
+
+                var weaponData = ContextFactory.Instance.Weapon.FirstOrDefault(x => x.CharacterId == character.Id);
                 var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == "Army2_stock");
                 if (propertyData.Stock - cost < 0)
                 {
-                    API.sendChatMessageToPlayer(player, "~r~Вы не можете взять данное оружие!\nНа складе нет достаточно материалов!");
+                    API.sendChatMessageToPlayer(player, "~r~Вы не можете получить данное оружие!\nНедостаточно материалов!");
                 }
                 else
                 {
@@ -762,26 +770,74 @@ namespace TheGodfatherGM.Server.Menu
                     {
                         case 1:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.APPistol, 150, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.Revolver, 50, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.Revolver, weaponTint);
+                            weaponData.Revolver = 1; weaponData.RevolverPt = 50; break;
                         case 2:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.SMG, 250, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.CarbineRifle, 250, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.CarbineRifle, weaponTint);
+                            weaponData.CarbineRifle = 1; weaponData.CarbineRiflePt = 250; break;
                         case 3:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.AdvancedRifle, 350, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.SniperRifle, 50, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.SniperRifle, weaponTint);
+                            weaponData.SniperRifle = 1; weaponData.SniperRiflePt = 50; break;
                         case 4:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.HeavySniper, 150, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.SmokeGrenade, 10, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.SmokeGrenade, weaponTint);
+                            weaponData.SmokeGrenade = 1; weaponData.SmokeGrenadePt = 10; break;
                         case 5:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.GrenadeLauncher, 150, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.FlareGun, 50, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.FlareGun, weaponTint);
+                            weaponData.FlareGun = 1; weaponData.FlareGunPt = 50; break;
                         case 6:
                             propertyData.Stock -= cost;
-                            API.givePlayerWeapon(player, WeaponHash.Grenade, 150, true, true); break;
+                            API.givePlayerWeapon(player, WeaponHash.CompactRifle, 250, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.CompactRifle, weaponTint);
+                            weaponData.CompactRifle = 1; weaponData.CompactRiflePt = 250; break;
+                        case 7:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.PumpShotgun, 100, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.PumpShotgun, weaponTint);
+                            weaponData.PumpShotgun = 1; weaponData.PumpShotgunPt = 100; break;
+                        case 8:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.BZGas, 100, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.BZGas, weaponTint);
+                            weaponData.BZGas = 1; weaponData.BZGasPt = 100; break;
+                        case 9:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.Nightstick, 1, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.Nightstick, weaponTint);
+                            weaponData.Nightstick = 1; break;
+                        case 10:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.StunGun, 120, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.StunGun, weaponTint);
+                            weaponData.StunGun = 1; weaponData.StunGunPt = 120; break;
+                        case 11:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.HeavyPistol, 100, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.HeavyPistol, weaponTint);
+                            weaponData.HeavyPistol = 1; weaponData.HeavyPistolPt = 100; break;
+                        case 12:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.BullpupRifle, 200, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.BullpupRifle, weaponTint);
+                            weaponData.BullpupRifle = 1; weaponData.BullpupRiflePt = 200; break;
+                        case 13:
+                            propertyData.Stock -= cost;
+                            API.givePlayerWeapon(player, WeaponHash.HeavyShotgun, 100, true, true);
+                            API.setPlayerWeaponTint(player, WeaponHash.HeavyShotgun, weaponTint);
+                            weaponData.HeavyShotgun = 1; weaponData.HeavyShotgunPt = 100; break;
                     }
                 }
-                ContextFactory.Instance.SaveChanges();                  
+                ContextFactory.Instance.SaveChanges();
             }
+
             if (eventName == "gang_ballas_add_to_group")
             {
                 int callBack = (int)args[2];

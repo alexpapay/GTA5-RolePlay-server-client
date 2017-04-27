@@ -19,6 +19,7 @@ namespace TheGodfatherGM.Server.DBManager
         {
            builder.Conventions.Remove<PluralizingTableNameConvention>();
         }
+        public DbSet<Weapon> Weapon { get; set; }
         public DbSet<ClothesTypes> ClothesTypes { get; set; }
         public DbSet<Clothes> Clothes { get; set; }
         public DbSet<Ban> Ban { get; set; }

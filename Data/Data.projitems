@@ -28,5 +28,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Const.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Property.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Vehicle.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Weapon.cs" />
   </ItemGroup>
 </Project>
