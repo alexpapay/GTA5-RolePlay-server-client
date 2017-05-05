@@ -20,7 +20,7 @@ namespace TheGodfatherGM.Server.Characters
         }
 
         [Command("createcharacter")]
-        public static void CreateCharacter(Client player, string name, string pwd)
+        public static void CreateCharacter(Client player, string name, string pwd, int language)
         {
             if (!CharacterController.NameValidityCheck(player, name))
             {
@@ -28,7 +28,7 @@ namespace TheGodfatherGM.Server.Characters
                 return;
             }
 
-            bool SuccessID = DatabaseManager.RegisterCharacter(player, name, pwd);
+            bool SuccessID = DatabaseManager.RegisterCharacter(player, name, pwd, language);
             if (SuccessID)
             {
                 API.shared.sendChatMessageToPlayer(player, "~g~Server: ~w~Character created!");

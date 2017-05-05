@@ -1,8 +1,12 @@
 ﻿using GTANetworkServer;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TheGodfatherGM.Data;
+using TheGodfatherGM.Data.Enums;
 using TheGodfatherGM.Server.Admin;
 using TheGodfatherGM.Server.Characters;
+using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Extensions;
 
 namespace TheGodfatherGM.Server
@@ -13,6 +17,26 @@ namespace TheGodfatherGM.Server
         {
             API.onChatMessage += OnChatMessageHandler;
             API.onChatCommand += OnChatCommandHandler;
+        }
+
+        public static void SendMessageInGroup (Client player, string message)
+        {
+            CharacterController characterController = player.getData("CHARACTER");
+            if (characterController == null) return;
+            Character character = characterController.Character;
+            string formatName = character.Name.Replace("_", " ");
+
+            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
+            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+
+            var allGroupPlayers = ContextFactory.Instance.Character.Where(x => x.GroupType == (int)groupType);
+            
+            foreach (var groupPlayer in allGroupPlayers)
+            {
+                Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == groupPlayer.SocialClub);
+                if (target == null) continue;
+                API.shared.sendChatMessageToPlayer(target, "Игрок " + formatName + " говорит группе: " + message);
+            }
         }
 
         public void OnChatMessageHandler(Client player, string message, CancelEventArgs e)

@@ -7,6 +7,8 @@ using TheGodfatherGM.Server.Characters;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Property;
 using TheGodfatherGM.Server.Vehicles;
+using System.Collections.Generic;
+using TheGodfatherGM.Server.Groups;
 
 namespace TheGodfatherGM.Server.Global
 {
@@ -117,10 +119,17 @@ namespace TheGodfatherGM.Server.Global
                     if (API.getVehicleLocked(vehicleController.Vehicle)) driverDoorStatus = 0;
                     var fuel = vehicleController.VehicleData.Fuel;
 
+                    var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
+                    var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                    var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+                    var owner = "";
+                    if (vehicleController.VehicleData.GroupId == null) owner = "Владелец: " + FormatName;
+                    else owner = "Владелец: " + EntityManager.GetDisplayName(groupType);
+
                     API.shared.triggerClientEvent(player, "vehicle_menu", 
                         2,                                          // 0
                         "Меню транспорта",                          // 1
-                        "Владелец: " + FormatName,                  // 2
+                        owner,                                      // 2
                         engineStatus,                               // 3
                         fuel.ToString(),                            // 4
                         inVehicleCheck,                             // 5
@@ -134,6 +143,21 @@ namespace TheGodfatherGM.Server.Global
                     var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
                     var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+                    var playerWeapons = API.getPlayerWeapons(player);
+                    var weaponList = "";
+                    for (var i = 0; i < playerWeapons.Length; i++)
+                        weaponList += playerWeapons[i].ToString() + "-";
+
+                    Data.Property materialProperty = new Data.Property();
+                    Group moneyStockGroup = new Group();
+                    var groupStockName = GroupController.GetGroupStockName(character);                    
+                    var moneyBankGroup = character.GroupType * 100;                    
+                    var gangRank = (int)groupExtraType - (int)groupType * 100;
+
+                    try { materialProperty = ContextFactory.Instance.Property.First(x => x.Name == groupStockName); }
+                    catch (Exception e) { }
+                    try { moneyStockGroup = ContextFactory.Instance.Group.First(x => x.Id == moneyBankGroup); }
+                    catch (Exception e) { }
 
                     API.shared.triggerClientEvent(player, "workposs_menu",
                          1,                                                                                  // 0
@@ -148,7 +172,23 @@ namespace TheGodfatherGM.Server.Global
                          CharacterController.IsCharacterGangBoss(characterController),                       // 9
                          CharacterController.IsCharacterArmyHighOfficer(characterController.Character),      // 10
                          CharacterController.IsCharacterInGhetto(player),                                    // 11
-                         CharacterController.IsCharacterArmyGeneral(characterController));                   // 12
+                         CharacterController.IsCharacterArmyGeneral(characterController),                    // 12
+                         weaponList,                                                                         // 13
+                         character.OID,                                                                      // 14
+                         materialProperty.Stock,                                                             // 15
+                         moneyStockGroup.MoneyBank,                                                          // 16
+                         CharacterController.IsCharacterHighRankInGang(character),                           // 17
+                         gangRank,                                                                           // 18
+                         (int)groupType);                                                                    // 19
+
+                }
+                else if ((int)args[0] == 13)
+                {
+                    API.shared.triggerClientEvent(player, "gang_map");
+                }
+                else if ((int)args[0] == 14)
+                {
+                    API.shared.triggerClientEvent(player, "face_custom");
                 }
             }
         }

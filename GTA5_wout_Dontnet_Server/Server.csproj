@@ -53,6 +53,9 @@
     <Reference Include="MySql.Data.Entity.EF6, Version=6.9.9.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <HintPath>..\packages\MySql.Data.Entity.6.9.9\lib\net45\MySql.Data.Entity.EF6.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -82,6 +85,7 @@
     <Compile Include="Admin\Commands.cs" />
     <Compile Include="Characters\CharacterController.cs" />
     <Compile Include="Characters\Commands.cs" />
+    <Compile Include="Clothes\ClothesManager.cs" />
     <Compile Include="Database\DatabaseManager.cs" />
     <Compile Include="Database\DefaultDbContext.cs" />
     <Compile Include="EntityManager.cs" />
@@ -104,6 +108,7 @@
     <Compile Include="Global\Util.cs" />
     <Compile Include="Vehicles\Commands.cs" />
     <Compile Include="Vehicles\VehicleController.cs" />
+    <Compile Include="Weapon\WeaponManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -113,6 +118,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="client\img\1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="client\img\2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="client\js\BlipManager.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

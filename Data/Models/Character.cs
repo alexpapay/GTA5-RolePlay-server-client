@@ -20,6 +20,8 @@ namespace TheGodfatherGM.Data
         public int Id { get; set; }
 
         public int OID { get; set; }
+        public int Language { get; set; }
+        // 1 - RUS; 2 - ENG;
 
         public string AccountId { get; set; }
         public IAccountData Account { get; set; }
@@ -44,6 +46,7 @@ namespace TheGodfatherGM.Data
         public int Cash { get; set; }
         public int Bank { get; set; }
         public int ActiveGroupID { get; set; }
+        public int GroupType { get; set; }
 
         public int JobId { get; set; }
         public int PlayMinutes { get; set; }

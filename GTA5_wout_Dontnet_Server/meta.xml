@@ -39,4 +39,7 @@
   <script src="client/js/Login.js" type="client" lang="javascript" />
   <script src="client/js/JobsManager.js" type="client" lang="javascript" />
   <script src="client/js/fly.js" type="client" lang="javascript" />
+
+  <file src="client/img/1.png" />
+  <file src="client/img/2.png" />
 </meta>

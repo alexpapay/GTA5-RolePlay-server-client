@@ -100,11 +100,12 @@ namespace TheGodfatherGM.Server.Jobs
             };
         }
         public void CreateMarkersColShape()
-        {
-                if (JobData.Id == 1)
+        {  
+            if (JobData.Id == 1)
             {
                 job1_1MarCol = API.shared.createCylinderColShape(job1Marker1, 2f, 3f);
                 job1_2MarCol = API.shared.createCylinderColShape(job1Marker2, 2f, 3f);
+                
 
                 job1_1MarCol.onEntityEnterColShape += (shape, entity) =>
                 {                    
@@ -151,12 +152,14 @@ namespace TheGodfatherGM.Server.Jobs
                 };
             }
             if (JobData.Id == 2)
-            {
+            {                
                 job2_1MarCol = API.shared.createCylinderColShape(job2Marker1, 2f, 3f);
                 job2_2MarCol = API.shared.createCylinderColShape(job2Marker2, 2f, 3f);
 
                 job2_1MarCol.onEntityEnterColShape += (shape, entity) =>
                 {
+                    var box = API.createObject(371570974, API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation);
+
                     CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
                     if (characterController == null) return;
                     if (characterController.Character.JobId == 2)
@@ -166,7 +169,10 @@ namespace TheGodfatherGM.Server.Jobs
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_two",
                                 job2Marker2.X, job2Marker2.Y, job2Marker2.Z);
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 9, 10, 0);
+
+                            //API.attachEntityToEntity(box, API.getPlayerFromHandle(entity), "IK_Head", API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation);
+
+                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 44, 0);
                             API.getPlayerFromHandle(entity).resetData("SECOND_OK");
                             API.getPlayerFromHandle(entity).setData("FIRST_OK", null);
                             Client player;
@@ -190,7 +196,10 @@ namespace TheGodfatherGM.Server.Jobs
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_one", 
                                 job2Marker1.X, job2Marker1.Y, job2Marker1.Z);
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 9, 10, 100);
+                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 42, 0);
+
+                            //var box = API.createObject(0, API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation); ;
+
                             API.getPlayerFromHandle(entity).resetData("FIRST_OK");
                             API.getPlayerFromHandle(entity).setData("SECOND_OK", null);
                             Client player;

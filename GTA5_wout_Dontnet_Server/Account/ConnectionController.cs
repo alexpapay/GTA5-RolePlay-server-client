@@ -1,18 +1,24 @@
 ﻿using GTANetworkServer;
 using GTANetworkShared;
+using TheGodfatherGM.Data;
+using TheGodfatherGM.Data.Localize;
+using TheGodfatherGM.Server.DBManager;
+using TheGodfatherGM.Server.Characters;
 using System;
 using System.Linq;
-using TheGodfatherGM.Server.DBManager;
-using TheGodfatherGM.Data;
-using TheGodfatherGM.Server.Characters;
 using System.Collections.Generic;
 
 namespace TheGodfatherGM.Server
 {
     public class ConnectionController : Script
     {
-        public static readonly Vector3 _startPos = new Vector3(3433.339f, 5177.579f, 39.79541f);
-        public static readonly Vector3 _startCamPos = new Vector3(3476.85f, 5228.022f, 9.453369f);
+        //public static readonly Vector3 _startPos = new Vector3(3433.339f, 5177.579f, 39.79541f);
+        //public static readonly Vector3 _startCamPos = new Vector3(3476.85f, 5228.022f, 9.453369f);
+        //public static readonly Vector3 _startPos = new Vector3(-1042.2, -2772.6, 4.639);
+        public static readonly Vector3 _startPos = new Vector3(-1043.045, -2772.4, 4.639);
+        private static readonly Vector3 _startRot = new Vector3(0.0, 0.0, 58.7041);
+        public static readonly Vector3 _startCamPos = new Vector3(-1042.0, -2776.0, 4.639);
+        public static readonly Vector3 _stopCamPos = new Vector3(-1044.0, -2772.0, 5.3);
 
         public ConnectionController()
         {
@@ -27,42 +33,36 @@ namespace TheGodfatherGM.Server
             Character targetCharacter = null;
             Client killer = API.getPlayerFromHandle(entityKiller);
             if (killer != null)
-            {
-                API.sendNotificationToAll(killer.name + " убил " + player.name);
+            {                                           // TODO: Lokalize
+                API.sendNotificationToAll(killer.name + Localize.Lang(2, "killed") + player.name);
                 targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == killer.socialClubName);
             }
             else
-            {
-                API.sendNotificationToAll(player.name + " умер...");
+            {                                           // TODO: Lokalize
+                API.sendNotificationToAll(player.name + Localize.Lang(2, "death"));
             }
 
             CharacterController characterController = player.getData("CHARACTER");            
             if (characterController == null) return;
 
-            SpawnManager.SetPlayerWeapon(player, characterController.Character, 2);
+            WeaponManager.SetPlayerWeapon(player, characterController.Character, 2);
 
             // Army change cloth after death
             if (CharacterController.IsCharacterInArmy(characterController))
-            {
-                SpawnManager.SetPlayerSkinClothesToDb(player, 101, characterController.Character, 1);
-
+            {                
                 if (targetCharacter != null && CharacterController.IsCharacterInGhetto(killer))
-                {                    
-                    if (CharacterController.IsCharacterArmySoldier(characterController))
+                {     
+                    switch (characterController.Character.ActiveClothes)
                     {
-                        targetCharacter.ClothesTypes = 2;
-                        API.sendChatMessageToPlayer(killer, "~g~Вы забрали форму солдата!");
-                    }                                           
-                    if (CharacterController.IsCharacterArmyInAllOfficers(characterController))
-                    {
-                        targetCharacter.ClothesTypes = 3;
-                        API.sendChatMessageToPlayer(killer, "~g~Вы забрали форму офицера!");
-                    }                        
-                    if (CharacterController.IsCharacterArmyGeneral(characterController))
-                    {
-                        targetCharacter.ClothesTypes = 4;
-                        API.sendChatMessageToPlayer(killer, "~g~Вы забрали форму генерала!");
-                    }                       
+                        case 2: targetCharacter.ClothesTypes = 2;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_soldier")); break;
+                        case 3: targetCharacter.ClothesTypes = 3;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_officer")); break;
+                        case 4: targetCharacter.ClothesTypes = 4;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_general")); break;
+                    }
+                    ClothesManager.SetPlayerSkinClothesToDb(player, 101, characterController.Character, 1);
+
                     ContextFactory.Instance.SaveChanges();
                 }
                 else API.sendNotificationToAll("[DEBUG]: Ошибка передачи формы!");
@@ -78,13 +78,13 @@ namespace TheGodfatherGM.Server
 
         public void OnPlayerConnectedHandler(Client player)
         {
-            Character characterToList = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
-            if (characterToList == null) return;
-            API.triggerClientEventForAll("playerlist_join", player.socialClubName, player.name, ColorForPlayer(player), characterToList.Id , characterToList.Name.ToString());
+            Character character = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
+            if (character == null) return;
+            API.triggerClientEventForAll("playerlist_join", player.socialClubName, player.name, ColorForPlayer(player), character.Id , character.Name.ToString());
  
             if (IsAccountBanned(player))
             {
-                player.kick("~r~Вы забанены на данном сервере.");
+                player.kick(Localize.Lang(character.Language, "kick"));
             }
         }
         public void OnPlayerFinishedDownloadHandler(Client player)
@@ -120,7 +120,7 @@ namespace TheGodfatherGM.Server
                 character.LastLogoutDate = DateTime.Now;
                 character.Online = false;
                 character.OID = 0;
-                SpawnManager.SetPlayerWeapon(player, character, 3);
+                WeaponManager.SetPlayerWeapon(player, character, 3);
                 ContextFactory.Instance.SaveChanges();
             }            
         }
@@ -142,8 +142,9 @@ namespace TheGodfatherGM.Server
         }
         public static void LoginMenu(Client player)
         {
-            API.shared.triggerClientEvent(player, "interpolateCamera", 20000, _startCamPos, _startCamPos + new Vector3(0.0, -50.0, 50.0), new Vector3(0.0, 0.0, 180.0), new Vector3(0.0, 0.0, 95.0));
+            API.shared.triggerClientEvent(player, "interpolateCamera", 2000, _startCamPos, _stopCamPos, new Vector3(0.0, 0.0, -80.0), new Vector3(0.0, 0.0, -115.0));
             player.position = _startPos;
+            player.rotation = _startRot;
             player.freeze(true);
             player.transparency = 0;
             PromptLoginScreen(player);
@@ -151,11 +152,13 @@ namespace TheGodfatherGM.Server
         public static void PromptLoginScreen(Client player)
         {
             var character = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
-            ContextFactory.Instance.SaveChanges();
             if (character == null) CharacterController.CreateCharacter(player);
             else
             {
-                API.shared.triggerClientEvent(player, "login_char_menu", 0);
+                SpawnManager.SetCharacterFace(player, character);
+                ClothesManager.SetPlayerSkinClothes(player, 0, character, 1);
+                player.transparency = 255;
+                API.shared.triggerClientEvent(player, "login_char_menu", character.Language);
             }
         }
 

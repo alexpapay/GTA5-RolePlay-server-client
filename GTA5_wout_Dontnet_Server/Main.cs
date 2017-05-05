@@ -17,7 +17,7 @@ namespace TheGodfatherGM.Server
         {
             API.onResourceStart += OnResourceStart;
             API.onResourceStop += OnResourceStop;
-            API.onUpdate += OnUpdateHandler;
+            API.onUpdate += OnUpdateHandler;            
         }
 
         private DateTime m_lastTick = DateTime.Now;

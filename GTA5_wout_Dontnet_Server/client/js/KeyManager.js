@@ -45,6 +45,12 @@
     else if (args.KeyCode == Keys.D3) {
         API.triggerServerEvent("onKeyDown", 12);
     }
+    else if (args.KeyCode == Keys.D5) {
+        API.triggerServerEvent("onKeyDown", 13);
+    }
+    else if (args.KeyCode == Keys.D6) {
+        API.triggerServerEvent("onKeyDown", 14);
+    }
     else if (args.KeyCode == Keys.D4) {
         API.createMarker(0, new Vector3(-1020.5, -2722.14, 13.8), new Vector3(), new Vector3(), new Vector3(1, 1, 1), 150, 255, 0, 50);
         API.createMarker(0, new Vector3(-1035.88, -2735.7, 13.8), new Vector3(), new Vector3(), new Vector3(1, 1, 1), 150, 255, 0, 50);

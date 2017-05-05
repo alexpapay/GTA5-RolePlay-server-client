@@ -6,7 +6,7 @@ var res = API.getScreenResolutionMantainRatio();
 API.onUpdate.connect(function (sender, args) {
 
     if (drawAnimationHUD) {
-        API.drawText("Press F to stop", res.Width - 30, res.Height - 100, 0.5, 255, 186, 131, 255, 4, 2, false, true, 0);
+        API.drawText("Press E to stop", res.Width - 30, res.Height - 100, 0.5, 255, 186, 131, 255, 4, 2, false, true, 0);
     }
 
     if (currentMoney != null) {

@@ -71,11 +71,11 @@ namespace TheGodfatherGM.Server
             return account.Account.Character.ToList();
         }
         */
-        public static bool RegisterCharacter(Client player, string name, string pwd)
+        public static bool RegisterCharacter(Client player, string name, string pwd, int laguage)
         {
             if (!DoesCharacterExist(name))
             {
-                new CharacterController(player, name, pwd);
+                new CharacterController(player, name, pwd, laguage);
                 return true;
             }
             return false;

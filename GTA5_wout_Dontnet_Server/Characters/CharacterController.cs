@@ -28,7 +28,7 @@ namespace TheGodfatherGM.Server.Characters
                 
                 player.setData("CHARACTER", this);
 
-                LoadProperties(player);
+                //LoadProperties(player);
                 switch (Character.RegistrationStep)
                 {
                     case 0:
@@ -79,9 +79,10 @@ namespace TheGodfatherGM.Server.Characters
             }
         }
 
-        public CharacterController(Client player, string name, string pwd)
+        public CharacterController(Client player, string name, string pwd, int language)
         {
             Character.AccountId = pwd;
+            Character.GroupType = 0;
             Character.ActiveGroupID = 1;
             Character.Admin = 0;
             Character.Bank = 0;
@@ -89,7 +90,7 @@ namespace TheGodfatherGM.Server.Characters
             Character.JobId = 0;            
             Character.Level = 0;            
             Character.Model = PedHash.FreemodeMale01.GetHashCode();
-            Character.ModelName = "FreeModeMale01";
+            Character.ModelName = "FreemodeMale01";
             Character.Name = name;
             Character.Online = false;
             Character.PosX = -1034.794f;
@@ -103,11 +104,12 @@ namespace TheGodfatherGM.Server.Characters
             Character.SocialClub = player.socialClubName;
             Character.ClothesTypes = 0;
             Character.ActiveClothes = 101;
-
+            Character.Language = language;
             ContextFactory.Instance.Character.Add(Character);            
             ContextFactory.Instance.SaveChanges();
-
-            SelectCharacter(player);
+            API.shared.setPlayerSkin(player, PedHash.FreemodeMale01);
+            API.shared.exported.gtaocharacter.initializePedFace(player.handle);
+            API.shared.triggerClientEvent(player, "face_custom");            
         }
 
         public void Save(Client player)
@@ -118,7 +120,6 @@ namespace TheGodfatherGM.Server.Characters
             Character.Rot = player.rotation.Z;
             Character.Model = player.model.GetHashCode();
         }
-
         private void OnPlayerDeathHandler(Client player, NetHandle entityKiller, int weapon)
         {
             
@@ -143,32 +144,19 @@ namespace TheGodfatherGM.Server.Characters
         {
             API.shared.triggerClientEvent(player, "create_char_menu", 0);
         }
-        public static void SelectCharacter(Client player)
+        public static void SelectCharacter(Client player, Character character)
         {
-            var character = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
-            ContextFactory.Instance.SaveChanges();
-            CharacterController characterController = new CharacterController(player, character);
-            characterController.LoginCharacter(player);           
-        }
-        public void LoginCharacter(Client player)
-        {
-            //ChatController.LoginMessages(this);            
-
-            if (Character.RegistrationStep == 0)
-            {
-                GroupController groupController = EntityManager.GetGroup(1);
-                AddGroup(groupController.Group, false);
-                SetActiveGroup(groupController.Group);
-            }
-            
-            SpawnManager.SpawnCharacter(player, this);
+            CharacterController characterController = new CharacterController(player, character);                     
+            SpawnManager.SpawnCharacter(player, characterController);
 
             API.shared.triggerClientEvent(player, "stopAudio");
             player.freeze(false);
             player.transparency = 255;
-            API.shared.triggerClientEvent(player, "update_money_display", Character.Cash);
+            API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
             API.shared.triggerClientEvent(player, "CEF_DESTROY");
         }
+
+        // TODO: А нужна ли вообще эта функция нам?
         public void LoadProperties(Client player)
         {
             if (Character.Property == null) return;
@@ -280,6 +268,20 @@ namespace TheGodfatherGM.Server.Characters
             if (character.ActiveGroupID >= 1600 &&
                 character.ActiveGroupID <= 1610) return true;
             if (character.ActiveGroupID >= 1700 &&
+                character.ActiveGroupID <= 1710) return true;
+            return false;
+        }
+        public static bool IsCharacterHighRankInGang(Character character)
+        {
+            if (character.ActiveGroupID >= 1307 &&
+                character.ActiveGroupID <= 1310) return true;
+            if (character.ActiveGroupID >= 1407 &&
+                character.ActiveGroupID <= 1410) return true;
+            if (character.ActiveGroupID >= 1507 &&
+                character.ActiveGroupID <= 1510) return true;
+            if (character.ActiveGroupID >= 1607 &&
+                character.ActiveGroupID <= 1610) return true;
+            if (character.ActiveGroupID >= 1707 &&
                 character.ActiveGroupID <= 1710) return true;
             return false;
         }

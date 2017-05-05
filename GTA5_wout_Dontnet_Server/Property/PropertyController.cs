@@ -153,9 +153,19 @@ namespace TheGodfatherGM.Server.Property
             if (PropertyData.Type == PropertyType.House)
             {
                 var owner = ContextFactory.Instance.Character.FirstOrDefault(x => x.Id == PropertyData.CharacterId);
+                
                 ExteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                     new Vector3(1f, 1f, 1f), 150, 255, 255, 50);
-                ExteriorTextLabel = API.createTextLabel("~g~Вход в дом.\nВладелец: " + owner.Name, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                
+                if (owner == null)
+                {
+                    var cost = PropertyData.Stock;
+                    ExteriorTextLabel = API.createTextLabel("~g~Купить дом №"+ PropertyData.PropertyID +".\nСтоимость: " + cost + "$", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
+                else
+                {                    
+                    ExteriorTextLabel = API.createTextLabel("~g~Вход в дом №" + PropertyData.PropertyID + ".\nВладелец: " + owner.Name, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
 
                 InteriorMarker = API.shared.createMarker(1, new Vector3(PropertyData.IntPosX, PropertyData.IntPosY, PropertyData.IntPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                 new Vector3(1f, 1f, 1f), 150, 255, 255, 0);
@@ -163,6 +173,7 @@ namespace TheGodfatherGM.Server.Property
 
                 Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
                 Blip.sprite = 40;
+                Blip.color = PropertyData.CharacterId == null ? 2 : 1;
                 Blip.name = "Жилой дом";
             }
             if (PropertyData.Type == PropertyType.Rent)
@@ -323,21 +334,30 @@ namespace TheGodfatherGM.Server.Property
             ExteriorColShape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 3f);
             ExteriorColShape.onEntityEnterColShape += (shape, entity) =>
             {
-                Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
+                if (API.getPlayerFromHandle(entity) != null)
                 {
-                    if (PropertyData.Enterable)
+                    CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
+                    if (PropertyData.Name == "House")
                     {
-                        API.shared.sendNotificationToPlayer(player, "Вы можете зайти сюда.\nНажмите N для входа.");
-                        player.setData("AT_PROPERTY", this);
+                        if (PropertyData.Enterable && PropertyData.CharacterId == characterController.Character.Id)
+                        {
+                            API.shared.sendNotificationToPlayer(API.getPlayerFromHandle(entity), "Вы можете зайти сюда.\nНажмите N для входа.");
+                            API.getPlayerFromHandle(entity).setData("AT_PROPERTY", this);
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 0);
+                        }
+                        else if (PropertyData.CharacterId == characterController.Character.Id)
+                        {
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 1);
+                        }
                     }
-                }
+                }                
             };
             ExteriorColShape.onEntityExitColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 0, 1);
                     if (PropertyData.Enterable) player.resetData("AT_PROPERTY");
                 }
             };
@@ -448,8 +468,7 @@ namespace TheGodfatherGM.Server.Property
                         var groupType = (GroupType)Enum.Parse(typeof(GroupType), numberOfArmy.Type.ToString());
                                                 
                         if (PropertyData.Name == "Army1_source" &&
-                        characterController.Character.ActiveGroupID >= 2001 &&
-                        characterController.Character.ActiveGroupID <= 2015 &&
+                        characterController.Character.GroupType == 20 &&
                         player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 1", "Вежливые люди и тут!", PropertyData.Name, 1);
                         
@@ -483,9 +502,7 @@ namespace TheGodfatherGM.Server.Property
                         var numberOfArmy = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == characterController.Character.ActiveGroupID);
                         var groupType = (GroupType)Enum.Parse(typeof(GroupType), numberOfArmy.Type.ToString());
                                                 
-                        if (PropertyData.Name == "Army1_weapon" &&
-                        characterController.Character.ActiveGroupID >= 2001 &&
-                        characterController.Character.ActiveGroupID <= 2015)
+                        if (PropertyData.Name == "Army1_weapon" && characterController.Character.GroupType == 20)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 1", "Вежливые люди и тут!", PropertyData.Name, 1);
 
                         if (PropertyData.Name == "Army1_main" &&
@@ -496,27 +513,20 @@ namespace TheGodfatherGM.Server.Property
                         }
 
                         if (PropertyData.Name == "Army1_stock" &&
-                        characterController.Character.ActiveGroupID >= 2101 &&
-                        characterController.Character.ActiveGroupID <= 2115 &&
-                        player.isInVehicle)
+                        characterController.Character.GroupType == 20 && player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди и тут!", PropertyData.Name, 2);
-
-
+                        
                         // GANG STEaLING:
-                        if (PropertyData.Name == "Army1_gang" &&
-                        characterController.Character.ActiveGroupID >= 1300 &&
-                        characterController.Character.ActiveGroupID <= 1330)
+                        if (PropertyData.Name == "Army1_gang" && CharacterController.IsCharacterInGang(characterController))
                         {
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, EntityManager.GetDisplayName(groupType), "Воровство", PropertyData.Name, 0);
                         }
                         if (PropertyData.Name == "Army1_stock" &&
-                        characterController.Character.ActiveGroupID >= 1300 &&
-                        characterController.Character.ActiveGroupID <= 1330 &&
+                        CharacterController.IsCharacterInGang(characterController) &&
                         !player.isInVehicle)
                         {
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, EntityManager.GetDisplayName(groupType), "Воровство", PropertyData.Name, 0);
                         }
-
                         ContextFactory.Instance.SaveChanges();
                     }
                 }
@@ -545,12 +555,8 @@ namespace TheGodfatherGM.Server.Property
                     if (PropertyData.Type == PropertyType.ArmyTwo)
                     {
                         CharacterController characterController = player.getData("CHARACTER");
-                        var numberOfArmy = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == characterController.Character.ActiveGroupID);
-                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), numberOfArmy.Type.ToString());
                         
-                        if (PropertyData.Name == "Army2_stock" &&
-                        characterController.Character.ActiveGroupID >= 2001 &&
-                        characterController.Character.ActiveGroupID <= 2015 &&
+                        if (PropertyData.Name == "Army2_stock" && characterController.Character.GroupType == 20 &&
                         player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 2);
 
@@ -583,30 +589,22 @@ namespace TheGodfatherGM.Server.Property
                         var numberOfArmy = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == characterController.Character.ActiveGroupID);
                         var groupType = (GroupType)Enum.Parse(typeof(GroupType), numberOfArmy.Type.ToString());
 
-                        if (PropertyData.Name == "Army2_stock" &&
-                        characterController.Character.ActiveGroupID >= 2101 &&
-                        characterController.Character.ActiveGroupID <= 2115 && 
+                        if (PropertyData.Name == "Army2_stock" && characterController.Character.GroupType == 21 && 
                         player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 1);
 
-                        if (PropertyData.Name == "Army2_stock" &&
-                        characterController.Character.ActiveGroupID >= 2001 &&
-                        characterController.Character.ActiveGroupID <= 2015 &&
+                        if (PropertyData.Name == "Army2_stock" && characterController.Character.GroupType == 20 &&
                         player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 2);
 
-                        if (PropertyData.Name == "Army2_weapon" &&
-                        characterController.Character.ActiveGroupID >= 2101 &&
-                        characterController.Character.ActiveGroupID <= 2115)
+                        if (PropertyData.Name == "Army2_weapon" && characterController.Character.GroupType == 21)
                         API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 1);
 
                         if (PropertyData.Name == "Army2_main" &&
                         characterController.Character.ActiveGroupID >= 2103 &&
-                        characterController.Character.ActiveGroupID <= 2115)
-                        {
+                        characterController.Character.ActiveGroupID <= 2115)                        
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, "Армия 2", "Вежливые люди тут!", PropertyData.Name, 1);
-                        }
-
+                        
                         // GANG STEaLING:
                         if (PropertyData.Name == "Army2_gang" && 
                         CharacterController.IsCharacterInGang(characterController) && !player.isInVehicle)
@@ -630,10 +628,8 @@ namespace TheGodfatherGM.Server.Property
 
                         if (PropertyData.Name == "Army2_stock" &&
                         CharacterController.IsCharacterInGang(characterController) && !player.isInVehicle)
-                        {
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, EntityManager.GetDisplayName(groupType), "Воровство", PropertyData.Name, 0);
-                        }
-
+                        
                         ContextFactory.Instance.SaveChanges();
                     }
                 }
@@ -661,17 +657,13 @@ namespace TheGodfatherGM.Server.Property
                     if (PropertyData.Type == PropertyType.GangBallas)
                     {
                         CharacterController characterController = player.getData("CHARACTER");
-                        var nameOfGang = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == characterController.Character.ActiveGroupID);
-                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), nameOfGang.Type.ToString());
-
+                        
                         if (PropertyData.Name == "Ballas_stock" &&
                         CharacterController.IsCharacterInGang(characterController) && player.isInVehicle)
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "Круче нас только яйца!", PropertyData.Name, 1, 0);
 
                         if (PropertyData.Name == "Ballas_main" && CharacterController.IsCharacterInGang(characterController))
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "Круче нас только яйца!", PropertyData.Name, 1, characterController.Character.ClothesTypes);
-
-                        ContextFactory.Instance.SaveChanges();
                     }
                 }
             };
@@ -730,7 +722,7 @@ namespace TheGodfatherGM.Server.Property
             };
         }
 
-        public static void CreateProperty(Client player, string ownerType, PropertyType type, string Name)
+        public static void CreateProperty(Client player, string ownerType, PropertyType type, string Name, int cost)
         {
             Data.Property propertyData = new Data.Property();
             string ownerName;
@@ -749,6 +741,11 @@ namespace TheGodfatherGM.Server.Property
                 propertyData.Group = groupController.Group;
                 ownerName = groupController.Group.Name;
             }
+            else if (ownerType == "null")
+            {
+                propertyData.GroupId = null;
+                ownerName = null;
+            }
             else
             {
                 API.shared.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы указали неверный тип (player/group");
@@ -757,6 +754,9 @@ namespace TheGodfatherGM.Server.Property
 
             PropertyController propertyController = new PropertyController(propertyData);
 
+            if ((int)type == 100) propertyData.Name = "House";
+
+            propertyData.Stock = cost;
             propertyData.Type = type;
             propertyData.ExtPosX = player.position.X;
             propertyData.ExtPosY = player.position.Y;

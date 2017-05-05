@@ -1,16 +1,20 @@
 ﻿using GTANetworkServer;
 using GTANetworkShared;
-using TheGodfatherGM.Server.Characters;
-using TheGodfatherGM.Server.Jobs;
-using System.Collections.Generic;
-using TheGodfatherGM.Server.DBManager;
+
 using TheGodfatherGM.Data;
-using System.Linq;
-using TheGodfatherGM.Server.Vehicles;
-using System.Security.Cryptography;
-using System.Text;
-using System;
 using TheGodfatherGM.Data.Enums;
+using TheGodfatherGM.Server.Groups;
+using TheGodfatherGM.Server.Vehicles;
+using TheGodfatherGM.Server.DBManager;
+using TheGodfatherGM.Server.Characters;
+
+using System.Security.Cryptography;
+using System;
+using System.Text;
+using System.Linq;
+using System.Collections.Generic;
+
+using Newtonsoft.Json;
 
 namespace TheGodfatherGM.Server.Menu
 {
@@ -24,24 +28,21 @@ namespace TheGodfatherGM.Server.Menu
 
         // Login & Registration
         private void onCreateEventTrigger(Client player, string eventName, object[] args)
-        {
-            if (eventName == "enter_login")            
-                API.shared.sendChatMessageToPlayer(player, string.Format("~g~Введите свой логин в формате Имя_Фамилия"));
-            if (eventName == "enter_pwd")            
-                API.shared.sendChatMessageToPlayer(player, string.Format("~g~Введите пароль"));
-
+        {  
             if (eventName == "create_char")
             {
                 if (CharacterController.NameValidityCheck(player, args[0].ToString()))
                 {
+                    // Password correct
                     MD5 md5 = new MD5CryptoServiceProvider();
                     string pass = args[1].ToString();
                     byte[] checkSum = md5.ComputeHash(Encoding.UTF8.GetBytes(pass));
                     string result = BitConverter.ToString(checkSum).Replace("-", String.Empty);
-                    CharacterController newCharacterController = new CharacterController(player, args[0].ToString(), result);
+                    CharacterController newCharacterController = new CharacterController(player, args[0].ToString(), result, (int)args[2]);
                 }
                 else
                 {
+                    // Password is wrong
                     API.shared.triggerClientEvent(player, "create_char_menu", 0);
                     return;
                 }
@@ -55,17 +56,75 @@ namespace TheGodfatherGM.Server.Menu
                 Character character = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
 
                 if (character.AccountId == result)
-                {
-                    CharacterController.SelectCharacter(player);
+                {                    
+                    CharacterController.SelectCharacter(player, character);
                     API.shared.triggerClientEvent(player, "reset_menu");
                 }                    
                 else
                 {
                     API.shared.sendChatMessageToPlayer(player, string.Format("~r~Вы ввели неверный пароль!"));
-                    API.shared.triggerClientEvent(player, "login_char_menu", 0);
+                    API.shared.triggerClientEvent(player, "login_char_menu", character.Language);
                     return;
                 }
                 ContextFactory.Instance.SaveChanges();
+            }
+            if (eventName == "change_face")
+            {
+                int value = (int)args[1];                
+
+                switch (args[0])
+                {
+                    case "GTAO_SHAPE_FIRST_ID":
+                        API.setEntitySyncedData(player, "GTAO_SHAPE_FIRST_ID", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_SHAPE_SECOND_ID":
+                        API.setEntitySyncedData(player, "GTAO_SHAPE_SECOND_ID", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_SKIN_FIRST_ID":
+                        API.setEntitySyncedData(player, "GTAO_SKIN_FIRST_ID", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_HAIR":
+                        API.setPlayerClothes(player, 2, value, 0); break;
+                    case "GTAO_HAIR_COLOR":
+                        API.setEntitySyncedData(player, "GTAO_HAIR_COLOR", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_EYE_COLOR":
+                        API.setEntitySyncedData(player, "GTAO_EYE_COLOR", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_EYEBROWS":
+                        API.setEntitySyncedData(player, "GTAO_EYEBROWS", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                    case "GTAO_EYEBROWS_COLOR":
+                        API.setEntitySyncedData(player, "GTAO_EYEBROWS_COLOR", value);
+                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;                    
+                }
+            }
+            if (eventName == "custom_char")
+            {
+                var faceJson = JsonConvert.DeserializeObject<Faces>((string)args[0]);
+                var character = ContextFactory.Instance.Character.First(x => x.SocialClub == player.socialClubName);
+
+                Faces characterFace = new Faces();
+                characterFace.CharacterId = character.Id;
+
+                characterFace.SEX = faceJson.SEX;
+                characterFace.GTAO_SHAPE_FIRST_ID = faceJson.GTAO_SHAPE_FIRST_ID;
+                characterFace.GTAO_SHAPE_SECOND_ID = faceJson.GTAO_SHAPE_SECOND_ID;
+                characterFace.GTAO_SKIN_FIRST_ID = faceJson.GTAO_SKIN_FIRST_ID;
+                characterFace.GTAO_HAIR = faceJson.GTAO_HAIR;
+                characterFace.GTAO_HAIR_COLOR = faceJson.GTAO_HAIR_COLOR;
+                characterFace.GTAO_EYE_COLOR = faceJson.GTAO_EYE_COLOR;
+                characterFace.GTAO_EYEBROWS = faceJson.GTAO_EYEBROWS;
+                characterFace.GTAO_EYEBROWS_COLOR = faceJson.GTAO_EYEBROWS_COLOR;
+
+                character.Model = faceJson.SEX;
+                character.ModelName = faceJson.SEX.ToString();
+
+                ContextFactory.Instance.Faces.Add(characterFace);
+                ContextFactory.Instance.SaveChanges();
+
+                CharacterController.SelectCharacter(player, character);
+                API.shared.triggerClientEvent(player, "reset_menu");
             }
         }
 
@@ -96,13 +155,14 @@ namespace TheGodfatherGM.Server.Menu
             if (eventName == "menu_handler_select_item")
             {
                 int callback = (int)args[0];
-
+                /*
                 if (callback == 0) // Character Menu
                 {
                     if ((int)args[1] == (int)args[2] - 1) CharacterController.CreateCharacter(player);
                     else CharacterController.SelectCharacter(player);
                 }
-                else if (callback == 1) // Vehicle Menu
+                else */
+                if (callback == 1) // Vehicle Menu
                 {
                     List<int> VehicleIDs = player.getData("VSTORAGE");
 
@@ -130,6 +190,81 @@ namespace TheGodfatherGM.Server.Menu
                 int drawable = (int)args[1];
                 int texture = (int)args[2];
                 API.setPlayerAccessory(player, slot, drawable, texture);
+            }
+            if (eventName == "house_menu_buysell")
+            {
+                var propertyId = (int)args[0];
+                var cost = (int)args[1];
+                var trigger = (int)args[2];
+
+                var buyedProperty = ContextFactory.Instance.Property.First(x => x.PropertyID == propertyId);
+                if (buyedProperty == null) return;
+
+                // Buy house
+                if (trigger == 1)
+                {
+                    if (character.Cash - cost < 0)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас недостаточно средств для покупки!");
+                        return;
+                    }
+                    else
+                    {
+                        character.Cash -= cost;
+                        buyedProperty.CharacterId = character.Id;
+
+                        var blips = API.getAllBlips();
+                        foreach (var blip in blips)
+                        {
+                            var blipPos = API.getBlipPosition(blip);
+                            if (blipPos.X == buyedProperty.ExtPosX &&
+                                blipPos.Y == buyedProperty.ExtPosY &&
+                                blipPos.Z == buyedProperty.ExtPosZ)
+                                API.setBlipColor(blip, 1);
+                        }
+                        var labels = API.getAllLabels();
+                        foreach (var label in labels)
+                        {
+                            var labelText = API.getTextLabelText(label);
+                            if (labelText.ToString().Contains("~g~Купить дом №" + buyedProperty.PropertyID))
+                                API.setTextLabelText(label, "~g~Вход в дом №" + buyedProperty.PropertyID + ".\nВладелец: " + character.Name);
+                        }
+                        API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+                        ContextFactory.Instance.SaveChanges();
+                    }
+                }
+                if (trigger == 0)
+                {
+                    if (character.Id != buyedProperty.CharacterId)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы не можете продать данный дом!");
+                        return;
+                    }
+                    else
+                    {
+                        character.Cash += cost/2;
+                        buyedProperty.CharacterId = null;
+
+                        var list = API.getAllBlips();
+                        foreach (var blip in list)
+                        {
+                            var blipPos = API.getBlipPosition(blip);
+                            if (blipPos.X == buyedProperty.ExtPosX &&
+                                blipPos.Y == buyedProperty.ExtPosY &&
+                                blipPos.Z == buyedProperty.ExtPosZ)
+                                API.setBlipColor(blip, 2);
+                        }
+                        var labels = API.getAllLabels();
+                        foreach (var label in labels)
+                        {
+                            var labelText = API.getTextLabelText(label);
+                            if (labelText.ToString().Contains("~g~Вход в дом №" + buyedProperty.PropertyID))
+                                API.setTextLabelText(label, "~g~Купить дом №" + buyedProperty.PropertyID +".\nСтоимость: " + cost + "$");
+                        }
+                        API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+                        ContextFactory.Instance.SaveChanges();
+                    }
+                }
             }
 
             // CAR MENU
@@ -352,7 +487,7 @@ namespace TheGodfatherGM.Server.Menu
                     ContextFactory.Instance.SaveChanges();
                     API.shared.triggerClientEvent(player, "loader_one", posX, posY, posZ);
                     player.setData("SECOND_OK", null);
-                    SpawnManager.SetPlayerSkinClothes(player, 1, characterController.Character, 1);
+                    ClothesManager.SetPlayerSkinClothes(player, 1, characterController.Character, 1);
                 }       
 
                 if (callback == 0)
@@ -361,7 +496,7 @@ namespace TheGodfatherGM.Server.Menu
                     ContextFactory.Instance.SaveChanges();
                     API.shared.triggerClientEvent(player, "loader_end");
                     API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
-                    SpawnManager.SetPlayerSkinClothes(player, 0, characterController.Character, 1);
+                    ClothesManager.SetPlayerSkinClothes(player, 0, characterController.Character, 1);
                     player.resetData("FIRST_OK");
                     player.resetData("SECOND_OK");
                 }
@@ -491,6 +626,8 @@ namespace TheGodfatherGM.Server.Menu
                 int trigger = (int)args[1];
 
                 string stockName = propertyName;
+                if (propertyName == "Army2_stock") stockName = "Army2_stock";
+                if (propertyName == "Army1_stock") stockName = "Army1_stock";
                 if (propertyName == "Army2_gang") stockName = "Army2_stock";
                 if (propertyName == "Army1_gang") stockName = "Army1_stock";
                 var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == stockName);
@@ -560,7 +697,7 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (character.ClothesTypes != 0)
                     {
-                        SpawnManager.SetPlayerSkinClothes(player, character.ClothesTypes, character, 1);
+                        ClothesManager.SetPlayerSkinClothes(player, character.ClothesTypes, character, 1);
                         character.ActiveClothes = character.ClothesTypes;
                         ContextFactory.Instance.SaveChanges();
                     }                        
@@ -578,7 +715,7 @@ namespace TheGodfatherGM.Server.Menu
                         case "GroveStreet_main":    cloth = 161; break;
                         case "TheRifa_main":        cloth = 171; break;
                     }
-                    SpawnManager.SetPlayerSkinClothesToDb(player, cloth, character, 1);
+                    ClothesManager.SetPlayerSkinClothesToDb(player, cloth, character, 1);
                     character.ActiveClothes = cloth;
                     ContextFactory.Instance.SaveChanges();
                 }
@@ -611,7 +748,60 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 ContextFactory.Instance.SaveChanges();                
             }
-
+            if (eventName == "gang_add_money")
+            {
+                var money = (int)args[0];
+                var gangGroupBank = character.GroupType * 100;
+                var gangBank = ContextFactory.Instance.Group.First(x => x.Id == gangGroupBank);
+                if (character.Cash - money < 0)
+                {
+                    API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас недостаточно средств для вклада!");
+                    return;
+                }
+                else
+                {
+                    character.Cash -= money;
+                    gangBank.MoneyBank += money;
+                    API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+                }
+                ContextFactory.Instance.SaveChanges();
+            }
+            if (eventName == "gang_get_money")
+            {
+                var money = (int)args[0];
+                var gangGroupBank = character.GroupType * 100;
+                var gangBank = ContextFactory.Instance.Group.First(x => x.Id == gangGroupBank);
+                if (gangBank.MoneyBank - money < 0)
+                {
+                    API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~В банке банды недостаточно средств для снятия!");
+                    return;
+                }
+                else
+                {
+                    character.Cash += money;
+                    gangBank.MoneyBank -= money;
+                    API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+                }
+                ContextFactory.Instance.SaveChanges();
+            }
+            if (eventName == "gang_get_material")
+            {
+                var material = (int)args[0];
+                var gangGroupProperty = character.GroupType * 100;
+                var gangStockProperty = ContextFactory.Instance.Property
+                    .First(x => x.Name == GroupController.GetGroupStockName(character));
+                if (gangStockProperty.Stock - material < 0)
+                {
+                    API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~В банке банды недостаточно материалов для снятия!");
+                    return;
+                }
+                else
+                {
+                    character.Material += material;
+                    gangStockProperty.Stock -= material;
+                }
+                ContextFactory.Instance.SaveChanges();
+            }
             if (eventName == "load_unload_material")
             {
                 int trigger = (int)args[0];
@@ -640,8 +830,145 @@ namespace TheGodfatherGM.Server.Menu
                     else API.sendChatMessageToPlayer(player, "~r~Вы не можете загрузить в эту машину больше!\nОна перегружена и в ней" + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов.");
                 }                
             }
+            if (eventName == "gang_ballas_add_to_group")
+            {
+                int callBack = (int)args[2];
+                if (character == null) return;
 
-            // ARMY TWO MENU
+                // Принятие в банду
+                if (callBack == 1)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int gangID = (int)args[1];
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                        if (target == null) return;
+                        if (player.position.DistanceTo(target.position) < 3.0F)
+                        {
+                            API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от пользователя!");
+                            return;
+                        }
+
+                        var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == gangID);
+                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                        var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                        targetCharacter.ActiveGroupID = gangID;
+                        targetCharacter.GroupType = (int)groupType;
+                        targetCharacter.JobId = 0;
+                        targetCharacter.ActiveClothes = ClothesManager.SetFractionClothes(target, gangID, targetCharacter);
+                        ContextFactory.Instance.SaveChanges();
+
+                        target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " принял вас в банду: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
+                        API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы перевели пользователя: " + targetCharacter.Name.ToString() + "\nВо фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+                // Выгнать из банды
+                if (callBack == 2)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int gangID = (int)args[1];
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        if (CharacterController.IsCharacterInGang(targetCharacter) &&
+                            !CharacterController.IsCharacterGangBoss(character))
+                        {
+                            targetCharacter.ActiveGroupID = 2;
+                            targetCharacter.GroupType = 100;
+                            ContextFactory.Instance.SaveChanges();
+
+                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                            if (target == null) return;
+                            targetCharacter.ActiveClothes = ClothesManager.SetFractionClothes(target, 0, targetCharacter);
+                            ContextFactory.Instance.SaveChanges();
+
+                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == gangID);
+                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " выгнал вас из банды: " + EntityManager.GetDisplayName(groupType) + "\nДля пособия по безработице - проследуйте в мэрию.");
+                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы выгнали пользователя: " + targetCharacter.Name.ToString() + "\nИз фракции: " + EntityManager.GetDisplayName(groupType));
+                        }
+                        else
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вы пытаетесь выгнать сами себя!");
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+                // Поменять ранг
+                if (callBack == 3)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int rangID = (int)args[1];
+                        int groupID = (int)args[3];
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == groupID);
+                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                        var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+                        var gangGroupId = (int)groupType * 100 + rangID;
+
+                        if (gangGroupId >= groupID)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Присваемый ранг выше вашего!");
+                            return;
+                        }
+                        else
+                        {
+                            targetCharacter.ActiveGroupID = gangGroupId;
+                            ContextFactory.Instance.SaveChanges();
+
+                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                            if (target == null) return;
+                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам ранг: " + EntityManager.GetDisplayName(groupExtraType));
+                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nРанг в банде: " + EntityManager.GetDisplayName(groupExtraType));
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+            }
+
+            // ARMY MENU
             if (eventName == "army_two_menu")
             {
                 if (character == null) return;
@@ -673,7 +1000,7 @@ namespace TheGodfatherGM.Server.Menu
                     
                     if (CharacterController.IsCharacterArmyInAllOfficers(character))
                     {
-                        SpawnManager.SetPlayerSkinClothes(player, type, characterController.Character, 1);
+                        ClothesManager.SetPlayerSkinClothes(player, type, characterController.Character, 1);
                         characterController.Character.ActiveClothes = type;
                     }                     
                 }
@@ -744,6 +1071,242 @@ namespace TheGodfatherGM.Server.Menu
                     else API.sendChatMessageToPlayer(player, "~r~Ваша машина заполнена!");                    
                     ContextFactory.Instance.SaveChanges();
                 }                
+            }
+            if (eventName == "army_add_to_group")
+            {
+                int callBack = (int)args[2];
+                if (character == null) return;
+
+                // Принятие в армию
+                if (callBack == 1)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int armyID = (int)args[1];
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                        if (target == null) return;
+                        if (player.position.DistanceTo(target.position) < 3.0F)
+                        {
+                            API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от пользователя!");
+                            return;
+                        }
+
+                        var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == armyID);
+                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                        var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                        targetCharacter.ActiveGroupID = armyID;
+                        targetCharacter.GroupType = (int)groupType;
+                        targetCharacter.JobId = 0;
+                        targetCharacter.ActiveClothes = ClothesManager.SetFractionClothes(target, armyID, targetCharacter);
+                        ContextFactory.Instance.SaveChanges();
+
+                        target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " принял вас в армию: " + EntityManager.GetDisplayName(groupType) + "\nНа звание: " + EntityManager.GetDisplayName(groupExtraType));
+                        API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы перевели пользователя: " + targetCharacter.Name.ToString() + "\nВо фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+                // Выгнать из армии
+                if (callBack == 2)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int groupID = (int)args[1];
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        if (CharacterController.IsCharacterInArmy(targetCharacter) &&
+                            groupID != character.ActiveGroupID)
+                        {
+                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                            if (target == null) return;
+                            targetCharacter.ActiveClothes = ClothesManager.SetFractionClothes(target, 0, targetCharacter);
+                            ContextFactory.Instance.SaveChanges();
+
+                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == groupID);
+                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " выгнал вас из фракции: " + EntityManager.GetDisplayName(groupType) + "\nДля пособия по безработице - проследуйте в мэрию.");
+                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы выгнали пользователя: " + targetCharacter.Name.ToString() + "\nИз фракции: " + EntityManager.GetDisplayName(groupType));
+
+                            targetCharacter.ActiveGroupID = 2;
+                            targetCharacter.GroupType = 100;
+                            ContextFactory.Instance.SaveChanges();
+                        }
+                        else
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции.\nЛибо вы пытаетесь выгнать сами себя!");
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+                // Поменять звание
+                if (callBack == 3)
+                {
+                    try
+                    {
+                        int userID = (int)args[0];
+                        int rangID = (int)args[1];
+                        int groupID = (int)args[3];
+                        int correctGroupId = 0;
+
+                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
+                        if (targetCharacter == null)
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            return;
+                        }
+
+                        if (rangID >= 1 && rangID <= 11 && CharacterController.IsCharacterArmyHighOfficer(character))
+                        {
+                            targetCharacter.ActiveGroupID = character.GroupType * 100 + rangID;
+                            ContextFactory.Instance.SaveChanges();
+
+                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                            if (target == null) return;
+
+                            if (CharacterController.IsCharacterArmyInAllOfficers(targetCharacter))
+                            {
+                                ClothesManager.SetPlayerSkinClothesToDb(target, 101, targetCharacter, 1);
+                                ClothesManager.SetPlayerSkinClothes(target, 3, targetCharacter, 1);
+                                targetCharacter.ActiveClothes = 3;
+                                ContextFactory.Instance.SaveChanges();
+                            }
+
+                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
+                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
+                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
+                        }
+                        else if (rangID >= 1 && rangID <= 14 && CharacterController.IsCharacterArmyGeneral(character))
+                        {
+                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
+                            ContextFactory.Instance.SaveChanges();
+
+                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                            if (target == null) return;
+
+                            if (CharacterController.IsCharacterArmyInAllOfficers(targetCharacter))
+                            {
+                                ClothesManager.SetPlayerSkinClothesToDb(target, 101, targetCharacter, 1);
+                                ClothesManager.SetPlayerSkinClothes(target, 3, targetCharacter, 1);
+                                targetCharacter.ActiveClothes = 3;
+                                ContextFactory.Instance.SaveChanges();
+                            }
+
+                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
+                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
+                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
+                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
+                        }
+                        else
+                        {
+                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вам недопустимо присвоение данного звания!");
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                }
+            }
+            if (eventName == "army_sell_cloth")
+            {
+
+            }
+
+            if (eventName == "yes_no_menu")
+            {
+                var type = (string)args[0];
+                var targetUserId = (int)args[1]; // OID of buyer
+                var initUserId = (int)args[4];   // OID of seller
+
+                if (type == "cloth")
+                {
+                    var cost = (int)args[3];
+
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
+                    if (targetCharacter == null)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    if (player.position.DistanceTo(target.position) > 3.0F)
+                    {
+                        API.sendChatMessageToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
+                        return;
+                    }
+
+                    API.shared.triggerClientEvent(target, "yes_no_menu_client",
+                        "Вам предлагают купить военную форму за " + cost + "$",// 0
+                        type,                                                       // 1
+                        0,                                                          // 2
+                        cost,                                                       // 3 
+                        initUserId,                                                 // 4  
+                        targetUserId);                                              // 5 
+                }
+                if (type == "weapon")
+                {
+                    var weapon = (string)args[2];
+                    var cost = (int)args[3];
+
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
+                    if (targetCharacter == null)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        return;
+                    }
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    if (player.position.DistanceTo(target.position) > 3.0F)
+                    {
+                        API.sendChatMessageToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
+                        return;
+                    }
+
+                    API.shared.triggerClientEvent(target, "yes_no_menu_client",
+                        "Вам предлагают " + weapon.ToString() + " за " + cost + "$",// 0
+                        type,                                                       // 1
+                        weapon,                                                     // 2
+                        cost,                                                       // 3 
+                        initUserId,                                                 // 4  
+                        targetUserId);                                              // 5 
+                }
             }
 
             if (eventName == "get_weapon")
@@ -837,367 +1400,108 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 ContextFactory.Instance.SaveChanges();
             }
-
-            if (eventName == "gang_ballas_add_to_group")
+            
+            if (eventName == "sell")
             {
-                int callBack = (int)args[2];
-                if (character == null) return;
+                var targetUserId = (int)args[1];
+                var initUserId = (int)args[4];
 
-                // Принятие в банду
-                if (callBack == 1)
+                if (args[0].ToString() == "weapon")
                 {
-                    try
+                    if (character == null) return;                    
+                    var weaponName = (string)args[2];
+                    var cost = (int)args[3];
+
+                    var initCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == initUserId);
+                    var sellPlayerWeapons = ContextFactory.Instance.Weapon.FirstOrDefault(x => x.CharacterId == initCharacter.Id);
+                    if (sellPlayerWeapons == null)
                     {
-                        int userID = (int)args[0];
-                        int gangID = (int)args[1];
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-                        targetCharacter.ActiveGroupID = gangID;
-                        targetCharacter.JobId = 0;
-                        ContextFactory.Instance.SaveChanges();
-
-                        Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                        if (target == null) return;
-
-                        targetCharacter.ActiveClothes = SpawnManager.SetFractionClothes(target, gangID, targetCharacter);
-                        ContextFactory.Instance.SaveChanges();
-
-                        var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == gangID);
-                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                        var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-                       
-                        target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " принял вас в банду: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
-                        API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы перевели пользователя: " + targetCharacter.Name.ToString() + "\nВо фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendChatMessageToPlayer(player, "~r~У вас нет оружия!");
                         return;
+                    }                    
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
+                    var buyPlayerWeapons = ContextFactory.Instance.Weapon.FirstOrDefault(x => x.CharacterId == targetCharacter.Id);
+                    if (targetCharacter == null || buyPlayerWeapons == null)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Продавцом был введен неверный пользовательский ID.");
+                        return;
+                    }
+
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    if (player.position.DistanceTo(target.position) > 3.0F)
+                    {
+                        API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от продавца!");
+                        return;
+                    }
+                    if (targetCharacter.Cash - cost < 0)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас недостаточно средств для покупки!");
+                        return;
+                    }
+                    else
+                    {
+                        targetCharacter.Cash -= cost;
+                        initCharacter.Cash += cost;
+                        int ammoAmount = API.getPlayerWeaponAmmo(player, WeaponManager.GetWeaponHash(weaponName));
+                        WeaponManager.BuySellWeapon(target, player, sellPlayerWeapons, buyPlayerWeapons, weaponName, ammoAmount, initCharacter, targetCharacter);
+                        API.shared.triggerClientEvent(target, "update_money_display", targetCharacter.Cash);
+                        API.shared.triggerClientEvent(player, "update_money_display", initCharacter.Cash);
+                        ContextFactory.Instance.SaveChanges();
+                        API.sendChatMessageToPlayer(player, "~g~[СЕРВЕР]: ~w~Вы успешно продали " + weaponName + " за " + cost + "$");
+                        API.sendChatMessageToPlayer(target, "~g~[СЕРВЕР]: ~w~Вы успешно купили " + weaponName + " за " + cost + "$");
                     }
                 }
-                // Выгнать из банды
-                if (callBack == 2)
+                if (args[0].ToString() == "cloth")
                 {
-                    try
+                    if (character == null) return;
+                    
+                    var cost = (int)args[3];
+
+                    var initCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == initUserId);
+                    
+                    if (initCharacter.ClothesTypes <= 1 && initCharacter.ClothesTypes > 4)
                     {
-                        int userID = (int)args[0];
-                        int gangID = (int)args[1];
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-
-                        if (CharacterController.IsCharacterInGang(targetCharacter) &&
-                            !CharacterController.IsCharacterGangBoss(character))
-                        {
-                            targetCharacter.ActiveGroupID = 2;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-                            targetCharacter.ActiveClothes = SpawnManager.SetFractionClothes(target, 0, targetCharacter);
-                            ContextFactory.Instance.SaveChanges();
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == gangID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-                                                       
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " выгнал вас из банды: " + EntityManager.GetDisplayName(groupType) + "\nДля пособия по безработице - проследуйте в мэрию.");
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы выгнали пользователя: " + targetCharacter.Name.ToString() + "\nИз фракции: " + EntityManager.GetDisplayName(groupType));
-                        }                        
-                        else
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вы пытаетесь выгнать сами себя!");
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendChatMessageToPlayer(player, "~r~У вас нет формы!");
                         return;
                     }
-                }
-
-                // Поменять звание TODO
-                if (callBack == 3)
-                {
-                    try
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
+                    if (targetCharacter == null)
                     {
-                        int userID = (int)args[0];
-                        int rangID = (int)args[1];
-                        int groupID = (int)args[3];
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-
-                        int correctGroupId = 0;
-                        if (groupID >= 2012 && groupID <= 2015)
-                        {
-                            correctGroupId = 2000;
-                            goto x;
-                        }
-                        if (groupID >= 2112 && groupID <= 2115)
-                        {
-                            correctGroupId = 2100;
-                            goto y;
-                        }
-
-                        x: if (rangID >= 1 && rangID <= 11 && groupID >= 2012 && groupID <= 2014)
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else if (rangID >= 1 && rangID <= 14 && groupID == 2015)
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вам недопустимо присвоение данного звания!");
-                            return;
-                        }
-
-                        y: if (rangID >= 1 && rangID <= 11 && groupID >= 2112 && groupID <= 2114)
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else if (rangID >= 1 && rangID <= 14 && groupID == 2115)
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вам недопустимо присвоение данного звания!");
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Продавцом был введен неверный пользовательский ID.");
                         return;
+                    }
+
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    if (player.position.DistanceTo(target.position) > 3.0F)
+                    {
+                        API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от продавца!");
+                        return;
+                    }
+                    if (targetCharacter.Cash - cost < 0)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас недостаточно средств для покупки!");
+                        return;
+                    }
+                    else
+                    {
+                        targetCharacter.Cash -= cost;
+                        initCharacter.Cash += cost;
+                        targetCharacter.ClothesTypes = initCharacter.ClothesTypes;
+                        initCharacter.ClothesTypes = 0;
+                        ClothesManager.SetPlayerSkinClothesToDb(player, 100, initCharacter, 1);
+                        API.shared.triggerClientEvent(target, "update_money_display", targetCharacter.Cash);
+                        API.shared.triggerClientEvent(player, "update_money_display", initCharacter.Cash);
+                        ContextFactory.Instance.SaveChanges();
+                        API.sendChatMessageToPlayer(player, "~g~[СЕРВЕР]: ~w~Вы успешно продали свою военную форму!");
+                        API.sendChatMessageToPlayer(target, "~g~[СЕРВЕР]: ~w~Вы успешно купили себе военную форму!");
                     }
                 }
             }
-            if (eventName == "national_guard_add_to_group")
-            {
-                int callBack = (int)args[2];
-                if (character == null) return;
-
-                // Принятие в армию
-                if (callBack == 1)
-                {
-                    try
-                    {
-                        int userID = (int)args[0];
-                        int armyID = (int)args[1];
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-                        targetCharacter.ActiveGroupID = armyID;
-                        targetCharacter.JobId = 0;
-                        ContextFactory.Instance.SaveChanges();
-
-                        Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                        if (target == null) return;
-                        targetCharacter.ActiveClothes = SpawnManager.SetFractionClothes(target, armyID, targetCharacter);
-                        ContextFactory.Instance.SaveChanges();
-
-                        var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == armyID);
-                        var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                        var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-                                                
-                        target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " принял вас в армию: " + EntityManager.GetDisplayName(groupType) + "\nНа звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы перевели пользователя: " + targetCharacter.Name.ToString() + "\nВо фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                        return;
-                    }
-                }
-                // Выгнать из армии
-                if (callBack == 2)
-                {
-                    try
-                    {
-                        int userID = (int)args[0];
-                        int groupID = (int)args[1];
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-
-                        if (CharacterController.IsCharacterInArmy(targetCharacter) && 
-                            groupID != character.ActiveGroupID)
-                        {
-                            targetCharacter.ActiveGroupID = 2;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-                            targetCharacter.ActiveClothes = SpawnManager.SetFractionClothes(target, 0, targetCharacter);
-                            ContextFactory.Instance.SaveChanges();
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == groupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " выгнал вас из фракции: " + EntityManager.GetDisplayName(groupType) + "\nДля пособия по безработице - проследуйте в мэрию.");
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы выгнали пользователя: " + targetCharacter.Name.ToString() + "\nИз фракции: " + EntityManager.GetDisplayName(groupType));
-                        }                        
-                        else
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции.\nЛибо вы пытаетесь выгнать сами себя!");
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                        return;
-                    }
-                }
-                // Поменять звание
-                if (callBack == 3)
-                {
-                    try
-                    {
-                        int userID = (int)args[0];
-                        int rangID = (int)args[1];
-                        int groupID = (int)args[3];
-                        int correctGroupId = 0;
-
-                        var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
-                        if (targetCharacter == null)
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                            return;
-                        }
-
-                        if (groupID >= 2012 && groupID <= 2015) correctGroupId = 2000;
-                        if (groupID >= 2112 && groupID <= 2115) correctGroupId = 2100;
-
-                        if (rangID >= 1 && rangID <= 11 && CharacterController.IsCharacterArmyHighOfficer(character))
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            if (CharacterController.IsCharacterArmyInAllOfficers(targetCharacter))
-                            {
-                                SpawnManager.SetPlayerSkinClothesToDb(target, 101, targetCharacter, 1);
-                                SpawnManager.SetPlayerSkinClothes(target, 3, targetCharacter, 1);
-                                targetCharacter.ActiveClothes = 3;
-                                ContextFactory.Instance.SaveChanges();
-                            }
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else if (rangID >= 1 && rangID <= 14 && CharacterController.IsCharacterArmyGeneral(character))
-                        {
-                            targetCharacter.ActiveGroupID = correctGroupId + rangID;
-                            ContextFactory.Instance.SaveChanges();
-
-                            Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
-                            if (target == null) return;
-
-                            if (CharacterController.IsCharacterArmyInAllOfficers(targetCharacter))
-                            {
-                                SpawnManager.SetPlayerSkinClothesToDb(target, 101, targetCharacter, 1);
-                                SpawnManager.SetPlayerSkinClothes(target, 3, targetCharacter, 1);
-                                targetCharacter.ActiveClothes = 3;
-                                ContextFactory.Instance.SaveChanges();
-                            }
-
-                            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == targetCharacter.ActiveGroupID);
-                            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                            var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-                            
-                            target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " присвоил вам звание: " + EntityManager.GetDisplayName(groupExtraType));
-                            API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы присвоили пользователю: " + targetCharacter.Name.ToString() + "\nВоинское звание: " + EntityManager.GetDisplayName(groupExtraType));
-                        }
-                        else
-                        {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Пользователь не состоит в вашей фракции\nИли вам недопустимо присвоение данного звания!");
-                            return;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
-                        return;
-                    }
-                }
-            }
+            
             if (eventName == "buy_driver_license")
             {
                 if (character == null) return;
@@ -1226,11 +1530,16 @@ namespace TheGodfatherGM.Server.Menu
                         API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
-                    targetCharacter.DriverLicense = 1;
-                    ContextFactory.Instance.SaveChanges();
 
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
                     if (target == null) return;
+                    if (player.position.DistanceTo(target.position) < 3.0F)
+                    {
+                        API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от пользователя!");
+                        return;
+                    }
+                    targetCharacter.DriverLicense = 1;
+                    ContextFactory.Instance.SaveChanges();
 
                     target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " выдал вам водительские права \nкатегории " + targetCharacter.DriverLicense.ToString());
                     API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы выдали права категории" + targetCharacter.DriverLicense.ToString() + "\nпользователю с ID: " + userID);
@@ -1242,6 +1551,11 @@ namespace TheGodfatherGM.Server.Menu
                 }
             }
 
+            if (eventName == "send_chat_message")
+            {
+                var message = (string)args[0];
+                ChatController.SendMessageInGroup(player, message);
+            }
             if (eventName == "admin_add_to_group")
             {
                 if (character == null) return;
@@ -1255,8 +1569,6 @@ namespace TheGodfatherGM.Server.Menu
                         API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
-                    targetCharacter.ActiveGroupID = groupID;
-                    ContextFactory.Instance.SaveChanges();
 
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
                     if (target == null) return;
@@ -1265,21 +1577,26 @@ namespace TheGodfatherGM.Server.Menu
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
                     var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
 
+                    targetCharacter.ActiveGroupID = groupID;
+                    targetCharacter.GroupType = (int)groupType;
+                    ContextFactory.Instance.SaveChanges();
+
                     if (CharacterController.IsCharacterArmyGeneral(targetCharacter))
                     {
-                        SpawnManager.SetPlayerSkinClothes(target, 4, targetCharacter, 1);
+                        ClothesManager.SetPlayerSkinClothesToDb(target, 4, targetCharacter, 1);
                         targetCharacter.ActiveClothes = 4;
                     }
                     if (CharacterController.IsCharacterGangBoss(targetCharacter))
                     {
-                        SpawnManager.SetPlayerSkinClothes(target, 131, targetCharacter, 1);
+                        ClothesManager.SetPlayerSkinClothesToDb(target, 131, targetCharacter, 1);
                         targetCharacter.ActiveClothes = 131;
                     }
                     if (targetCharacter.ActiveGroupID == 101 || targetCharacter.ActiveGroupID == 101)
                     {
-                        SpawnManager.SetPlayerSkinClothes(target, 10, targetCharacter, 1);
+                        ClothesManager.SetPlayerSkinClothesToDb(target, 10, targetCharacter, 1);
                         targetCharacter.ActiveClothes = 10;
                     }
+                   
 
                     target.sendChatMessage("~g~[СЕРВЕР]: ~w~Игрок " + FormatName + " перевел вас во фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
                     API.sendChatMessageToPlayer(player, "~g~[УСПЕШНО]: ~w~Вы перевели пользователя: " + targetCharacter.Name.ToString() + "\nВо фракцию: " + EntityManager.GetDisplayName(groupType) + "\nНа должность: " + EntityManager.GetDisplayName(groupExtraType));
@@ -1345,7 +1662,8 @@ namespace TheGodfatherGM.Server.Menu
                     API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                     return;
                 }
-            }            
+            }   
+            
         }
     }
 }

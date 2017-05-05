@@ -85,15 +85,15 @@ namespace TheGodfatherGM.Data.Enums
 
         [Display(Name = "Военные 1")]
         [BlipType(60)]
-        NationalGuardOne = 20,
+        Army1 = 20,
 
         [Display(Name = "Военные 2")]
         [BlipType(60)]
-        NationalGuardTwo = 21,
+        Army2 = 21,
 
         [Display(Name = "Русская Мафия")]
         [BlipType(60)]
-        MafiaRussianBase = 30,
+        MafiaRussian = 30,
 
         [Display(Name = "Безработный")]
         [BlipType(315)]

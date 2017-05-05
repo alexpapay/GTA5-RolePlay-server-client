@@ -52,5 +52,22 @@ namespace TheGodfatherGM.Server.Groups
         {
             return Group.ExtraType.GetDisplayName();
         }
+
+        public static string GetGroupStockName (Character character)
+        {
+            string propertyName = null;
+            if (character.ActiveGroupID > 1300 && character.ActiveGroupID <= 1310) propertyName = "Ballas_stock"; 
+            if (character.ActiveGroupID > 1400 && character.ActiveGroupID <= 1410) propertyName = "Vagos_stock";
+            if (character.ActiveGroupID > 1500 && character.ActiveGroupID <= 1510) propertyName = "LaCostaNotsa_stock";
+            if (character.ActiveGroupID > 1600 && character.ActiveGroupID <= 1610) propertyName = "GroveStreet_stock";
+            if (character.ActiveGroupID > 1700 && character.ActiveGroupID <= 1710) propertyName = "TheRifa_stock";
+            if (character.ActiveGroupID > 2000 && character.ActiveGroupID <= 2015) propertyName = "Army1_stock";
+            if (character.ActiveGroupID > 2100 && character.ActiveGroupID <= 2115) propertyName = "Army2_stock";
+            if (character.ActiveGroupID > 100 && character.ActiveGroupID <= 114)   propertyName = "Police_stock";
+            if (character.ActiveGroupID > 300 && character.ActiveGroupID <= 310)   propertyName = "FBI_stock";
+
+            return propertyName;
+        }
+
     }
 }

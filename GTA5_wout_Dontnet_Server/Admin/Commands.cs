@@ -17,6 +17,30 @@ namespace TheGodfatherGM.Server.Admin
             CharacterController.PlayAnimation(player, animDict, animName, flag);
         }
 
+        [Command("facetest")]
+        public void facetest(Client player, int component)
+        {
+            API.setEntitySyncedData(player.handle, "GTAO_LIPSTICK", 1);
+            API.exported.gtaocharacter.updatePlayerFace(player.handle);
+        }
+
+        [Command("karnacja")]
+        public void Command_edit_skin(Client player, int value)
+        {
+            // 0 - 45
+            API.setEntitySyncedData(player, "GTAO_SKIN_FIRST_ID", value);
+            API.setEntitySyncedData(player, "GTAO_SKIN_SECOND_ID", value);
+            API.exported.gtaocharacter.updatePlayerFace(player.handle);
+            API.sendNotificationToPlayer(player, "Nowa karnacja: " + value + ".");
+            return;
+        }
+
+        [Command("an")]
+        public void an(Client player, string animDict, string animName, int flag)
+        {
+            API.playPedAnimation(player, false, animDict, animName);
+        }
+
         [Command("scene")]
         public void scene(Client player, string scenario)
         {
@@ -389,13 +413,13 @@ namespace TheGodfatherGM.Server.Admin
             else player.sendChatMessage("~r~ERROR: ~w~You are not in a vehicle.");
         }
 
-        [Command("createproperty", "~y~Usage: ~w~/createproperty [player/group] [type] [ID/Part of Name]\nTypes: House (0), Door (1), Building (2), Rent(4)")]
-        public void createproperty(Client player, string OwnerType, PropertyType type, string IDOrName)
+        [Command("createproperty", "~y~Usage: ~w~/createproperty [player/group] [type] [ID/Part of Name] [cost] \nTypes: House (100), Rent(4)")]
+        public void createproperty(Client player, string OwnerType, PropertyType type, string IDOrName, int cost)
         {
             CharacterController characterController = player.getData("CHARACTER");
             if (!AdminController.AdminRankCheck("createproperty", characterController.Character, player)) return;
 
-            PropertyController.CreateProperty(player, OwnerType, type, IDOrName);
+            PropertyController.CreateProperty(player, OwnerType, type, IDOrName, cost);
         }
 
         [Command("setproperty", "~y~Usage: ~w~/setproperty [id] [interior/exterior/IPL/Enterable]")]
