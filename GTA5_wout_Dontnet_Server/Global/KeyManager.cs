@@ -9,6 +9,7 @@ using TheGodfatherGM.Server.Property;
 using TheGodfatherGM.Server.Vehicles;
 using System.Collections.Generic;
 using TheGodfatherGM.Server.Groups;
+using Newtonsoft.Json;
 
 namespace TheGodfatherGM.Server.Global
 {
@@ -159,6 +160,9 @@ namespace TheGodfatherGM.Server.Global
                     try { moneyStockGroup = ContextFactory.Instance.Group.First(x => x.Id == moneyBankGroup); }
                     catch (Exception e) { }
 
+                    var gangsSectors = GroupController.GetGangsSectors();
+                    //var sectorsString = JsonConvert.SerializeObject(gangsSectors);                    
+
                     API.shared.triggerClientEvent(player, "workposs_menu",
                          1,                                                                                  // 0
                          character.ActiveGroupID,                                                            // 1
@@ -179,8 +183,8 @@ namespace TheGodfatherGM.Server.Global
                          moneyStockGroup.MoneyBank,                                                          // 16
                          CharacterController.IsCharacterHighRankInGang(character),                           // 17
                          gangRank,                                                                           // 18
-                         (int)groupType);                                                                    // 19
-
+                         (int)groupType,                                                                     // 19
+                         gangsSectors);                                                                      // 20
                 }
                 else if ((int)args[0] == 13)
                 {

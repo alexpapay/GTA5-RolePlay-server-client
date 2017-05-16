@@ -17,24 +17,6 @@ namespace TheGodfatherGM.Server.Admin
             CharacterController.PlayAnimation(player, animDict, animName, flag);
         }
 
-        [Command("facetest")]
-        public void facetest(Client player, int component)
-        {
-            API.setEntitySyncedData(player.handle, "GTAO_LIPSTICK", 1);
-            API.exported.gtaocharacter.updatePlayerFace(player.handle);
-        }
-
-        [Command("karnacja")]
-        public void Command_edit_skin(Client player, int value)
-        {
-            // 0 - 45
-            API.setEntitySyncedData(player, "GTAO_SKIN_FIRST_ID", value);
-            API.setEntitySyncedData(player, "GTAO_SKIN_SECOND_ID", value);
-            API.exported.gtaocharacter.updatePlayerFace(player.handle);
-            API.sendNotificationToPlayer(player, "Nowa karnacja: " + value + ".");
-            return;
-        }
-
         [Command("an")]
         public void an(Client player, string animDict, string animName, int flag)
         {
@@ -254,7 +236,10 @@ namespace TheGodfatherGM.Server.Admin
             API.exported.gtaocharacter.initializePedFace(player.handle);
             API.setEntitySyncedData(player, "GTAO_HAIR_COLOR", value);
             API.setEntitySyncedData(player, "GTAO_HAIR_HIGHLIGHT_COLOR", value);
-            API.exported.gtaocharacter.updatePlayerFace(player.handle);
+
+            CharacterController.UpdatePlayerFace(player.handle);
+            //API.exported.gtaocharacter.updatePlayerFace(player.handle);
+
             API.sendNotificationToPlayer(player, "New hairstyle: " + value + ".");
             return;
         }

@@ -39,7 +39,14 @@
   <script src="client/js/Login.js" type="client" lang="javascript" />
   <script src="client/js/JobsManager.js" type="client" lang="javascript" />
   <script src="client/js/fly.js" type="client" lang="javascript" />
+  <script src="client/js/gtao_handler.js" type="client" lang="javascript" />
 
+  <file src="client/img/0.png" />
   <file src="client/img/1.png" />
-  <file src="client/img/2.png" />
+  <file src="client/img/13.png" />
+  <file src="client/img/14.png" />
+  <file src="client/img/15.png" />
+  <file src="client/img/16.png" />
+  <file src="client/img/17.png" />
+  <file src="client/img/player.png" />
 </meta>

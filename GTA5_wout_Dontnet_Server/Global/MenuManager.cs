@@ -76,27 +76,41 @@ namespace TheGodfatherGM.Server.Menu
                 {
                     case "GTAO_SHAPE_FIRST_ID":
                         API.setEntitySyncedData(player, "GTAO_SHAPE_FIRST_ID", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle);
+                        break;
                     case "GTAO_SHAPE_SECOND_ID":
                         API.setEntitySyncedData(player, "GTAO_SHAPE_SECOND_ID", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle); 
+                        break;
                     case "GTAO_SKIN_FIRST_ID":
                         API.setEntitySyncedData(player, "GTAO_SKIN_FIRST_ID", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle); 
+                        break;
                     case "GTAO_HAIR":
                         API.setPlayerClothes(player, 2, value, 0); break;
                     case "GTAO_HAIR_COLOR":
                         API.setEntitySyncedData(player, "GTAO_HAIR_COLOR", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle);
+                        break;
                     case "GTAO_EYE_COLOR":
                         API.setEntitySyncedData(player, "GTAO_EYE_COLOR", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle); 
+                        break;
                     case "GTAO_EYEBROWS":
                         API.setEntitySyncedData(player, "GTAO_EYEBROWS", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle);
+                        break;
                     case "GTAO_EYEBROWS_COLOR":
                         API.setEntitySyncedData(player, "GTAO_EYEBROWS_COLOR", value);
-                        API.exported.gtaocharacter.updatePlayerFace(player.handle); break;                    
+                        CharacterController.UpdatePlayerFace(player.handle);
+                        //API.exported.gtaocharacter.updatePlayerFace(player.handle); 
+                        break;                    
                 }
             }
             if (eventName == "custom_char")
@@ -265,6 +279,14 @@ namespace TheGodfatherGM.Server.Menu
                         ContextFactory.Instance.SaveChanges();
                     }
                 }
+            }
+            if (eventName == "ask_user_posXY")
+            {
+                API.shared.triggerClientEvent(player, "send_user_posXY", (int)player.position.X, (int)player.position.Y);
+            }
+            if (eventName == "ask_user_sector")
+            {
+                API.shared.triggerClientEvent(player, "send_user_sector", CharacterController.InWhichSectorOfGhetto(player));
             }
 
             // CAR MENU
@@ -719,7 +741,17 @@ namespace TheGodfatherGM.Server.Menu
                     character.ActiveClothes = cloth;
                     ContextFactory.Instance.SaveChanges();
                 }
-            }
+                // Take metall
+                if (trigger == 6)
+                {
+                    if (character == null) return;
+                    character.TempVar = 0;
+                    character.Cash += 500;
+                    ContextFactory.Instance.SaveChanges();
+                    API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+                    API.sendChatMessageToPlayer(player, "~g~Вы успешно сдали металл и получили 500$");
+                }
+            }            
             if (eventName == "gang_weapon")
             {
                 if (character == null) return;
@@ -784,12 +816,25 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 ContextFactory.Instance.SaveChanges();
             }
+            if (eventName == "gang_rob_house")
+            {
+                var targetCharacterId = (int)args[0];
+                var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.Id == targetCharacterId);
+                if (targetCharacter == null || targetCharacter.Online == false) return;
+                else
+                {
+                    character.TempVar = 111;
+                    ContextFactory.Instance.SaveChanges();
+                    API.sendChatMessageToPlayer(player, "~g~Вы успешно украли металл и теперь можете сдать его.");
+                }                
+            }
             if (eventName == "gang_get_material")
             {
                 var material = (int)args[0];
                 var gangGroupProperty = character.GroupType * 100;
+                var gangStockName = GroupController.GetGroupStockName(character);
                 var gangStockProperty = ContextFactory.Instance.Property
-                    .First(x => x.Name == GroupController.GetGroupStockName(character));
+                    .First(x => x.Name == gangStockName);
                 if (gangStockProperty.Stock - material < 0)
                 {
                     API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~В банке банды недостаточно материалов для снятия!");
@@ -966,7 +1011,7 @@ namespace TheGodfatherGM.Server.Menu
                         return;
                     }
                 }
-            }
+            }            
 
             // ARMY MENU
             if (eventName == "army_two_menu")
@@ -1240,11 +1285,7 @@ namespace TheGodfatherGM.Server.Menu
                         return;
                     }
                 }
-            }
-            if (eventName == "army_sell_cloth")
-            {
-
-            }
+            }            
 
             if (eventName == "yes_no_menu")
             {
@@ -1306,6 +1347,42 @@ namespace TheGodfatherGM.Server.Menu
                         cost,                                                       // 3 
                         initUserId,                                                 // 4  
                         targetUserId);                                              // 5 
+                }
+                if (type == "gang_sector")
+                {
+
+                    var sector = (string)args[2];
+                    var gangNum = (int)args[3];         // Gang Number for selling
+                    var cost = (int)args[5];
+                    var sellerGangType = (int)args[6];  // Seller Gang ID
+
+                    var selectedSector = sector.Split('_');
+                    var selectedSectorData = GroupController.GetGangSectorData(
+                        Convert.ToInt32(selectedSector[0]), Convert.ToInt32(selectedSector[1]));
+
+                    if (selectedSectorData == sellerGangType * 10 || selectedSectorData != sellerGangType)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы не можете продать данный сектор!");
+                        return;
+                    }
+
+                    var targetGangBoss = gangNum * 100 + 10;
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.ActiveGroupID == targetGangBoss);
+                    if (targetCharacter == null)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный номер банды!");
+                        return;
+                    }
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    API.shared.triggerClientEvent(target, "yes_no_menu_client",
+                            "Вам предлагают сектор " + selectedSector[0].ToString() + " " + selectedSector[1].ToString() + " за " + cost + "$",// 0
+                            type,                                                       // 1
+                            selectedSector,                                             // 2
+                            cost,                                                       // 3 
+                            initUserId,                                                 // 4  
+                            targetGangBoss);                                            // 5 
                 }
             }
 
@@ -1404,13 +1481,47 @@ namespace TheGodfatherGM.Server.Menu
             if (eventName == "sell")
             {
                 var targetUserId = (int)args[1];
+                var cost = (int)args[3];
                 var initUserId = (int)args[4];
 
+                if (args[0].ToString() == "gang_sector")
+                {
+                    if (character == null) return;
+
+                    var sectorRow = ((List<object>)args[2]).ElementAt(0);
+                    var sectorCol = ((List<object>)args[2]).ElementAt(1);
+
+                    var initCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == initUserId);
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.ActiveGroupID == targetUserId);
+                    if (targetCharacter == null)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Продавцом был введен неверный пользовательский ID.");
+                        return;
+                    }
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
+                    if (target == null) return;
+
+                    if (targetCharacter.Cash - cost < 0)
+                    {
+                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас недостаточно средств для покупки!");
+                        return;
+                    }
+                    else
+                    {
+                        targetCharacter.Cash -= cost;
+                        initCharacter.Cash += cost;
+                        GroupController.SetGangSectorData(Convert.ToInt32(sectorRow), Convert.ToInt32(sectorCol), targetCharacter.GroupType);
+                        API.shared.triggerClientEvent(target, "update_money_display", targetCharacter.Cash);
+                        API.shared.triggerClientEvent(player, "update_money_display", initCharacter.Cash);
+                        ContextFactory.Instance.SaveChanges();
+                        API.sendChatMessageToPlayer(player, "~g~[СЕРВЕР]: ~w~Вы успешно продали сектор" + sectorRow + " " + sectorCol + " за " + cost + "$");
+                        API.sendChatMessageToPlayer(target, "~g~[СЕРВЕР]: ~w~Вы успешно купили " + sectorRow + " " + sectorCol + " за " + cost + "$");
+                    }
+                }
                 if (args[0].ToString() == "weapon")
                 {
                     if (character == null) return;                    
                     var weaponName = (string)args[2];
-                    var cost = (int)args[3];
 
                     var initCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == initUserId);
                     var sellPlayerWeapons = ContextFactory.Instance.Weapon.FirstOrDefault(x => x.CharacterId == initCharacter.Id);
@@ -1456,8 +1567,6 @@ namespace TheGodfatherGM.Server.Menu
                 if (args[0].ToString() == "cloth")
                 {
                     if (character == null) return;
-                    
-                    var cost = (int)args[3];
 
                     var initCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == initUserId);
                     
@@ -1662,8 +1771,7 @@ namespace TheGodfatherGM.Server.Menu
                     API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                     return;
                 }
-            }   
-            
+            }               
         }
     }
 }

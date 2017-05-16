@@ -99,7 +99,10 @@ namespace TheGodfatherGM.Server
             var pedHash = face.SEX == 1885233650 ? PedHash.FreemodeMale01 : PedHash.FreemodeFemale01;
 
             API.shared.setPlayerSkin(player, pedHash);
-            API.shared.exported.gtaocharacter.initializePedFace(player.handle);
+
+            CharacterController.InitializePedFace(player.handle);
+            //API.shared.exported.gtaocharacter.initializePedFace(player.handle);
+
             API.shared.setEntitySyncedData(player, "GTAO_SHAPE_FIRST_ID", face.GTAO_SHAPE_FIRST_ID);
             API.shared.setEntitySyncedData(player, "GTAO_SHAPE_SECOND_ID", face.GTAO_SHAPE_SECOND_ID);
             API.shared.setEntitySyncedData(player, "GTAO_SKIN_FIRST_ID", face.GTAO_SKIN_FIRST_ID);
@@ -108,7 +111,9 @@ namespace TheGodfatherGM.Server
             API.shared.setEntitySyncedData(player, "GTAO_EYE_COLOR", face.GTAO_SHAPE_FIRST_ID);
             API.shared.setEntitySyncedData(player, "GTAO_EYEBROWS", face.GTAO_EYEBROWS);
             API.shared.setEntitySyncedData(player, "GTAO_EYEBROWS_COLOR", face.GTAO_EYEBROWS_COLOR);
-            API.shared.exported.gtaocharacter.updatePlayerFace(player.handle);
+
+            CharacterController.UpdatePlayerFace(player.handle);
+            //API.shared.exported.gtaocharacter.updatePlayerFace(player.handle);
         }
 
         public static Vector3 GetSpawnPosition() { return _newPlayerPosition; }

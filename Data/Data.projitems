@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Clothes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ClothesTypes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Faces.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\GangSectors.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Group.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\GroupMember.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Job.cs" />

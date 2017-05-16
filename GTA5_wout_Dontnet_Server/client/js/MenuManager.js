@@ -15,7 +15,12 @@ var text = null;
 var pool = null;
 var draw = false;
 var pwdtext = null;
+
+var userSector = "0;0";
 var gangMap = 0;
+var playerX = 0;
+var playerY = 0;
+var gangsSectors = new Array();
 
 var faceJson = { SEX: 1885233650, GTAO_SHAPE_FIRST_ID: 0, GTAO_SHAPE_SECOND_ID: 0, GTAO_SKIN_FIRST_ID: 0, GTAO_HAIR: 0, GTAO_HAIR_COLOR: 0, GTAO_EYE_COLOR: 0, GTAO_EYEBROWS: 0, GTAO_EYEBROWS_COLOR: 0 };
 
@@ -442,13 +447,13 @@ API.onServerEventTrigger.connect(function (name, args) {
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
         menuPool.Add(mainWindow);
 
-        var weapon = args[2];
+        var parameter = args[2];
         var cost = args[3];
 
         var yes = API.createMenuItem("~g~Да", "");
         yes.Activated.connect(function (menu, item) {
             mainWindow.Visible = false;
-            API.triggerServerEvent("sell", type, targetUserId, weapon, cost, initUserId);
+            API.triggerServerEvent("sell", type, targetUserId, parameter, cost, initUserId);
         });
         mainWindow.AddItem(yes);
 
@@ -486,6 +491,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         var isCharacterIsHighRankInGang = args[17];
         var gangRank = args[18];
         var intGroupType = args[19];
+        gangsSectors = args[20];
 
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
@@ -783,8 +789,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                         API.triggerServerEvent("gang_ballas_add_to_group", userId, intGroupType * 100 + 1, 1);
                     });
                     mainWindow2.AddItem(gangAdd);
-                }
-                
+                }                
                 if (gangRank >= 7 && gangRank <= 10) {
                     var gangDel = API.createMenuItem("~y~Изменить~s~ ранг пользователя в банде", "Ваш ранг в банде: " + gangRank);
                     gangDel.Activated.connect(function (menu, item) {
@@ -798,7 +803,6 @@ API.onServerEventTrigger.connect(function (name, args) {
                     });
                     mainWindow2.AddItem(gangDel);
                 }
-
                 if (gangRank >= 8 && gangRank <= 10) {
                     var gangDel = API.createMenuItem("~r~Выгнать~s~ пользователя из банды", "");
                     gangDel.Activated.connect(function (menu, item) {
@@ -818,6 +822,19 @@ API.onServerEventTrigger.connect(function (name, args) {
                     API.triggerServerEvent("gang_get_money", money);
                 });
                 mainWindow2.AddItem(gangGetMoney);
+
+                var sellSector = API.createMenuItem("~r~Продать~s~ территорию банды.", "");
+                sellSector.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.displaySubtitle("Введите номер квадрата в формате N_N", 5000);
+                    var sector = API.getUserInput("", 40);
+                    API.displaySubtitle("Введите номер банды", 5000);
+                    var gangNum = parseInt(API.getUserInput("", 40));
+                    API.displaySubtitle("Введите сумму", 5000);
+                    var cost = parseInt(API.getUserInput("", 40));
+                    API.triggerServerEvent("yes_no_menu", "gang_sector", 0, sector, gangNum, initUserId, cost, intGroupType);
+                });
+                mainWindow2.AddItem(sellSector);
 
                 var back = API.createMenuItem("~g~Назад", "");
                 back.Activated.connect(function (menu, item) {
@@ -1187,11 +1204,20 @@ API.onServerEventTrigger.connect(function (name, args) {
         var banner = "Жилой дом";
         var subtitle = "Стоимость дома: " + args[1] + "$";
         var callbackId = args[2];
-        var action = args[3];
+        var action = args[3];        
 
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
         menuPool.Add(mainWindow);
+
+        if (action == 2) {
+            var robHouse = API.createMenuItem("~y~Ограбить~s~ дом", "");
+            robHouse.Activated.connect(function (menu, item) {
+                mainWindow.Visible = false;
+                API.triggerServerEvent("gang_rob_house", args[4]);
+            });
+            mainWindow.AddItem(robHouse);
+        }
 
         if (action == 1) {
             var buyHouse = API.createMenuItem("~g~Купить дом", "");
@@ -1209,7 +1235,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                 API.triggerServerEvent("house_menu_buysell", args[0], args[1], 0);
             });
             mainWindow.AddItem(sellHouse);
-        }        
+        }
 
         var exit = API.createMenuItem("~r~Выйти", "");
         exit.Activated.connect(function (menu, item) {
@@ -1318,18 +1344,60 @@ API.onServerEventTrigger.connect(function (name, args) {
         if (propertyName == "Ballas_stock") {
             banner = "Банда Ballas";
             subtitle = "Разгрузите украденные материалы.";
-        }
+        }        
         if (propertyName == "Ballas_main") {
             banner = "Банда Ballas";
             subtitle = "Ваша база.";
         }
+        if (propertyName == "Azcas_stock") {
+            banner = "Банда Azcas";
+            subtitle = "Разгрузите украденные материалы.";
+        }
+        if (propertyName == "Azcas_main") {
+            banner = "Банда Azcas";
+            subtitle = "Ваша база.";
+        }
+        if (propertyName == "Vagos_stock") {
+            banner = "Банда Vagos";
+            subtitle = "Разгрузите украденные материалы.";
+        }
+        if (propertyName == "Vagos_main") {
+            banner = "Банда Vagos";
+            subtitle = "Ваша база.";
+        }
+        if (propertyName == "Grove_stock") {
+            banner = "Банда Grove";
+            subtitle = "Разгрузите украденные материалы.";
+        }
+        if (propertyName == "Grove_main") {
+            banner = "Банда Grove";
+            subtitle = "Ваша база.";
+        }
+        if (propertyName == "Rifa_stock") {
+            banner = "Банда Rifa";
+            subtitle = "Разгрузите украденные материалы.";
+        }
+        if (propertyName == "Rifa_main") {
+            banner = "Банда Rifa";
+            subtitle = "Ваша база.";
+        }        
+
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
         menuPool.Add(mainWindow);
 
+        if (propertyName == "Gangs_metall") {
+            var steal = API.createMenuItem("~s~Сдать материалы", "");
+            steal.Activated.connect(function (menu, item) {
+                mainWindow.Visible = false;
+                API.triggerServerEvent("gang_menu", propertyName, 6);
+            });
+            mainWindow.AddItem(steal);
+        }  
+
         if (propertyName == "Army2_gang" || propertyName == "Army1_gang") {
             var steal = API.createMenuItem("~s~Украсть 500 материалов", "");
-        steal.Activated.connect(function (menu, item) {
+            steal.Activated.connect(function (menu, item) {
             mainWindow.Visible = false;
             API.triggerServerEvent("gang_menu", propertyName, 1);
         });
@@ -1345,7 +1413,8 @@ API.onServerEventTrigger.connect(function (name, args) {
             mainWindow.AddItem(steal);
         }  
 
-        if (propertyName == "Ballas_stock") {
+        if (propertyName == "Ballas_stock" && propertyName == "Azcas_stock" &&
+            propertyName == "Vagos_stock" && propertyName == "Grove_stock" && propertyName == "Rifa_stock") {
             var unload = API.createMenuItem("~g~Разгрузить материалы", "");
             unload.Activated.connect(function (menu, item) {
                 mainWindow.Visible = false;
@@ -1354,7 +1423,8 @@ API.onServerEventTrigger.connect(function (name, args) {
             mainWindow.AddItem(unload);
         }  
 
-        if (propertyName == "Ballas_main") {
+        if (propertyName == "Ballas_main" && propertyName == "Azcas_main" &&
+            propertyName == "Vagos_main" && propertyName == "Grove_main" && propertyName == "Rifa_main") {
             var clothName = "";
             if (cloth == 3) clothName = "солдата";
             if (cloth == 4) clothName = "офицера";
@@ -1376,45 +1446,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                 API.triggerServerEvent("gang_menu", propertyName, 5);
             });
             mainWindow.AddItem(unload);
-        }  
-
-        if (propertyName == "Ballas_weapon") {
-            var pistol = API.createMenuItem("~s~ Взять APPistol : 50 мат.", "");
-            pistol.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 1, 50);
-            });
-            mainWindow.AddItem(pistol);
-
-            var smg = API.createMenuItem("~s~ Взять SMG : 100 мат.", "");
-            smg.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 2, 100);
-            });
-            mainWindow.AddItem(smg);
-
-            var AdvancedRifle = API.createMenuItem("~s~ Взять AdvancedRifle : 250 мат.", "");
-            AdvancedRifle.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 3, 250);
-            });
-            mainWindow.AddItem(AdvancedRifle);
-
-            var HeavySniper = API.createMenuItem("~s~ Взять HeavySniper : 350 мат.", "");
-            HeavySniper.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 4, 350);
-            });
-            mainWindow.AddItem(HeavySniper);
-
-            var GrenadeLauncher = API.createMenuItem("~s~ Взять GrenadeLauncher : 500 мат.", "");
-            GrenadeLauncher.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 5, 500);
-            });
-            mainWindow.AddItem(GrenadeLauncher);
-
-            var Grenade = API.createMenuItem("~s~ Взять Grenade : 100 мат.", "");
-            Grenade.Activated.connect(function (menu, item) {
-                API.triggerServerEvent("ballas_weapon", 6, 50);
-            });
-            mainWindow.AddItem(Grenade);
-        }
+        }          
 
         var close = API.createMenuItem("~r~Закрыть", "");
         close.Activated.connect(function (menu, item) {
@@ -1923,6 +1955,17 @@ API.onServerEventTrigger.connect(function (name, args) {
     if (name == "gang_map") {
         gangMap = 1;
     }
+
+    if (name == "send_user_posXY") {
+        playerX = args[0];
+        playerY = args[1];
+    }
+
+    if (name == "send_user_sector") {
+        userSector = args[0];
+    }
+
+    
 });
 
 function resetMainMenu() {
@@ -1948,11 +1991,54 @@ function resetMainMenu() {
 API.onUpdate.connect(function () {
 
     if (gangMap != 0) {
-        var res = API.getScreenResolution();
-        var x = res.Width;
-        var y = res.Height;
-        API.dxDrawTexture("client/img/1.png", new Point(x/2 - 1140/2 - 200, y/2 - 700/2), new Size(1142, 713), 0);
-        API.dxDrawTexture("client/img/2.png", new Point(x/2 - 1140/2 + 100, y/2 - 700/2 + 100), new Size(50, 50), 0);
+        var x = 300;
+        var y = 50;
+
+        var zeroPointX = -468;
+        var zeroPointY = -2262;
+
+        var zeroMapPointX = x + 101;
+        var zeroMapPointY = y + 925;
+
+        API.triggerServerEvent("ask_user_posXY");
+        API.triggerServerEvent("ask_user_sector");
+        API.sendChatMessage(userSector);
+
+        API.dxDrawTexture("client/img/1.png", new Point(x, y), new Size(1148, 997), 0);
+
+        var xGangs = 0;
+        var yGangs = 0;
+        var inc = 0;
+
+        for (var i = 0; i < 13; i++) {
+            for (var j = 0; j < 13; j++) {
+                var color = gangsSectors[j + inc];
+                switch (color) {
+                    case 0: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 255, 255, 255, 255); break;
+                    case 13: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 72, 0, 58, 255); break;
+                    case 14: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 9, 15, 70, 255); break;
+                    case 15: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 100, 100, 0, 255); break;
+                    case 16: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 0, 80, 0, 255); break;
+                    case 17: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 0, 100, 100, 255); break;
+                    case 130: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 72, 0, 58, 255); break;
+                    case 140: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 9, 15, 70, 255); break;
+                    case 150: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 100, 100, 0, 255); break;
+                    case 160: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 0, 80, 0, 255); break;
+                    case 170: API.drawRectangle(x + 108 + xGangs, y + 932 - 65 - yGangs, 65.0, 65.0, 0, 100, 100, 255); break;
+                }                
+                xGangs = xGangs + 66;
+            }
+            inc = inc + 13;
+            xGangs = 0;
+            yGangs = yGangs + 66;
+        }
+        
+        var playerMarkerX = zeroMapPointX - Math.floor((zeroPointX - playerX) / 2);
+        var playerMarkerY = zeroMapPointY + Math.floor((zeroPointY - playerY) / 2);
+
+        if (x < playerMarkerX && playerMarkerX < x + 1148)
+            if (y < playerMarkerY && playerMarkerY < y + 997)
+                API.dxDrawTexture("client/img/player.png", new Point(playerMarkerX, playerMarkerY), new Size(14, 14), 0);
     }    
 
     if (pool != null) {

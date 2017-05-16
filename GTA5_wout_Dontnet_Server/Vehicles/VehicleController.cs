@@ -181,14 +181,18 @@ namespace TheGodfatherGM.Server.Vehicles
 
         public static void RentVehicle(int vehicleModel)
         {            
-            foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Type == vehicleModel).ToList())
+            foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Model == vehicleModel).ToList())
             {
                 if (vehicle.RentTime != 0)
-                {
-                    if (vehicle.Model == Data.Models.RentModels.TaxiModel && vehicle.Character != null)
+                {                   
+                    if (vehicle.Model == Data.Models.RentModels.TaxiModel || 
+                        vehicle.Model == Data.Models.RentModels.ScooterModel)
                     {
-                        vehicle.RentTime = vehicle.RentTime - 1;
-                        ContextFactory.Instance.SaveChanges();
+                        if (vehicle.Character != null)
+                        {
+                            vehicle.RentTime = vehicle.RentTime - 1;
+                            ContextFactory.Instance.SaveChanges();
+                        }
                     }                    
                 }
                 else

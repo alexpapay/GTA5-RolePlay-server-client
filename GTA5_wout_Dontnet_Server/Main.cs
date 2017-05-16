@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using TheGodfatherGM.Data;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Vehicles;
+using TheGodfatherGM.Server.Groups;
 
 namespace TheGodfatherGM.Server
 {
@@ -17,12 +18,13 @@ namespace TheGodfatherGM.Server
         {
             API.onResourceStart += OnResourceStart;
             API.onResourceStop += OnResourceStop;
-            API.onUpdate += OnUpdateHandler;            
+            API.onUpdate += OnUpdateHandler;
+            API.onPlayerWeaponSwitch += OnPlayerWeaponSwitchHandler;
         }
 
         private DateTime m_lastTick = DateTime.Now;
         private DateTime MinuteAnnounce;
-        private DateTime TenMinuteAnnounce;
+        private DateTime OneSecond;
         private DateTime HourAnnounce;
 
         // Добавление минуты к пребыванию в игре после авторизации пользователя
@@ -34,7 +36,6 @@ namespace TheGodfatherGM.Server
                 try
                 {
                     var characters = ContextFactory.Instance.Character.Where(x => x.Online == true);
-
                     foreach (var character in characters)
                     {
                         character.PlayMinutes++;
@@ -56,6 +57,7 @@ namespace TheGodfatherGM.Server
                             if (character.JobId == 777 && isTaxiVehicle != null) character.Cash += 300; // TaxiDrivers
                             if (character.JobId == 888) character.Cash += 100; // Unemployers
                             character.Cash += Data.Models.PayDayMoney.GetPayDaYMoney(character.ActiveGroupID);
+
                             try
                             {
                                 Client currentPlayer = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
@@ -81,12 +83,30 @@ namespace TheGodfatherGM.Server
 
             if (DateTime.Now.Subtract(HourAnnounce).TotalMinutes >= 60)
             {
+                // Начисление зарплаты в банк банд каждый час по количеству квадратов.
+                try
+                {
+                    var numInc = 0;
+                    for (var i = 1300; i <= 1700; i += 100)
+                    {
+                        var currentGang = ContextFactory.Instance.Group.First(x => x.Id == i);
+                        var numOfSectors = GroupController.GetCountOfGangsSectors();
+                        var money = numOfSectors[numInc] * 50;
+                        currentGang.MoneyBank += money;
+                        numInc++;
+                    }
+                }
+                catch (Exception e) { }
+
                 HourAnnounce = DateTime.Now;                
             }
             
-            if (DateTime.Now.Subtract(TenMinuteAnnounce).TotalMinutes >= 10)
+            if (DateTime.Now.Subtract(OneSecond).TotalSeconds >= 1)
             {
-                TenMinuteAnnounce = DateTime.Now;
+                //Client player = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
+                //API.shared.triggerClientEvent(player, "send_coord", player.position.X, player.position.Y);
+
+                //OneSecond = DateTime.Now;
             }
 
             // List of players
@@ -126,6 +146,15 @@ namespace TheGodfatherGM.Server
             }
         }
 
+        private void OnPlayerWeaponSwitchHandler(Client player, WeaponHash oldWeapon)
+        {
+            var weapons = API.getPlayerWeapons(player);
+            foreach (var weapon in weapons)
+            {
+                if (weapon == WeaponHash.Minigun) player.kick("This weapon are restricted!");
+            }
+        }
+
         private void OnResourceStart()
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-GB");
@@ -147,6 +176,7 @@ namespace TheGodfatherGM.Server
             });
             DBTerminate.Wait();
             API.consoleOutput(Global.GlobalVars.ServerName + " был остановлен в " + DateTime.Now);
+            //Console.ReadKey();
         }
     }
 }

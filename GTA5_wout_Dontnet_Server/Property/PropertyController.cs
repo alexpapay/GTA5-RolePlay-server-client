@@ -61,19 +61,15 @@ namespace TheGodfatherGM.Server.Property
         public ColShape ArmyTwoStockColshape { get; private set; }
 
         //Gangs place fileds
-        public Marker GangsMarker { get; private set; }
-        public TextLabel GangsTextLabel { get; private set; }
-        public ColShape GangsColshape { get; private set; }
-
-        //GangBallas place fileds
-        public Marker GangBallasMarker { get; private set; }
-        public TextLabel GangBallasTextLabel { get; private set; }
-        public ColShape GangBallasColshape { get; private set; }
+        public Marker GangsMarker           { get; private set; }
+        public TextLabel GangsTextLabel     { get; private set; }
+        public ColShape GangsMainColshape   { get; private set; } // 2f
+        public ColShape GangsStockColshape  { get; private set; } // 3f
 
         //Police place fileds
-        public Marker PoliceMarker { get; private set; }
-        public TextLabel PoliceTextLabel { get; private set; }
-        public ColShape PoliceColshape { get; private set; }
+        public Marker PoliceMarker          { get; private set; }
+        public TextLabel PoliceTextLabel    { get; private set; }
+        public ColShape PoliceColshape      { get; private set; }
 
         public PropertyController() { }
         public PropertyController(Data.Property PropertyData)
@@ -124,7 +120,7 @@ namespace TheGodfatherGM.Server.Property
         [Display(Name = "Мэрия")]               Meria = 11
         [Display(Name = "Балласы")]             GangBallas = 13
         [Display(Name = "Военные 1")]           ArmyOne = 20
-        [Display(Name = "Военные 2")]           ArmyTwo = 21        
+        [Display(Name = "Военные 2")]           ArmyTwo = 21   
         [Display(Name = "Жилой дом")]           House = 100
         */
         public void CreateWorldEntity()
@@ -284,6 +280,18 @@ namespace TheGodfatherGM.Server.Property
                     ArmysTextLabel = API.createTextLabel("~w~Армия 2\nЛичка бандита", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                 }
             }
+            if (PropertyData.Type == PropertyType.Gangs)
+            {                
+                if (PropertyData.Name == "Gangs_metall")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(1f, 1f, 1f), 70, 0, 100, 153);
+                    GangsTextLabel = API.createTextLabel("~w~Сдача металла", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip.sprite = 478;
+                    Blip.name = "Сдача металла";
+                }
+            }
             if (PropertyData.Type == PropertyType.GangBallas)
             {
                 if (PropertyData.Name == "Ballas_main")
@@ -300,20 +308,83 @@ namespace TheGodfatherGM.Server.Property
                     GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
                     GangsTextLabel = API.createTextLabel("~w~Балласы\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 106;
-                    Blip.name = "Балласы : Склад";
+                    //Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    //Blip.sprite = 106;
+                    //Blip.name = "Балласы : Склад";
                 }
-                if (PropertyData.Name == "Ballas_weapon")
+            } // 13
+            if (PropertyData.Type == PropertyType.GangAzcas)
+            {
+                if (PropertyData.Name == "Azcas_main")
                 {
                     GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(2f, 2f, 2f), 250, 25, 50, 200);
-                    GangsTextLabel = API.createTextLabel("~w~Балласы\nОружие", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                                                        new Vector3(2f, 2f, 2f), 250, 9, 15, 70);
+                    GangsTextLabel = API.createTextLabel("~w~Azcas\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 106;
-                    Blip.name = "Балласы : Оружие";
+                    Blip.sprite = 76;
+                    Blip.name = "Azcas : Главная";
                 }
-            }
+                if (PropertyData.Name == "Azcas_stock")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
+                    GangsTextLabel = API.createTextLabel("~w~Azcas\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
+            }  // 14
+            if (PropertyData.Type == PropertyType.GangVagos)
+            {
+                if (PropertyData.Name == "Vagos_main")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(2f, 2f, 2f), 250, 100, 100, 0);
+                    GangsTextLabel = API.createTextLabel("~w~Vagos\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip.sprite = 120;
+                    Blip.name = "Vagos : Главная";
+                }
+                if (PropertyData.Name == "Vagos_stock")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
+                    GangsTextLabel = API.createTextLabel("~w~Vagos\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
+            }  // 15
+            if (PropertyData.Type == PropertyType.GangGrove)
+            {
+                if (PropertyData.Name == "Grove_main")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(2f, 2f, 2f), 250, 0, 80, 0);
+                    GangsTextLabel = API.createTextLabel("~w~Grove\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip.sprite = 77;
+                    Blip.name = "Grove : Главная";
+                }
+                if (PropertyData.Name == "Grove_stock")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
+                    GangsTextLabel = API.createTextLabel("~w~Grove\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
+            }  // 16
+            if (PropertyData.Type == PropertyType.GangRifa)
+            {
+                if (PropertyData.Name == "Rifa_main")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(2f, 2f, 2f), 250, 0, 100, 100);
+                    GangsTextLabel = API.createTextLabel("~w~Rifa\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip.sprite = 88;
+                    Blip.name = "Rifa : Главная";
+                }
+                if (PropertyData.Name == "Rifa_stock")
+                {
+                    GangsMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
+                    GangsTextLabel = API.createTextLabel("~w~Rifa\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                }
+            }   // 17
             if (PropertyData.Type == PropertyType.Police)
             {
                 if (PropertyData.Name == "Police_stock")
@@ -343,12 +414,19 @@ namespace TheGodfatherGM.Server.Property
                         {
                             API.shared.sendNotificationToPlayer(API.getPlayerFromHandle(entity), "Вы можете зайти сюда.\nНажмите N для входа.");
                             API.getPlayerFromHandle(entity).setData("AT_PROPERTY", this);
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 0);
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), 
+                                "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 0);
                         }
-                        else if (PropertyData.CharacterId == characterController.Character.Id)
-                        {
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 1);
-                        }
+
+                        if (PropertyData.CharacterId == null)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), 
+                                "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 1);
+
+                        if (PropertyData.CharacterId != null && 
+                        CharacterController.IsCharacterInGang(characterController) &&
+                        PropertyData.Enterable && PropertyData.CharacterId != characterController.Character.Id)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), 
+                                "house_menu", PropertyData.PropertyID, PropertyData.Stock, 1, 2, PropertyData.CharacterId);
                     }
                 }                
             };
@@ -357,7 +435,7 @@ namespace TheGodfatherGM.Server.Property
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 0, 1);
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "house_menu", PropertyData.PropertyID, PropertyData.Stock, 0, 1, 0);
                     if (PropertyData.Enterable) player.resetData("AT_PROPERTY");
                 }
             };
@@ -648,35 +726,113 @@ namespace TheGodfatherGM.Server.Property
                 }
             };
 
-            GangBallasColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
-            GangBallasColshape.onEntityEnterColShape += (shape, entity) =>
+            // For all Gangs, MAIN (2f dimension):
+            GangsMainColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 2f);
+            GangsMainColshape.onEntityEnterColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    if (PropertyData.Type == PropertyType.GangBallas)
-                    {
-                        CharacterController characterController = player.getData("CHARACTER");
-                        
-                        if (PropertyData.Name == "Ballas_stock" &&
-                        CharacterController.IsCharacterInGang(characterController) && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "Круче нас только яйца!", PropertyData.Name, 1, 0);
+                    CharacterController characterController = player.getData("CHARACTER");
 
-                        if (PropertyData.Name == "Ballas_main" && CharacterController.IsCharacterInGang(characterController))
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "Круче нас только яйца!", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                    switch (PropertyData.Type)
+                    {
+                        case PropertyType.Gangs:
+                            if (PropertyData.Name == "Gangs_metall" &&
+                                CharacterController.IsCharacterInGang(characterController) &&
+                                characterController.Character.TempVar == 111)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Прием металла", "Сдайте украденный металл!", PropertyData.Name, 1, 0);
+                            else    API.sendNotificationToPlayer(API.getPlayerFromHandle(entity), "~r~У вас нет металла для сдачи!"); break;
+
+                        case PropertyType.GangBallas:
+                            if (PropertyData.Name == "Ballas_main" && 
+                                CharacterController.IsCharacterInGangNum(characterController) == 13)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                            break;
+                        case PropertyType.GangAzcas:
+                            if (PropertyData.Name == "Azcas_main" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 14)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Azcas", "", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                            break;
+                        case PropertyType.GangVagos:
+                            if (PropertyData.Name == "Vagos_main" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 15)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Vagos", "", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                            break;
+                        case PropertyType.GangGrove:
+                            if (PropertyData.Name == "Grove_main" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 16)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Grove", "", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                            break;
+                        case PropertyType.GangRifa:
+                            if (PropertyData.Name == "Rifa_main" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 17)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Rifa", "", PropertyData.Name, 1, characterController.Character.ClothesTypes);
+                            break;
+                    }                    
+                }
+            };
+            GangsMainColshape.onEntityExitColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    CharacterController characterController = player.getData("CHARACTER");
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, "", "", PropertyData.Name, 0);
+                }
+            };
+
+            // For all Gangs, STOCK (3f dimension):
+            GangsStockColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
+            GangsStockColshape.onEntityEnterColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    CharacterController characterController = player.getData("CHARACTER");
+
+                    switch (PropertyData.Type)
+                    {
+                        case PropertyType.GangBallas:
+                            if (PropertyData.Name == "Ballas_stock" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 13 && 
+                                player.isInVehicle)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Балласы", "", PropertyData.Name, 1, 0);
+                            break;
+                        case PropertyType.GangAzcas:
+                            if (PropertyData.Name == "Azcas_stock" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 14 && 
+                                player.isInVehicle)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Azcas", "", PropertyData.Name, 1, 0);
+                            break;
+                        case PropertyType.GangVagos:
+                            if (PropertyData.Name == "Vagos_stock" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 15 && 
+                                player.isInVehicle)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Vagos", "", PropertyData.Name, 1, 0);
+                            break;
+                        case PropertyType.GangGrove:
+                            if (PropertyData.Name == "Grove_stock" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 16 && 
+                                player.isInVehicle)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Grove", "", PropertyData.Name, 1, 0);
+                            break;
+                        case PropertyType.GangRifa:
+                            if (PropertyData.Name == "Rifa_stock" &&
+                                CharacterController.IsCharacterInGangNum(characterController) == 17 && 
+                                player.isInVehicle)
+                                    API.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, "Rifa", "", PropertyData.Name, 1, 0);
+                            break;
                     }
                 }
             };
-            GangBallasColshape.onEntityExitColShape += (shape, entity) =>
+            GangsStockColshape.onEntityExitColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    if (PropertyData.Type == PropertyType.GangBallas)
-                    {
-                        CharacterController characterController = player.getData("CHARACTER");                        
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, "", "Воровство", PropertyData.Name, 0);
-                    }
+                    CharacterController characterController = player.getData("CHARACTER");
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, "", "", PropertyData.Name, 0);
                 }
             };
 

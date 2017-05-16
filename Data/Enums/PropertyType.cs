@@ -39,6 +39,22 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Балласы")]
         GangBallas = 13,
 
+        [BlipType(76)]
+        [Display(Name = "Azcas")]
+        GangAzcas = 14,
+
+        [BlipType(120)]
+        [Display(Name = "Vagos")]
+        GangVagos = 15,
+
+        [BlipType(77)]
+        [Display(Name = "Grove")]
+        GangGrove = 16,
+
+        [BlipType(88)]
+        [Display(Name = "Rifa")]
+        GangRifa = 17,
+
         [BlipType(60)]
         [Display(Name = "Военные 1")]
         ArmyOne = 20,
@@ -47,6 +63,9 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Военные 2")]
         ArmyTwo = 21,
 
+        [BlipType(478)]
+        [Display(Name = "Прием металла")]
+        Gangs = 99,
 
         [BlipType(40)]
         [Display(Name = "Жилой дом")]
