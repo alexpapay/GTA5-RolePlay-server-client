@@ -20,6 +20,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Localize\Localize.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MessagingModels\CreateGroupMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Ban.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Caption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Character.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\Clothes.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Models\ClothesTypes.cs" />

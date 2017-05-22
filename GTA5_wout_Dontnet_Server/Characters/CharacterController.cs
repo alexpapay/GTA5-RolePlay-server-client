@@ -97,6 +97,7 @@ namespace TheGodfatherGM.Server.Characters
             Character.PosY = -2727.422f;
             Character.PosZ = 13.75663f;
             Character.RegisterDate = DateTime.Now;
+            Character.DebtDate = DateTime.Now;
             Character.PlayMinutes = 0;
             Character.DriverLicense = 0;
             Character.TempVar = 0;
@@ -104,6 +105,10 @@ namespace TheGodfatherGM.Server.Characters
             Character.SocialClub = player.socialClubName;
             Character.ClothesTypes = 0;
             Character.ActiveClothes = 101;
+            Character.Debt = 0;
+            Character.DebtMafia = 0;
+            Character.DebtLimit = 0;
+            Character.MafiaRoof = 0;
             Character.Language = language;
             ContextFactory.Instance.Character.Add(Character);
             ContextFactory.Instance.SaveChanges();
@@ -246,19 +251,25 @@ namespace TheGodfatherGM.Server.Characters
             API.shared.triggerClientEvent(player, "animation_text");
         }
 
-        public static int IsCharacterInGangNum(CharacterController characterController)
+        public static bool IsCharacterInMafia(CharacterController characterController)
         {
-            if (characterController.Character.ActiveGroupID >= 1300 &&
-                characterController.Character.ActiveGroupID <= 1310) return 13;
-            if (characterController.Character.ActiveGroupID >= 1400 &&
-                characterController.Character.ActiveGroupID <= 1410) return 14;
-            if (characterController.Character.ActiveGroupID >= 1500 &&
-                characterController.Character.ActiveGroupID <= 1510) return 15;
-            if (characterController.Character.ActiveGroupID >= 1600 &&
-                characterController.Character.ActiveGroupID <= 1610) return 16;
-            if (characterController.Character.ActiveGroupID >= 1700 &&
-                characterController.Character.ActiveGroupID <= 1710) return 17;
-            return 0;
+            if (characterController.Character.ActiveGroupID >= 3000 &&
+                characterController.Character.ActiveGroupID <= 3010) return true;
+            if (characterController.Character.ActiveGroupID >= 3100 &&
+                characterController.Character.ActiveGroupID <= 3110) return true;
+            if (characterController.Character.ActiveGroupID >= 3200 &&
+                characterController.Character.ActiveGroupID <= 3210) return true;
+            return false;
+        }
+        public static bool IsCharacterInMafia(Character character)
+        {
+            if (character.ActiveGroupID >= 3000 &&
+                character.ActiveGroupID <= 3010) return true;
+            if (character.ActiveGroupID >= 3100 &&
+                character.ActiveGroupID <= 3110) return true;
+            if (character.ActiveGroupID >= 3200 &&
+                character.ActiveGroupID <= 3210) return true;
+            return false;
         }
         public static bool IsCharacterInGang(CharacterController characterController)
         {

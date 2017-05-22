@@ -19,23 +19,43 @@ namespace TheGodfatherGM.Server
             API.onChatCommand += OnChatCommandHandler;
         }
 
-        public static void SendMessageInGroup (Client player, string message)
+        public static void SendMessageInMyGroup (Client player, string message)
+        {
+            CharacterController characterController = player.getData("CHARACTER");
+            if (characterController == null) return;
+            Character character = characterController.Character;
+            string formatName = character.Name.Replace("_", " ");
+            
+            var allGroupPlayers = ContextFactory.Instance.Character.Where(x => x.GroupType == character.GroupType);
+            
+            foreach (var groupPlayer in allGroupPlayers)
+            {
+                if (groupPlayer.Online == true)
+                {
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == groupPlayer.SocialClub);
+                    if (target == null) return;
+                    API.shared.sendChatMessageToPlayer(target, "Игрок " + formatName + " говорит группе:\n" + message);
+                }                
+            }
+        }
+
+        public static void SendMessageInGroup(Client player, int group, string message)
         {
             CharacterController characterController = player.getData("CHARACTER");
             if (characterController == null) return;
             Character character = characterController.Character;
             string formatName = character.Name.Replace("_", " ");
 
-            var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
-            var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
+            var allGroupPlayers = ContextFactory.Instance.Character.Where(x => x.GroupType == character.DebtMafia);
 
-            var allGroupPlayers = ContextFactory.Instance.Character.Where(x => x.GroupType == (int)groupType);
-            
             foreach (var groupPlayer in allGroupPlayers)
             {
-                Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == groupPlayer.SocialClub);
-                if (target == null) continue;
-                API.shared.sendChatMessageToPlayer(target, "Игрок " + formatName + " говорит группе: " + message);
+                if (groupPlayer.Online == true)
+                {
+                    Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == groupPlayer.SocialClub);
+                    if (target == null) continue;
+                    API.shared.sendChatMessageToPlayer(target, "Игрок " + formatName + " говорит группе:\n" + message);
+                }
             }
         }
 

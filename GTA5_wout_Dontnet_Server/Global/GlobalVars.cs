@@ -16,6 +16,6 @@ namespace TheGodfatherGM.Server.Global
         public static int WebRTCServerPort;
         public static string WebRTCServerConnectionString;
 
-        public static string ServerName = "The Godfather";
+        public static string ServerName = "GTA 5 : RP";
     }
 }

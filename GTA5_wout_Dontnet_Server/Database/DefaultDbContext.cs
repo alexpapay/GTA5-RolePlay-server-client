@@ -18,8 +18,7 @@ namespace TheGodfatherGM.Server.DBManager
         protected override void OnModelCreating(DbModelBuilder builder)
         {
            builder.Conventions.Remove<PluralizingTableNameConvention>();
-        }
-        public DbSet<GangSectors> GangSectors { get; set; }
+        }                
         public DbSet<Faces> Faces { get; set; }
         public DbSet<Weapon> Weapon { get; set; }
         public DbSet<ClothesTypes> ClothesTypes { get; set; }
@@ -33,6 +32,9 @@ namespace TheGodfatherGM.Server.DBManager
         public DbSet<Job> Job { get; set; }
         public DbSet<Data.Property> Property { get; set; }
         public DbSet<Vehicle> Vehicle { get; set; }
+
+        public DbSet<GangSectors> GangSectors { get; set; }
+        public DbSet<Caption> Caption { get; set; }
     }
 
     public class ContextFactory : IDbContextFactory<DefaultDbContext>

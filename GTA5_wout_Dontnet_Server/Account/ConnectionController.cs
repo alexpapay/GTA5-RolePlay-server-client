@@ -7,6 +7,7 @@ using TheGodfatherGM.Server.Characters;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using TheGodfatherGM.Data.Enums;
 
 namespace TheGodfatherGM.Server
 {
@@ -30,12 +31,26 @@ namespace TheGodfatherGM.Server
 
         private void OnPlayerDeath(Client player, NetHandle entityKiller, int weapon)
         {
-            Character targetCharacter = null;
+            Character killerCharacter = null;
             Client killer = API.getPlayerFromHandle(entityKiller);
             if (killer != null)
             {                                           // TODO: Lokalize
                 API.sendNotificationToAll(killer.name + Localize.Lang(2, "killed") + player.name);
-                targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == killer.socialClubName);
+                killerCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == killer.socialClubName);
+
+                var caption = ContextFactory.Instance.Caption.First(x => x.Id == 1);
+                if (caption.Sector != "0;0")
+                {
+                    var getAttackGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == caption.GangAttack * 100);
+                    var groupAttackType = (GroupType)Enum.Parse(typeof(GroupType), getAttackGroup.Type.ToString());
+                    var getDefendGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == caption.GangDefend * 100);
+                    var groupDefendType = (GroupType)Enum.Parse(typeof(GroupType), getAttackGroup.Type.ToString());
+
+                    if (killerCharacter.GroupType == caption.GangAttack) caption.FragsAttack += 1;
+                    if (killerCharacter.GroupType == caption.GangDefend) caption.FragsDefend += 1;
+                    API.shared.sendChatMessageToAll("Фрагов у банды " + EntityManager.GetDisplayName(groupAttackType) + ": " + caption.FragsAttack + "\nФрагов у банды " + EntityManager.GetDisplayName(groupDefendType) + ": " + caption.FragsDefend);
+                    ContextFactory.Instance.SaveChanges();
+                }                
             }
             else
             {                                           // TODO: Lokalize
@@ -50,16 +65,16 @@ namespace TheGodfatherGM.Server
             // Army change cloth after death
             if (CharacterController.IsCharacterInArmy(characterController))
             {                
-                if (targetCharacter != null && CharacterController.IsCharacterInGhetto(killer))
+                if (killerCharacter != null && CharacterController.IsCharacterInGhetto(killer))
                 {     
                     switch (characterController.Character.ActiveClothes)
                     {
-                        case 2: targetCharacter.ClothesTypes = 2;
-                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_soldier")); break;
-                        case 3: targetCharacter.ClothesTypes = 3;
-                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_officer")); break;
-                        case 4: targetCharacter.ClothesTypes = 4;
-                            API.sendNotificationToPlayer(killer, Localize.Lang(targetCharacter.Language, "kill_cloth_general")); break;
+                        case 2: killerCharacter.ClothesTypes = 2;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(killerCharacter.Language, "kill_cloth_soldier")); break;
+                        case 3: killerCharacter.ClothesTypes = 3;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(killerCharacter.Language, "kill_cloth_officer")); break;
+                        case 4: killerCharacter.ClothesTypes = 4;
+                            API.sendNotificationToPlayer(killer, Localize.Lang(killerCharacter.Language, "kill_cloth_general")); break;
                     }
                     ClothesManager.SetPlayerSkinClothesToDb(player, 101, characterController.Character, 1);
 

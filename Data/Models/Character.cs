@@ -31,6 +31,7 @@ namespace TheGodfatherGM.Data
         public DateTime RegisterDate { get; set; }
         public DateTime LastLoginDate { get; set; }
         public DateTime LastLogoutDate { get; set; }
+        public DateTime DebtDate { get; set; }
         public int RegistrationStep { get; set; }
         public bool Online { get; set; }
         public float PosX { get; set; }
@@ -57,6 +58,10 @@ namespace TheGodfatherGM.Data
 
         public int ClothesTypes { get; set; }
         public int ActiveClothes { get; set; }
+        public int Debt { get; set; }
+        public int DebtLimit { get; set; }
+        public int DebtMafia { get; set; }
+        public int MafiaRoof { get; set; }
 
         public virtual ICollection<GroupMember> GroupMember { get; set; }
         public virtual ICollection<Property> Property { get; set; }

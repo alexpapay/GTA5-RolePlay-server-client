@@ -21,7 +21,7 @@ namespace TheGodfatherGM.Data.Enums
         [BlipType(61)]
         FBI = 3,
 
-        [Display(Name = "Азтэк")]
+        [Display(Name = "")]
         CorrectionalFacility = 4,
 
         [Display(Name = "Авианосец")]
@@ -94,6 +94,14 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Русская Мафия")]
         [BlipType(60)]
         MafiaRussian = 30,
+
+        [Display(Name = "Mafial LKN")]
+        [BlipType(60)]
+        MafiaLKN = 31,
+
+        [Display(Name = "Mafia Armeny")]
+        [BlipType(60)]
+        MafiaArmeny = 32,
 
         [Display(Name = "Безработный")]
         [BlipType(315)]

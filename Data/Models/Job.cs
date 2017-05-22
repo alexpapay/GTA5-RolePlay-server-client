@@ -13,6 +13,7 @@ namespace TheGodfatherGM.Data
 
         public int? GroupId { get; set; }
         public Group Group { get; set; }
+        public int CharacterId { get; set; }
 
         public float PosX { get; set; }
         public float PosY { get; set; }

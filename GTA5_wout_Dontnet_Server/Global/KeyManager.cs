@@ -87,10 +87,11 @@ namespace TheGodfatherGM.Server.Global
                         job,                                                // 5
                         character.Bank.ToString(),                          // 6
                         driverLicense,                                      // 7
-                        character.ActiveGroupID,                            // 8
+                        character.Debt,                                     // 8
                         EntityManager.GetDisplayName(groupType),            // 9
                         EntityManager.GetDisplayName(groupExtraType),       // 10
-                        character.Material);                                // 11
+                        character.Material,                                 // 11
+                        CharacterController.IsCharacterInMafia(character)); // 12
                 }
                 // GET info about car
                 else if ((int)args[0] == 10)
@@ -144,15 +145,18 @@ namespace TheGodfatherGM.Server.Global
                     var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
                     var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
+
                     var playerWeapons = API.getPlayerWeapons(player);
                     var weaponList = "";
                     for (var i = 0; i < playerWeapons.Length; i++)
                         weaponList += playerWeapons[i].ToString() + "-";
 
                     Data.Property materialProperty = new Data.Property();
+
                     Group moneyStockGroup = new Group();
                     var groupStockName = GroupController.GetGroupStockName(character);                    
-                    var moneyBankGroup = character.GroupType * 100;                    
+                    var moneyBankGroup = character.GroupType * 100;
+
                     var gangRank = (int)groupExtraType - (int)groupType * 100;
 
                     try { materialProperty = ContextFactory.Instance.Property.First(x => x.Name == groupStockName); }
@@ -161,7 +165,12 @@ namespace TheGodfatherGM.Server.Global
                     catch (Exception e) { }
 
                     var gangsSectors = GroupController.GetGangsSectors();
-                    //var sectorsString = JsonConvert.SerializeObject(gangsSectors);                    
+                    var gangCurrentSector = CharacterController.InWhichSectorOfGhetto(player).Split(';');
+                    var gangCurrentSectorData = GroupController.GetGangSectorData(Convert.ToInt32(gangCurrentSector[0]), Convert.ToInt32(gangCurrentSector[1]));
+                    if (gangCurrentSectorData > 100) gangCurrentSectorData /= 10;
+                    var isSectorInYourGang = gangCurrentSectorData == (int)groupType ? true : false;
+                    if (gangCurrentSectorData > 100 && isSectorInYourGang == false)
+                        isSectorInYourGang = true;
 
                     API.shared.triggerClientEvent(player, "workposs_menu",
                          1,                                                                                  // 0
@@ -184,7 +193,11 @@ namespace TheGodfatherGM.Server.Global
                          CharacterController.IsCharacterHighRankInGang(character),                           // 17
                          gangRank,                                                                           // 18
                          (int)groupType,                                                                     // 19
-                         gangsSectors);                                                                      // 20
+                         gangsSectors,                                                                       // 20
+                         isSectorInYourGang,                                                                 // 21
+                         groupStockName,                                                                     // 22
+                         CharacterController.IsCharacterInMafia(characterController));                       // 23
+
                 }
                 else if ((int)args[0] == 13)
                 {

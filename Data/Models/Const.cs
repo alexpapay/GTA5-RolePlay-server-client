@@ -1,5 +1,12 @@
 ﻿namespace TheGodfatherGM.Data.Models
 {
+    class WorkPay
+    {
+        public const int BusDriver1Pay = 1000;
+
+        public const int Loader1Pay = 10;       // Стройка
+        public const int Loader2Pay = 7;        // Порт
+    }
     class RentModels
     {
         public const int ScooterModel = -1842748181;

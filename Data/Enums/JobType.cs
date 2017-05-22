@@ -5,9 +5,9 @@ namespace TheGodfatherGM.Data.Enums
 {
     public enum JobType
     {
-        [Display(Name = "Detective")]
-        [BlipType(458)]
-        Detective = 1,
+        [Display(Name = "Gas Station")]
+        [BlipType(361)]
+        GasStation = 1,
 
         [Display(Name = "Lawyer")]
         [BlipType(408)]
@@ -30,7 +30,11 @@ namespace TheGodfatherGM.Data.Enums
         Trucker = 6,
 
         [Display(Name = "Грузчик")]
-        [BlipType(277)]
-        Loader = 7
+        [BlipType(311)]
+        Loader = 7,
+
+        [Display(Name = "Водитель автобуса")]
+        [BlipType(513)]
+        BusDriver = 8
     }
 }

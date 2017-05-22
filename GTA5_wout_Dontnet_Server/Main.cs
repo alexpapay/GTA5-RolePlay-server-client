@@ -9,6 +9,8 @@ using TheGodfatherGM.Data;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Vehicles;
 using TheGodfatherGM.Server.Groups;
+using TheGodfatherGM.Data.Enums;
+using TheGodfatherGM.Data.Models;
 
 namespace TheGodfatherGM.Server
 {
@@ -27,7 +29,6 @@ namespace TheGodfatherGM.Server
         private DateTime OneSecond;
         private DateTime HourAnnounce;
 
-        // Добавление минуты к пребыванию в игре после авторизации пользователя
         public void OnUpdateHandler()
         {
             if (DateTime.Now.Subtract(MinuteAnnounce).TotalMinutes >= 1)
@@ -56,12 +57,12 @@ namespace TheGodfatherGM.Server
                             var isTaxiVehicle = ContextFactory.Instance.Vehicle.FirstOrDefault(x => x.CharacterId == character.Id);
                             if (character.JobId == 777 && isTaxiVehicle != null) character.Cash += 300; // TaxiDrivers
                             if (character.JobId == 888) character.Cash += 100; // Unemployers
-                            character.Cash += Data.Models.PayDayMoney.GetPayDaYMoney(character.ActiveGroupID);
+                            character.Cash += PayDayMoney.GetPayDaYMoney(character.ActiveGroupID);
 
                             try
                             {
                                 Client currentPlayer = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
-                                API.shared.sendChatMessageToPlayer(currentPlayer, "~g~[СЕРВЕР]: ~w~ Вы получили свою зарплату: " + Data.Models.PayDayMoney.GetPayDaYMoney(character.ActiveGroupID) + "$.");
+                                API.shared.sendChatMessageToPlayer(currentPlayer, "~g~[СЕРВЕР]: ~w~ Вы получили свою зарплату: " + PayDayMoney.GetPayDaYMoney(character.ActiveGroupID) + "$.");
                                 API.shared.triggerClientEvent(currentPlayer, "update_money_display", character.Cash);
                             }
                             catch (Exception e) { }
@@ -73,10 +74,46 @@ namespace TheGodfatherGM.Server
                 // Прокат транспорта (каждую минуту вычитается 1 ед. Fuel):
                 try
                 {
-                    VehicleController.RentVehicle(Data.Models.RentModels.ScooterModel);
-                    VehicleController.RentVehicle(Data.Models.RentModels.TaxiModel);
+                    VehicleController.RentVehicle(RentModels.ScooterModel);
+                    VehicleController.RentVehicle(RentModels.TaxiModel);
                 }
-                catch (Exception e) { }                
+                catch (Exception e) { }
+                // Капт сектора
+                try
+                {
+                    var tick = 0;
+                    var startCapting = ContextFactory.Instance.Caption.First(x => x.Id == 1);
+                    if (startCapting.Sector != "0;0")
+                    {
+                        var sector = startCapting.Sector.Split(';');
+                        tick += 1;
+                        if (tick == 2)
+                        {
+                            var getAttackGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == startCapting.GangAttack * 100);
+                            var groupAttackType = (GroupType)Enum.Parse(typeof(GroupType), getAttackGroup.Type.ToString());
+                            var getDefendGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == startCapting.GangDefend * 100);
+                            var groupDefendType = (GroupType)Enum.Parse(typeof(GroupType), getAttackGroup.Type.ToString());
+
+                            if (startCapting.FragsAttack > startCapting.FragsDefend || 
+                                (startCapting.FragsAttack == 0 && startCapting.FragsDefend == 0))
+                            {                                
+                                GroupController.SetGangSectorData(Convert.ToInt32(sector[0]),
+                                    Convert.ToInt32(sector[1]), startCapting.GangAttack);
+                                API.shared.sendChatMessageToAll("Банда: " + EntityManager.GetDisplayName(groupAttackType) + "захватила у банды: \n" + EntityManager.GetDisplayName(groupDefendType) + "сектор: " + startCapting.Sector);
+                            }
+                            else
+                            {
+                                GroupController.SetGangSectorData(Convert.ToInt32(sector[0]),
+                                    Convert.ToInt32(sector[1]), startCapting.GangDefend);
+                                API.shared.sendChatMessageToAll("Банда: " + EntityManager.GetDisplayName(groupDefendType) + "не смогла захватить у банды: \n" + EntityManager.GetDisplayName(groupAttackType) + "сектор: " + startCapting.Sector);
+                            }
+
+                            GroupController.SetDefaultCaption(1);
+                        }
+                    }
+                    else tick = 0;
+                }
+                catch (Exception e) { }
 
                 MinuteAnnounce = DateTime.Now;
             }
@@ -160,7 +197,7 @@ namespace TheGodfatherGM.Server
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-GB");
             Console.BackgroundColor = ConsoleColor.Blue;
             API.consoleOutput(Global.GlobalVars.ServerName + " was started at " + DateTime.Now);
-            Console.ResetColor();
+            Console.ResetColor();            
         }
 
         private void OnResourceStop()

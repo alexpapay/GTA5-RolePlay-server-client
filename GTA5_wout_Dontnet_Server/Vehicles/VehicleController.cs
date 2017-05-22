@@ -61,7 +61,11 @@ namespace TheGodfatherGM.Server.Vehicles
                 if (vehicleController.VehicleData.GroupId != null)
                     VehicleGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == vehicleController.VehicleData.GroupId);
 
-                if (vehicleController.VehicleData.Character == characterController.Character)
+                if (vehicleController.VehicleData.Model == Data.Models.RentModels.ScooterModel ||
+                    vehicleController.VehicleData.Model == Data.Models.RentModels.TaxiModel)
+                    API.sendNotificationToPlayer(player, "Вы сели в прокатный транспорт");
+
+                else if(vehicleController.VehicleData.Character == characterController.Character)
                     API.sendNotificationToPlayer(player, "Вы сели в свой транспорт");
 
                 else if (VehicleGroup.Type == CharacterGroup.Type)
@@ -72,9 +76,9 @@ namespace TheGodfatherGM.Server.Vehicles
 
                 else
                 {
-                    API.sendNotificationToPlayer(player, "Вы сели в чужой транспорт");
                     if (VehicleGroup == null && vehicleController.VehicleData.Character == null)
                         API.sendNotificationToPlayer(player, "Данный транспорт не принадлежит никому");
+                    else API.sendNotificationToPlayer(player, "Вы сели в чужой транспорт");                    
                 }
             }
             API.triggerClientEvent(player, "show_vehicle_hud"); // TODO: use this for vehicle HUD
@@ -272,7 +276,7 @@ namespace TheGodfatherGM.Server.Vehicles
             }                
 
             if (VehicleGroup.Type == CharacterGroup.Type ||
-                vehicleController.VehicleData.Character == characterController.Character)
+                vehicleController.VehicleData.CharacterId == characterController.Character.Id)
             {
                 if (player.velocity != new Vector3(0.0f, 0.0f, 0.0f))
                 {

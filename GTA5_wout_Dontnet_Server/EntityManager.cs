@@ -28,7 +28,7 @@ namespace TheGodfatherGM.Server
             GroupController.LoadGroups();
             VehicleController.LoadVehicles();
             PropertyController.LoadProperties();
-            JobController.LoadJobs();
+            JobController.LoadJobs();            
         }
 
         private static Dictionary<int, CharacterController> characterDictionary = new Dictionary<int, CharacterController>();

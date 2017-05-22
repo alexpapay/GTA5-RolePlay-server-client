@@ -144,6 +144,7 @@ namespace TheGodfatherGM.Server.Admin
                 else if (id == 74) API.setEntityPosition(player, new Vector3(-163.145, -940.611, 29.3)); // 1st work
                 else if (id == 75) API.setEntityPosition(player, new Vector3(853.3, -2927.611, 6.1)); // 2nd work
                 else if (id == 76) API.setEntityPosition(player, new Vector3(-1869.72, 2998.29, 32.8105)); // Army 2
+                else if (id == 77) API.setEntityPosition(player, new Vector3(-831.386, -2350.93, 14.5706)); // Army 2
 
             }
         }
@@ -330,14 +331,12 @@ namespace TheGodfatherGM.Server.Admin
         public void createvehicle(Client player, string OwnerType, string Name, VehicleHash hash, int color1, int color2)
         {
             CharacterController characterController = player.getData("CHARACTER");
-            //if (!AdminController.AdminRankCheck("createvehicle", characterController.Character, player)) return;
+            if (!AdminController.AdminRankCheck("createvehicle", characterController.Character, player)) return;
 
             Data.Vehicle VehicleData = new Data.Vehicle();
             if (OwnerType == "player")
             {
-                /*AccountController TargetAccountController = AccountController.GetAccountControllerFromName(Name);
-                if (TargetAccountController == null) return;
-                VehicleData.Character = TargetAccountController.CharacterController.Character;*/
+                VehicleData.CharacterId = characterController.Character.Id;
             }
             else if (OwnerType == "group")
             {
@@ -405,6 +404,15 @@ namespace TheGodfatherGM.Server.Admin
             if (!AdminController.AdminRankCheck("createproperty", characterController.Character, player)) return;
 
             PropertyController.CreateProperty(player, OwnerType, type, IDOrName, cost);
+        }
+
+        [Command("createhome", "~y~Usage: ~w~/createhome  [cost]")]
+        public void createhome(Client player, int cost)
+        {
+            CharacterController characterController = player.getData("CHARACTER");
+            if (!AdminController.AdminRankCheck("createproperty", characterController.Character, player)) return;
+
+            PropertyController.CreateHome(player, cost);
         }
 
         [Command("setproperty", "~y~Usage: ~w~/setproperty [id] [interior/exterior/IPL/Enterable]")]

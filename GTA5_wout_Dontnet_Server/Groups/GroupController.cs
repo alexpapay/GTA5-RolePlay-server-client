@@ -1,6 +1,5 @@
 ﻿using TheGodfatherGM.Data.Extensions;
 using GTANetworkServer;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Data;
@@ -33,6 +32,8 @@ namespace TheGodfatherGM.Server.Groups
                 new GroupController(group);
             }
             API.shared.consoleOutput("[GM] Загружено групп: " + ContextFactory.Instance.Group.Count() + " шт.");
+            API.shared.consoleOutput("[GM] Параметры капта обнулены.");
+            SetDefaultCaption(1);
         }
 
         public static string GetName(int groupId)
@@ -58,16 +59,31 @@ namespace TheGodfatherGM.Server.Groups
         {
             string propertyName = null;
             if (character.ActiveGroupID > 1300 && character.ActiveGroupID <= 1310) propertyName = "Ballas_stock"; 
-            if (character.ActiveGroupID > 1400 && character.ActiveGroupID <= 1410) propertyName = "Vagos_stock";
-            if (character.ActiveGroupID > 1500 && character.ActiveGroupID <= 1510) propertyName = "LaCostaNotsa_stock";
-            if (character.ActiveGroupID > 1600 && character.ActiveGroupID <= 1610) propertyName = "GroveStreet_stock";
-            if (character.ActiveGroupID > 1700 && character.ActiveGroupID <= 1710) propertyName = "TheRifa_stock";
+            if (character.ActiveGroupID > 1400 && character.ActiveGroupID <= 1410) propertyName = "Azcas_stock";
+            if (character.ActiveGroupID > 1500 && character.ActiveGroupID <= 1510) propertyName = "Vagos_stock";
+            if (character.ActiveGroupID > 1600 && character.ActiveGroupID <= 1610) propertyName = "Grove_stock";
+            if (character.ActiveGroupID > 1700 && character.ActiveGroupID <= 1710) propertyName = "Rifa_stock";
             if (character.ActiveGroupID > 2000 && character.ActiveGroupID <= 2015) propertyName = "Army1_stock";
             if (character.ActiveGroupID > 2100 && character.ActiveGroupID <= 2115) propertyName = "Army2_stock";
+            if (character.ActiveGroupID > 3000 && character.ActiveGroupID <= 3010) propertyName = "RussianMafia_stock";
+            if (character.ActiveGroupID > 3100 && character.ActiveGroupID <= 3110) propertyName = "MafiaLKN_stock";
+            if (character.ActiveGroupID > 3200 && character.ActiveGroupID <= 3210) propertyName = "MafiaArmeny_stock";
             if (character.ActiveGroupID > 100 && character.ActiveGroupID <= 114)   propertyName = "Police_stock";
             if (character.ActiveGroupID > 300 && character.ActiveGroupID <= 310)   propertyName = "FBI_stock";
 
             return propertyName;
+        }
+
+        public static void SetDefaultCaption (int id)
+        {
+            var caption = ContextFactory.Instance.Caption.FirstOrDefault(x => x.Id == id);
+            caption.Time = DateTime.Now;
+            caption.Sector = "0;0";
+            caption.GangAttack = 0;
+            caption.FragsAttack = 0;
+            caption.GangDefend = 0;
+            caption.FragsDefend = 0;
+            ContextFactory.Instance.SaveChanges();
         }
 
         public static void SetGangSectorData(int row, int col, int data)
@@ -93,23 +109,27 @@ namespace TheGodfatherGM.Server.Groups
         }
         public static int GetGangSectorData(int row, int col)
         {
-            var selectedSector = ContextFactory.Instance.GangSectors.First(x => x.IdRow == row);
-            switch (col)
+            try
             {
-                case 1: return selectedSector.Col1;
-                case 2: return selectedSector.Col2;
-                case 3: return selectedSector.Col3;
-                case 4: return selectedSector.Col4;
-                case 5: return selectedSector.Col5;
-                case 6: return selectedSector.Col6;
-                case 7: return selectedSector.Col7;
-                case 8: return selectedSector.Col8;
-                case 9: return selectedSector.Col9;
-                case 10: return selectedSector.Col10;
-                case 11: return selectedSector.Col11;
-                case 12: return selectedSector.Col12;
-                case 13: return selectedSector.Col13;
+                var selectedSector = ContextFactory.Instance.GangSectors.First(x => x.IdRow == row);
+                switch (col)
+                {
+                    case 1: return selectedSector.Col1;
+                    case 2: return selectedSector.Col2;
+                    case 3: return selectedSector.Col3;
+                    case 4: return selectedSector.Col4;
+                    case 5: return selectedSector.Col5;
+                    case 6: return selectedSector.Col6;
+                    case 7: return selectedSector.Col7;
+                    case 8: return selectedSector.Col8;
+                    case 9: return selectedSector.Col9;
+                    case 10: return selectedSector.Col10;
+                    case 11: return selectedSector.Col11;
+                    case 12: return selectedSector.Col12;
+                    case 13: return selectedSector.Col13;
+                }
             }
+            catch (Exception e) { }
             return 0;
         }
         public static int [] GetCountOfGangsSectors()

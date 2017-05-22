@@ -12,12 +12,13 @@ namespace TheGodfatherGM.Data.Enums
         [Display(Name = "Полиция")]
         Police = 1,
 
-        [Display(Name = "Дверь")]
-        Door = 2,
+        [BlipType(51)]
+        [Display(Name = "Emergency")]
+        Emergency = 2,
 
-        [BlipType(40)]
-        [Display(Name = "Строение")]
-        Building = 3,
+        [BlipType(60)]
+        [Display(Name = "FBI")]
+        FBI = 3,
 
         [BlipType(512)]
         [Display(Name = "Прокат")]
@@ -62,6 +63,18 @@ namespace TheGodfatherGM.Data.Enums
         [BlipType(60)]
         [Display(Name = "Военные 2")]
         ArmyTwo = 21,
+
+        [BlipType(78)]
+        [Display(Name = "Russian Mafia")]
+        RussianMafia = 30,
+
+        [BlipType(78)]
+        [Display(Name = "Mafial LKN")]
+        MafiaLKN = 31,
+
+        [BlipType(78)]
+        [Display(Name = "Mafia Armeny")]
+        MafiaArmeny = 32,
 
         [BlipType(478)]
         [Display(Name = "Прием металла")]

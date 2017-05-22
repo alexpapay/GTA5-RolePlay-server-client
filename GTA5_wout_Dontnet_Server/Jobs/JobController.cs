@@ -1,13 +1,16 @@
-﻿using GTANetworkServer;
-using GTANetworkShared;
+﻿using System;
 using System.Linq;
-using TheGodfatherGM.Server.DBManager;
+using System.Collections.Generic;
+
+using GTANetworkServer;
+using GTANetworkShared;
+
 using TheGodfatherGM.Data;
+using TheGodfatherGM.Data.Models;
 using TheGodfatherGM.Data.Extensions;
 using TheGodfatherGM.Data.Attributes;
+using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Characters;
-using System.Collections.Generic;
-using System;
 
 namespace TheGodfatherGM.Server.Jobs
 {
@@ -18,10 +21,24 @@ namespace TheGodfatherGM.Server.Jobs
         public Vector3 job1Marker2 = new Vector3(936.667, -2907.894, 5.9);
         ColShape job1_1MarCol;
         ColShape job1_2MarCol;
+
         public Vector3 job2Marker1 = new Vector3(-155.5, -959.14, 269.2);
         public Vector3 job2Marker2 = new Vector3(-179.88, -1008.7, 254.1316);
         ColShape job2_1MarCol;
         ColShape job2_2MarCol;
+
+        // Водитель автобуса :: метки и маркеры
+        public Vector3 jobBus1Marker1 = new Vector3(307.9809, -1378.786, 31.47842);
+        public Vector3 jobBus1Marker2 = new Vector3(115.8893, -938.0698, 29.32286);
+        public Vector3 jobBus1Marker3 = new Vector3(-146.7599, -919.225, 28.87529);
+        public Vector3 jobBus1Marker4 = new Vector3(-1032.782, -2723.743, 13.66907);
+        public Vector3 jobBus1MarkerFin = new Vector3(-810.782, -2330.743, 14.66907);
+        ColShape jobBus1Colshape1;
+        ColShape jobBus1Colshape2;
+        ColShape jobBus1Colshape3;
+        ColShape jobBus1Colshape4;
+        ColShape jobBus1ColshapeFin;
+
         public static int currentJobId;
 
         // Таксист :: переменные
@@ -37,13 +54,11 @@ namespace TheGodfatherGM.Server.Jobs
         TextLabel textLabel;
 
         public JobController() { }
-
         public JobController(Job jobData)
         {
             JobData = jobData;
             EntityManager.Add(this);
         }
-
         public static void LoadJobs()
         {
             foreach (var job in ContextFactory.Instance.Job)
@@ -59,20 +74,42 @@ namespace TheGodfatherGM.Server.Jobs
             API.setBlipSprite(blip, JobData.Type.GetAttributeOfType<BlipTypeAttribute>().BlipId);
             API.setBlipName(blip, (Group == null ? Type() : Group.Group.Name));
 
-            marker = API.createMarker(1, new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-               new Vector3(1f, 1f, 1f), 250, 25, 50, 200);
 
-            if (JobData.Type == Data.Enums.JobType.Loader) 
-                textLabel = API.createTextLabel("~w~Работа грузчиком.\nЗаработок даже за один цикл", new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-            else
-                textLabel = API.createTextLabel("~b~[Job (ID: " + JobData.Id + ")]" + (Group == null ? "" : "\n~w~Company: \n" +
-                Group.Group.Name) + "\n~y~Job: " + Type() + "\n~w~Level: " + JobData.Level,
-                new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+
+            switch (JobData.Type)
+            {
+                case Data.Enums.JobType.Loader:
+                    textLabel = API.createTextLabel("~w~Работа грузчиком.\nЗаработок даже за один цикл", new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    marker = API.createMarker(1, new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                 new Vector3(1f, 1f, 1f), 250, 25, 50, 200);
+                    break;
+
+                case Data.Enums.JobType.BusDriver:
+                    textLabel = API.createTextLabel("~w~Работа водителем\nавтобуса", new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    marker = API.createMarker(1, new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                 new Vector3(1.5f, 1.5f, 1.5f), 250, 25, 50, 200); break;
+
+                case Data.Enums.JobType.GasStation:
+                    if (JobData.CharacterId == 0)
+                    {
+                        textLabel = API.createTextLabel("~w~Бизнес: заправка\n(свободен)", new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                        marker = API.createMarker(1, new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                 new Vector3(1f, 1f, 1f), 250, 10, 250, 10);
+                    }
+                    else
+                    {
+                        //var character = ContextFactory.Instance.Character.First(x => x.Id == JobData.CharacterId);
+                        //if (character == null) break;
+                        textLabel = API.createTextLabel("~w~Бизнес: заправка\n", new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                        marker = API.createMarker(1, new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                                                 new Vector3(1f, 1f, 1f), 250, 10, 250, 10);
+                    }
+                    break;
+            }
 
             CreateColShape();
             CreateMarkersColShape();
         }
-
         public void CreateColShape()
         {
             colShape = API.createCylinderColShape(new Vector3(JobData.PosX, JobData.PosY, JobData.PosZ), 2f, 3f);
@@ -81,12 +118,23 @@ namespace TheGodfatherGM.Server.Jobs
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    Vector3 firstMarker = null;
-                    if (JobData.Id == 1) firstMarker = job1Marker1;
-                    if (JobData.Id == 2) firstMarker = job2Marker1;
-                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 1, 
-                        "Работа грузчиком", "Заработайте свои первые деньги!", JobData.Id, 
-                        firstMarker.X, firstMarker.Y, firstMarker.Z);                    
+                    switch (JobData.Type)
+                    {
+                        case Data.Enums.JobType.Loader:
+                            Vector3 firstMarker = null;
+                            if (JobData.Id == 1) firstMarker = job1Marker1;
+                            if (JobData.Id == 2) firstMarker = job2Marker1;
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 1,
+                                "Работа грузчиком", "Заработайте свои первые деньги!", JobData.Id,
+                                firstMarker.X, firstMarker.Y, firstMarker.Z); break;
+
+                        case Data.Enums.JobType.BusDriver:
+                            Vector3 firstBusMarker = null;
+                            if (JobData.Id == 7) firstBusMarker = jobBus1Marker1;
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_busdriver_menu", 1,
+                                "Водитель автобуса", "Перевозите пассажиров за деньги!", JobData.Id,
+                                firstBusMarker.X, firstBusMarker.Y, firstBusMarker.Z); break;
+                    }                                      
                 }
             };
             colShape.onEntityExitColShape += (shape, entity) =>
@@ -94,36 +142,169 @@ namespace TheGodfatherGM.Server.Jobs
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 0, 
-                        "Работа грузчиком", "Заработайте свои первые деньги!", JobData.Id, 0.0, 0.0, 0.0);
+                    switch (JobData.Type)
+                    {
+                        case Data.Enums.JobType.Loader:
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_loader_menu", 0,
+                                "Работа грузчиком", "Заработайте свои первые деньги!", JobData.Id, 0.0, 0.0, 0.0); break;
+                        case Data.Enums.JobType.BusDriver:
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "work_busdriver_menu", 0,
+                                "Водитель автобуса", "Перевозите пассажиров за деньги!", JobData.Id, 0.0, 0.0, 0.0); break;
+                    }                    
                 }
             };
         }
         public void CreateMarkersColShape()
         {  
+            if (JobData.Id == 7)
+            {
+                jobBus1Colshape1 = API.shared.createCylinderColShape(jobBus1Marker1, 3f, 3f);
+                jobBus1Colshape2 = API.shared.createCylinderColShape(jobBus1Marker2, 3f, 3f);
+                jobBus1Colshape3 = API.shared.createCylinderColShape(jobBus1Marker3, 3f, 3f);
+                jobBus1Colshape4 = API.shared.createCylinderColShape(jobBus1Marker4, 3f, 3f);
+                jobBus1ColshapeFin = API.shared.createCylinderColShape(jobBus1MarkerFin, 3f, 3f);
+
+                jobBus1Colshape1.onEntityEnterColShape += (shape, entity) =>
+                {
+                    var playersOcupation = API.getVehicleOccupants(entity);
+                    Client player = API.getPlayerFromHandle(entity);
+                    foreach (var playerInCar in playersOcupation)
+                        if (playerInCar.vehicleSeat == -1) player = playerInCar;
+                 
+                    CharacterController characterController = player.getData("CHARACTER");
+                    if (characterController == null) return;
+
+                    if (characterController.Character.JobId == 7)
+                    { 
+                        if (player.hasData("FIRSTBUS_1") && player.isInVehicle)
+                        {
+                            API.triggerClientEvent(player, "bus_end");
+                            API.triggerClientEvent(player, "bus_marker", jobBus1Marker2.X, jobBus1Marker2.Y, jobBus1Marker2.Z);
+                            player.resetData("FIRSTBUS_1");
+                            player.setData("SECONDBUS_1", null);
+                            API.triggerClientEvent(player, "markonmap", jobBus1Marker2.X, jobBus1Marker2.Y);
+                            API.sendNotificationToPlayer(player, "Первая остановка: Больница. Двигайтесь дальше.");
+                        }
+                    }
+                };
+                jobBus1Colshape2.onEntityEnterColShape += (shape, entity) =>
+                {
+                    var playersOcupation = API.getVehicleOccupants(entity);
+                    Client player = API.getPlayerFromHandle(entity);
+                    foreach (var playerInCar in playersOcupation)
+                        if (playerInCar.vehicleSeat == -1) player = playerInCar;
+
+                    CharacterController characterController = player.getData("CHARACTER");
+                    if (characterController == null) return;
+
+                    if (characterController.Character.JobId == 7)
+                    {
+                        if (player.hasData("SECONDBUS_1") && player.isInVehicle)
+                        {
+                            API.triggerClientEvent(player, "bus_end");
+                            API.triggerClientEvent(player, "bus_marker", jobBus1Marker3.X, jobBus1Marker3.Y, jobBus1Marker3.Z);
+                            player.resetData("SECONDBUS_1");
+                            player.setData("THIRDBUS_1", null);
+                            API.triggerClientEvent(player, "markonmap", jobBus1Marker3.X, jobBus1Marker3.Y);
+                            API.sendNotificationToPlayer(player, "Вторая остановка: Мэрия. Двигайтесь дальше.");
+                        }
+                    }
+                };
+                jobBus1Colshape3.onEntityEnterColShape += (shape, entity) =>
+                {
+                    var playersOcupation = API.getVehicleOccupants(entity);
+                    Client player = API.getPlayerFromHandle(entity);
+                    foreach (var playerInCar in playersOcupation)
+                        if (playerInCar.vehicleSeat == -1) player = playerInCar;
+
+                    CharacterController characterController = player.getData("CHARACTER");
+                    if (characterController == null) return;
+
+                    if (characterController.Character.JobId == 7)
+                    {
+                        if (player.hasData("THIRDBUS_1") && player.isInVehicle)
+                        {
+                            API.triggerClientEvent(player, "bus_end");
+                            API.triggerClientEvent(player, "bus_marker", jobBus1Marker4.X, jobBus1Marker4.Y, jobBus1Marker4.Z);
+                            player.resetData("THIRDBUS_1");
+                            player.setData("FOURTHBUS_1", null);
+                            API.triggerClientEvent(player, "markonmap", jobBus1Marker4.X, jobBus1Marker4.Y);
+                            API.sendNotificationToPlayer(player, "Третья остановка: Работа грузчиком. Двигайтесь дальше.");
+                        }
+                    }
+                };
+                jobBus1Colshape4.onEntityEnterColShape += (shape, entity) =>
+                {
+                    var playersOcupation = API.getVehicleOccupants(entity);
+                    Client player = API.getPlayerFromHandle(entity);
+                    foreach (var playerInCar in playersOcupation)
+                        if (playerInCar.vehicleSeat == -1) player = playerInCar;
+
+                    CharacterController characterController = player.getData("CHARACTER");
+                    if (characterController == null) return;
+
+                    if (characterController.Character.JobId == 7)
+                    {
+                        if (player.hasData("FOURTHBUS_1") && player.isInVehicle)
+                        {
+                            API.triggerClientEvent(player, "bus_end");
+                            API.triggerClientEvent(player, "bus_marker", jobBus1Marker4.X, jobBus1Marker4.Y, jobBus1Marker4.Z);
+                            player.resetData("FOURTHBUS_1");
+                            player.setData("FIFTHBUS_1", null);
+                            API.triggerClientEvent(player, "markonmap", jobBus1Marker4.X, jobBus1Marker4.Y);
+                            API.sendNotificationToPlayer(player, "Конечная остановка: Аэропорт. Двигайтесь обратно на автовокзал.");
+                        }
+                    }
+                };
+                jobBus1ColshapeFin.onEntityEnterColShape += (shape, entity) =>
+                {
+                    var playersOcupation = API.getVehicleOccupants(entity);
+                    Client player = API.getPlayerFromHandle(entity);
+                    foreach (var playerInCar in playersOcupation)
+                        if (playerInCar.vehicleSeat == -1) player = playerInCar;
+
+                    CharacterController characterController = player.getData("CHARACTER");
+                    if (characterController == null) return;
+
+                    if (characterController.Character.JobId == 7)
+                    {
+                        if (player.hasData("FIFTHBUS_1") && player.isInVehicle)
+                        {
+                            characterController.Character.Cash += WorkPay.BusDriver1Pay;
+                            ContextFactory.Instance.SaveChanges();
+                            API.triggerClientEvent(player, "update_money_display", characterController.Character.Cash);
+
+                            API.triggerClientEvent(player, "bus_end");
+                            API.triggerClientEvent(player, "bus_marker", jobBus1MarkerFin.X, jobBus1MarkerFin.Y, jobBus1MarkerFin.Z);
+                            player.resetData("FIFTHBUS_1");
+                            API.triggerClientEvent(player, "markonmap", jobBus1MarkerFin.X, jobBus1MarkerFin.Y);
+                            API.sendNotificationToPlayer(player, "Маршрут окончен: выберите новый на автовокзале. ~g~Ваш заработок: " + WorkPay.BusDriver1Pay + "$");
+                        }
+                    }
+                };
+            }
             if (JobData.Id == 1)
             {
                 job1_1MarCol = API.shared.createCylinderColShape(job1Marker1, 2f, 3f);
-                job1_2MarCol = API.shared.createCylinderColShape(job1Marker2, 2f, 3f);
-                
+                job1_2MarCol = API.shared.createCylinderColShape(job1Marker2, 2f, 3f);                
 
                 job1_1MarCol.onEntityEnterColShape += (shape, entity) =>
                 {                    
                     CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
                     if (characterController == null) return;
+
                     if (characterController.Character.JobId == 1)
                     {
-                        if (API.getPlayerFromHandle(entity).hasData("SECOND_OK"))
+                        Client player = API.getPlayerFromHandle(entity);
+
+                        if (player.hasData("SECOND_OK"))
                         {
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_two", 
-                                job1Marker2.X, job1Marker2.Y, job1Marker2.Z);
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 44, 0);
-                            API.getPlayerFromHandle(entity).resetData("SECOND_OK");
-                            API.getPlayerFromHandle(entity).setData("FIRST_OK", null);
-                            Client player;
-                            if ((player = API.getPlayerFromHandle(entity)) == null) return;
-                            API.shared.triggerClientEvent(player, "markonmap", job1Marker2.X, job1Marker2.Y);
+                            API.triggerClientEvent(player, "loader_end");
+                            API.triggerClientEvent(player, "loader_two", job1Marker2.X, job1Marker2.Y, job1Marker2.Z);
+                            API.setPlayerClothes(player, 5, 44, 0);
+                            player.resetData("SECOND_OK");
+                            player.setData("FIRST_OK", null);
+                            API.triggerClientEvent(player, "markonmap", job1Marker2.X, job1Marker2.Y);
                         }
                     }
                 };
@@ -131,22 +312,24 @@ namespace TheGodfatherGM.Server.Jobs
                 {
                     CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
                     if (characterController == null) return;
+
                     if (characterController.Character.JobId == 1)
                     {
-                        if (API.getPlayerFromHandle(entity).hasData("FIRST_OK"))
+                        Client player = API.getPlayerFromHandle(entity);
+
+                        if (player.hasData("FIRST_OK"))
                         {
-                            API.shared.sendChatMessageToPlayer(API.getPlayerFromHandle(entity), "Вы заработали 5$");
-                            characterController.Character.Cash += 5;
+                            characterController.Character.Cash += WorkPay.Loader1Pay;
                             ContextFactory.Instance.SaveChanges();
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "update_money_display", characterController.Character.Cash);
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_one", job1Marker1.X, job1Marker1.Y, job1Marker1.Z);
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 42, 0);
-                            API.getPlayerFromHandle(entity).resetData("FIRST_OK");
-                            API.getPlayerFromHandle(entity).setData("SECOND_OK", null);
-                            Client player;
-                            if ((player = API.getPlayerFromHandle(entity)) == null) return;
-                            API.shared.triggerClientEvent(player, "markonmap", job1Marker1.X, job1Marker1.Y);
+                            API.sendNotificationToPlayer(player, "Вы заработали: " + WorkPay.Loader1Pay + "$");
+                            API.triggerClientEvent(player, "update_money_display", characterController.Character.Cash);
+
+                            API.triggerClientEvent(player, "loader_end");
+                            API.triggerClientEvent(player, "loader_one", job1Marker1.X, job1Marker1.Y, job1Marker1.Z);
+                            API.setPlayerClothes(player, 5, 42, 0);
+                            player.resetData("FIRST_OK");
+                            player.setData("SECOND_OK", null);
+                            API.triggerClientEvent(player, "markonmap", job1Marker1.X, job1Marker1.Y);
                         }
                     }                        
                 };
@@ -157,27 +340,26 @@ namespace TheGodfatherGM.Server.Jobs
                 job2_2MarCol = API.shared.createCylinderColShape(job2Marker2, 2f, 3f);
 
                 job2_1MarCol.onEntityEnterColShape += (shape, entity) =>
-                {
-                    var box = API.createObject(371570974, API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation);
-
+                {                    
                     CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
                     if (characterController == null) return;
+
                     if (characterController.Character.JobId == 2)
                     {
-                        if (API.getPlayerFromHandle(entity).hasData("SECOND_OK"))
-                        {
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_two",
+                        Client player = API.getPlayerFromHandle(entity);
+
+                        if (player.hasData("SECOND_OK"))
+                        {                            
+                            API.triggerClientEvent(player, "loader_end");
+                            API.triggerClientEvent(player, "loader_two",
                                 job2Marker2.X, job2Marker2.Y, job2Marker2.Z);
 
                             //API.attachEntityToEntity(box, API.getPlayerFromHandle(entity), "IK_Head", API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation);
 
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 44, 0);
-                            API.getPlayerFromHandle(entity).resetData("SECOND_OK");
-                            API.getPlayerFromHandle(entity).setData("FIRST_OK", null);
-                            Client player;
-                            if ((player = API.getPlayerFromHandle(entity)) == null) return;
-                            API.shared.triggerClientEvent(player, "markonmap", job2Marker2.X, job2Marker2.Y);
+                            API.setPlayerClothes(player, 5, 44, 0);
+                            player.resetData("SECOND_OK");
+                            player.setData("FIRST_OK", null);
+                            API.triggerClientEvent(player, "markonmap", job2Marker2.X, job2Marker2.Y);
                         }
                     }
                 };
@@ -185,50 +367,31 @@ namespace TheGodfatherGM.Server.Jobs
                 {
                     CharacterController characterController = API.getPlayerFromHandle(entity).getData("CHARACTER");
                     if (characterController == null) return;
+
                     if (characterController.Character.JobId == 2)
                     {
-                        if (API.getPlayerFromHandle(entity).hasData("FIRST_OK"))
-                        {
-                            API.shared.sendChatMessageToPlayer(API.getPlayerFromHandle(entity), "Вы заработали 5$");
-                            characterController.Character.Cash += 5;
+                        Client player = API.getPlayerFromHandle(entity);
+
+                        if (player.hasData("FIRST_OK"))
+                        {                            
+                            characterController.Character.Cash += WorkPay.Loader2Pay;
                             ContextFactory.Instance.SaveChanges();
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "update_money_display", characterController.Character.Cash);
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_end");
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "loader_one", 
+                            API.sendNotificationToPlayer(player, "Вы заработали: " + WorkPay.Loader2Pay + "$");
+                            API.triggerClientEvent(player, "update_money_display", characterController.Character.Cash);
+
+                            API.triggerClientEvent(player, "loader_end");
+                            API.triggerClientEvent(player, "loader_one", 
                                 job2Marker1.X, job2Marker1.Y, job2Marker1.Z);
-                            API.shared.setPlayerClothes(API.getPlayerFromHandle(entity), 5, 42, 0);
-
-                            //var box = API.createObject(0, API.getPlayerFromHandle(entity).position, API.getPlayerFromHandle(entity).rotation); ;
-
-                            API.getPlayerFromHandle(entity).resetData("FIRST_OK");
-                            API.getPlayerFromHandle(entity).setData("SECOND_OK", null);
-                            Client player;
-                            if ((player = API.getPlayerFromHandle(entity)) == null) return;
-                            API.shared.triggerClientEvent(player, "markonmap", job2Marker1.X, job2Marker1.Y);
+                            API.setPlayerClothes(player, 5, 42, 0);
+                            player.resetData("FIRST_OK");
+                            player.setData("SECOND_OK", null);
+                            API.triggerClientEvent(player, "markonmap", job2Marker1.X, job2Marker1.Y);
                         }
                     }
                 };
             }
         }
-
-        // Работа грузчиком
-        public static void JobWorkLoader(Client player, int jobId, int trigger)
-        {
-            CharacterController characterController = player.getData("CHARACTER");
-            if (characterController == null) return;           
-
-            if (trigger == 1)
-            {
-                currentJobId = characterController.Character.JobId;
-                characterController.Character.JobId = jobId;
-            }
-            if (trigger == 0)
-            {
-                characterController.Character.JobId = currentJobId;
-            }
-            ContextFactory.Instance.SaveChanges();
-        }
-
+        
         // Работа таксистом
         public void UseTaxis(Client player)
         {
@@ -245,7 +408,6 @@ namespace TheGodfatherGM.Server.Jobs
             }
         }
         static int i = 0;
-
         public void Accepted(Client driver, double d)
         {
             foreach (var driver2 in API.getAllPlayers())
@@ -273,7 +435,6 @@ namespace TheGodfatherGM.Server.Jobs
             }
         }
         
-
         public string Type()
         {
             return JobData.Type.GetDisplayName();

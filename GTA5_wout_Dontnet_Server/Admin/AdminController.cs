@@ -9,6 +9,7 @@ namespace TheGodfatherGM.Server.Admin
         public static bool AdminRankCheck(string cmd, Character character, Client player)
         {
             if (cmd == "makeadmin" && character.Admin > 4) return true;
+            else if (cmd == "createvehicle" && character.Admin > 4) return true;
             else if (cmd == "creategroup" && character.Admin > 4) return true;
             else if (cmd == "editgroup" && character.Admin > 4) return true;
             else if (cmd == "createproperty" && character.Admin > 4) return true;
