@@ -1,18 +1,15 @@
-﻿using GTANetworkServer;
-using GTANetworkShared;
-using System;
-using System.Collections.Generic;
-using TheGodfatherGM.Server.Property;
-using TheGodfatherGM.Server.Jobs;
+﻿using System;
 using System.Linq;
-using TheGodfatherGM.Server.Vehicles;
-using TheGodfatherGM.Server.Groups;
+using GTANetworkServer;
+using GTANetworkShared;
 using TheGodfatherGM.Data;
+using System.Collections.Generic;
+using TheGodfatherGM.Server.Jobs;
+using TheGodfatherGM.Server.Groups;
+using TheGodfatherGM.Server.Property;
+using TheGodfatherGM.Server.Vehicles;
 using TheGodfatherGM.Server.Characters;
 using System.ComponentModel.DataAnnotations;
-using TheGodfatherGM.Data.Models;
-using TheGodfatherGM.Data.Attributes;
-using TheGodfatherGM.Server.DBManager;
 
 namespace TheGodfatherGM.Server
 {

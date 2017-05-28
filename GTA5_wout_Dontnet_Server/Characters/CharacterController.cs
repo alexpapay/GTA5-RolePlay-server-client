@@ -161,17 +161,8 @@ namespace TheGodfatherGM.Server.Characters
             player.freeze(false);
             player.transparency = 255;
             API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
+            API.shared.triggerClientEvent(player, "update_bank_money_display", character.Bank);
             API.shared.triggerClientEvent(player, "CEF_DESTROY");
-        }
-
-        // TODO: А нужна ли вообще эта функция нам?
-        public void LoadProperties(Client player)
-        {
-            if (Character.Property == null) return;
-            foreach (Data.Property property in Character.Property)
-            {
-                API.shared.triggerClientEvent(player, "create_blip", new Vector3(property.ExtPosX, property.ExtPosY, property.ExtPosZ), 0, 0);
-            }
         }
 
         public GroupMember GetGroupInfo(int GroupId)
@@ -521,7 +512,7 @@ namespace TheGodfatherGM.Server.Characters
 
             API.shared.setEntitySyncedData(ent, "GTAO_FACE_FEATURES_LIST", list);
         }
-        public static void RemovePedFace(NetHandle ent)
+        private void RemovePedFace(NetHandle ent)
         {
             API.shared.setEntitySyncedData(ent, "GTAO_HAS_CHARACTER_DATA", false);
 
@@ -546,7 +537,7 @@ namespace TheGodfatherGM.Server.Characters
             API.shared.resetEntitySyncedData(ent, "GTAO_LIPSTICK_COLOR2");
             API.shared.resetEntitySyncedData(ent, "GTAO_FACE_FEATURES_LIST");
         }
-        public static bool IsPlayerFaceValid(NetHandle ent)
+        private bool IsPlayerFaceValid(NetHandle ent)
         {
             if (!API.shared.hasEntitySyncedData(ent, "GTAO_SHAPE_FIRST_ID")) return false;
             if (!API.shared.hasEntitySyncedData(ent, "GTAO_SHAPE_SECOND_ID")) return false;

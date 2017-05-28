@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Threading.Tasks;
 using TheGodfatherGM.Data;
 using TheGodfatherGM.Server.DBManager;
-using TheGodfatherGM.Server.Vehicles;
 using TheGodfatherGM.Server.Groups;
 using TheGodfatherGM.Data.Enums;
 using TheGodfatherGM.Data.Models;
@@ -22,11 +21,13 @@ namespace TheGodfatherGM.Server
             API.onResourceStop += OnResourceStop;
             API.onUpdate += OnUpdateHandler;
             API.onPlayerWeaponSwitch += OnPlayerWeaponSwitchHandler;
+
+            // TODO: do different method later
+            API.createObject(552807189, new Vector3(-1397.168, 5815.977, 20.0), new Vector3(0.0f, 0.0f, 0.0f));
         }
 
         private DateTime m_lastTick = DateTime.Now;
         private DateTime MinuteAnnounce;
-        private DateTime OneSecond;
         private DateTime HourAnnounce;
 
         public void OnUpdateHandler()
@@ -55,14 +56,17 @@ namespace TheGodfatherGM.Server
                         if (character.PlayMinutes % 60 == 0)
                         {
                             var isTaxiVehicle = ContextFactory.Instance.Vehicle.FirstOrDefault(x => x.CharacterId == character.Id);
-                            if (character.JobId == 777 && isTaxiVehicle != null) character.Cash += 300; // TaxiDrivers
-                            if (character.JobId == 888) character.Cash += 100; // Unemployers
-                            character.Cash += PayDayMoney.GetPayDaYMoney(character.ActiveGroupID);
+                            var money = 0;
+                            if (character.JobId == JobsIdNonDataBase.TaxiDriver && isTaxiVehicle != null) money += WorkPay.TaxiDriver; // TaxiDrivers
+                            //if (character.JobId == JobsIdNonDataBase.BusDriver1) money += WorkPay.BusDriver1Pay; // BusDrivers
+                            if (character.JobId == JobsIdNonDataBase.Unemployer) money += WorkPay.Unemployer; // Unemployers
+                            money += PayDayMoney.GetPayDaYMoney(character.ActiveGroupID);
+                            character.Cash += money;
 
                             try
                             {
                                 Client currentPlayer = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
-                                API.shared.sendChatMessageToPlayer(currentPlayer, "~g~[СЕРВЕР]: ~w~ Вы получили свою зарплату: " + PayDayMoney.GetPayDaYMoney(character.ActiveGroupID) + "$.");
+                                API.shared.sendChatMessageToPlayer(currentPlayer, "~g~[СЕРВЕР]: ~w~ Вы получили деньги: " + money + "$.");
                                 API.shared.triggerClientEvent(currentPlayer, "update_money_display", character.Cash);
                             }
                             catch (Exception e) { }
@@ -71,13 +75,7 @@ namespace TheGodfatherGM.Server
                     ContextFactory.Instance.SaveChanges();
                 }
                 catch (Exception e) { }
-                // Прокат транспорта (каждую минуту вычитается 1 ед. Fuel):
-                try
-                {
-                    VehicleController.RentVehicle(RentModels.ScooterModel);
-                    VehicleController.RentVehicle(RentModels.TaxiModel);
-                }
-                catch (Exception e) { }
+
                 // Капт сектора
                 try
                 {
@@ -115,6 +113,13 @@ namespace TheGodfatherGM.Server
                 }
                 catch (Exception e) { }
 
+                // Тестовая зона (ежеминутный тик)
+                try
+                {
+                    
+                }
+                catch (Exception e) { }
+
                 MinuteAnnounce = DateTime.Now;
             }
 
@@ -130,24 +135,53 @@ namespace TheGodfatherGM.Server
                         var numOfSectors = GroupController.GetCountOfGangsSectors();
                         var money = numOfSectors[numInc] * 50;
                         currentGang.MoneyBank += money;
-                        numInc++;
+                        ContextFactory.Instance.SaveChanges();
+                        numInc++;                        
                     }
                 }
                 catch (Exception e) { }
 
-                HourAnnounce = DateTime.Now;                
-            }
-            
-            if (DateTime.Now.Subtract(OneSecond).TotalSeconds >= 1)
-            {
-                //Client player = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
-                //API.shared.triggerClientEvent(player, "send_coord", player.position.X, player.position.Y);
+                // Начисление зарплаты в за каждый бизнес. Пока 10К за любую заправку.
+                try
+                {                    
+                    var characters = ContextFactory.Instance.Character.Where(x => x.Online == true).ToList();
+                    var test2 = characters.Count();
+                    ContextFactory.Instance.SaveChanges();
 
-                //OneSecond = DateTime.Now;
-            }
+                    foreach (var character in characters)
+                    {
+                        var jobs = ContextFactory.Instance.Job.Where(y => y.CharacterId == character.Id).ToList();
+
+                        foreach (var job in jobs)
+                        {
+                            character.Cash += job.Cost;
+                            ContextFactory.Instance.SaveChanges();
+
+                            try
+                            {
+                                Client currentPlayer = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == character.SocialClub);
+                                API.shared.sendChatMessageToPlayer(currentPlayer, "~g~[СЕРВЕР]: ~w~ Вы получили за " + job.Id + " бизнес: " + job.Cost + "$.");
+                                API.shared.triggerClientEvent(currentPlayer, "update_money_display", character.Cash);
+                            }
+                            catch (Exception e) { }
+                        }                        
+                    }
+                    /*foreach (var character in characters)
+                    
+                                character.Cash += WorkPay.AllGusStationOwner;
+                                
+                                
+                            }
+                        }
+                    }*/
+                }
+                catch (Exception e) {}
+
+                HourAnnounce = DateTime.Now;                
+            }  
 
             // List of players
-            if ((DateTime.Now - m_lastTick).TotalMilliseconds >= 1000)
+            if ((DateTime.Now - m_lastTick).TotalMilliseconds >= 500)
             {
                 m_lastTick = DateTime.Now;
 
@@ -191,7 +225,6 @@ namespace TheGodfatherGM.Server
                 if (weapon == WeaponHash.Minigun) player.kick("This weapon are restricted!");
             }
         }
-
         private void OnResourceStart()
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo("en-GB");
@@ -199,7 +232,6 @@ namespace TheGodfatherGM.Server
             API.consoleOutput(Global.GlobalVars.ServerName + " was started at " + DateTime.Now);
             Console.ResetColor();            
         }
-
         private void OnResourceStop()
         {
             var characters = ContextFactory.Instance.Character.Where(x => x.Online == true);

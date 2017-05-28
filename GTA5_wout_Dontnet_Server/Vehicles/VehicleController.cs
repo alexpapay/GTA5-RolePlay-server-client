@@ -1,10 +1,12 @@
-﻿using GTANetworkServer;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using GTANetworkServer;
 using GTANetworkShared;
+using TheGodfatherGM.Data;
+using TheGodfatherGM.Data.Models;
+using System.Collections.Generic;
 using TheGodfatherGM.Server.DBManager;
 using TheGodfatherGM.Server.Characters;
-using TheGodfatherGM.Data;
 
 namespace TheGodfatherGM.Server.Vehicles
 {
@@ -14,11 +16,21 @@ namespace TheGodfatherGM.Server.Vehicles
         public GTANetworkServer.Vehicle Vehicle;
         public Groups.GroupController Group;
 
+        private DateTime OneSecond;
+        private DateTime OneMinute;
+        private DateTime HourAnnounce;
+        private double vehRPM;
+        private double currentFuel;
+
         public VehicleController()
         {
+            API.onUpdate += VehicleFuelEvent;
+            API.onUpdate += RentVehicleEvent;
+            API.onUpdate += RespawnStaticVehicle;
             API.onVehicleDeath += OnVehicleExplode;
-            API.onPlayerEnterVehicle += OnPlayerEnterVehicle;
             API.onPlayerExitVehicle += OnPlayerExitVehicle;
+            API.onPlayerEnterVehicle += OnPlayerEnterVehicle;
+            API.onClientEventTrigger += OnClientEventTrigger;            
         }
 
         public VehicleController(Data.Vehicle VehicleData, GTANetworkServer.Vehicle vehicle)
@@ -26,7 +38,16 @@ namespace TheGodfatherGM.Server.Vehicles
             this.VehicleData = VehicleData;
             Vehicle = vehicle;
             API.setVehicleEngineStatus(vehicle, false); // Engine is always off.
-            API.setVehicleDoorState(vehicle, 0, false); // Driver door is always closed.
+
+            if (VehicleData.JobId == JobsIdNonDataBase.BusDriver || VehicleData.Type == 1)
+            {
+                API.setVehicleLocked(vehicle, false);       // Driver door is opened for Buses.
+            }
+            else
+            {                
+                API.setVehicleDoorState(vehicle, 0, false); // Driver door is always closed.
+                API.setVehicleLocked(vehicle, true);        // Driver door is always locked.
+            }
             EntityManager.Add(this);
         }
 
@@ -56,20 +77,24 @@ namespace TheGodfatherGM.Server.Vehicles
             VehicleController vehicleController = EntityManager.GetVehicle(vehicle);
             if (vehicleController != null)
             {
+                currentFuel = vehicleController.VehicleData.Fuel;
                 var CharacterGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == characterController.Character.ActiveGroupID);
                 Group VehicleGroup = null;
                 if (vehicleController.VehicleData.GroupId != null)
                     VehicleGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == vehicleController.VehicleData.GroupId);
 
-                if (vehicleController.VehicleData.Model == Data.Models.RentModels.ScooterModel ||
-                    vehicleController.VehicleData.Model == Data.Models.RentModels.TaxiModel)
+                if (vehicleController.VehicleData.Model == RentModels.ScooterModel ||
+                    vehicleController.VehicleData.Model == RentModels.TaxiModel)
                     API.sendNotificationToPlayer(player, "Вы сели в прокатный транспорт");
 
                 else if(vehicleController.VehicleData.Character == characterController.Character)
                     API.sendNotificationToPlayer(player, "Вы сели в свой транспорт");
 
-                else if (VehicleGroup.Type == CharacterGroup.Type)
-                    API.sendNotificationToPlayer(player, "Вы сели в транспорт вашей организации");
+                else if (VehicleGroup != null)
+                {
+                    if (VehicleGroup.Type == CharacterGroup.Type)
+                        API.sendNotificationToPlayer(player, "Вы сели в транспорт вашей организации");
+                }                       
 
                 else if (vehicleController.VehicleData.JobId == characterController.Character.JobId)
                     API.sendNotificationToPlayer(player, "Вы сели в транспорт вашей рабочей профессии");
@@ -110,8 +135,7 @@ namespace TheGodfatherGM.Server.Vehicles
                 if (vehicle.Group != null) // -1 is reserved for non-group job vehicles.
                 {
                     VehicleController.Group = EntityManager.GetGroup(vehicle.Group.Id);
-                }
-                API.shared.setVehicleLocked(VehicleController.Vehicle, true);
+                }                
             }
             API.shared.consoleOutput("[GM] Загружено транспорта: " + ContextFactory.Instance.Vehicle.Count() +" ед.");
         }
@@ -144,38 +168,7 @@ namespace TheGodfatherGM.Server.Vehicles
             if (vehicle.isDoorOpen(DoorID)) vehicle.closeDoor(DoorID);
             else vehicle.openDoor(DoorID);
         }
-
-        [Command("vstorage")]
-        public static void VehicleStorage(Client player)
-        {
-            CharacterController characterController = player.getData("CHARACTER");
-            if (characterController == null) return;
-
-            if (characterController.Character.Vehicle == null)
-            {
-                API.shared.sendChatMessageToPlayer(player, "You have no vehicles.");
-                return;
-            }
-            else if (characterController.Character.Vehicle.Count == 0)
-            {
-                API.shared.sendChatMessageToPlayer(player, "You have no vehicles.");
-            }
-            else
-            {
-                List<string> VehicleNames = new List<string>();
-                List<int> VehicleIDs = new List<int>();
-                foreach (var VehicleData in characterController.Character.Vehicle)
-                {
-                    VehicleController _VehicleController = EntityManager.GetVehicle(VehicleData);
-                    string isSpawned = (_VehicleController == null ? " (stored)" : " (spawned)");
-                    VehicleNames.Add(API.shared.getVehicleDisplayName((VehicleHash)VehicleData.Model) + isSpawned);
-                    VehicleIDs.Add(VehicleData.Id);
-                }
-
-                player.setData("VSTORAGE", VehicleIDs);
-                API.shared.triggerClientEvent(player, "create_menu", 1, null, "Vehicles", false, VehicleNames.ToArray());
-            }
-        }
+        
         public void UnloadVehicle(Character character)
         {
             //API.sendNotificationToPlayer(account.Client, "You stored your " + API.getVehicleDisplayName((VehicleHash)Vehicle.model));
@@ -183,14 +176,14 @@ namespace TheGodfatherGM.Server.Vehicles
             Vehicle.delete();
         }
 
-        public static void RentVehicle(int vehicleModel)
+        private void RentVehicle(int vehicleModel)
         {            
             foreach (var vehicle in ContextFactory.Instance.Vehicle.Where(x => x.Model == vehicleModel).ToList())
             {
                 if (vehicle.RentTime != 0)
                 {                   
-                    if (vehicle.Model == Data.Models.RentModels.TaxiModel || 
-                        vehicle.Model == Data.Models.RentModels.ScooterModel)
+                    if (vehicle.Model == RentModels.TaxiModel || 
+                        vehicle.Model == RentModels.ScooterModel)
                     {
                         if (vehicle.Character != null)
                         {
@@ -206,8 +199,8 @@ namespace TheGodfatherGM.Server.Vehicles
                                         
                     if (player == null || player.isInVehicle == false)
                     {
-                        if (vehicle.Model == Data.Models.RentModels.ScooterModel) ContextFactory.Instance.Vehicle.Remove(vehicle);
-                        if (vehicle.Model == Data.Models.RentModels.TaxiModel) RespawnWorkVehicle(vehicle, Data.Models.RentModels.TaxiModel, 126, 126);
+                        if (vehicle.Model == RentModels.ScooterModel) ContextFactory.Instance.Vehicle.Remove(vehicle);
+                        if (vehicle.Model == RentModels.TaxiModel) RespawnWorkVehicle(vehicle, RentModels.TaxiModel, 126, 126);
                         ContextFactory.Instance.SaveChanges();
                     }
                     if (player.isInVehicle)
@@ -216,12 +209,12 @@ namespace TheGodfatherGM.Server.Vehicles
                         string banner = "";
                         string text = "";
 
-                        if (vehicle.Model == Data.Models.RentModels.ScooterModel)
+                        if (vehicle.Model == RentModels.ScooterModel)
                         {
                             banner = "Время проката мопеда вышло";
                             text = "Продлите ваш мопед на полчаса всего за 30$";
                         }  // Scooter
-                        if (vehicle.Model == Data.Models.RentModels.TaxiModel)
+                        if (vehicle.Model == RentModels.TaxiModel)
                         {
                             banner = "Время проката такси вышло";
                             text = "Продлите ваше такси на час всего за 100$";
@@ -234,6 +227,7 @@ namespace TheGodfatherGM.Server.Vehicles
                 }
             }
         }
+
         public static void RespawnWorkVehicle (Data.Vehicle vehicle, int vehicleModel, int vehicleCol1, int vehicleCol2)
         {
             var vehiclePosX = vehicle.PosX;
@@ -249,13 +243,61 @@ namespace TheGodfatherGM.Server.Vehicles
                 new Vector3(vehiclePosX, vehiclePosY, vehiclePosZ), 
                 new Vector3(0.0f, 0.0f, vehicleRotZ), vehicleCol1, vehicleCol2));
 
-            if (vehicle.Model == Data.Models.RentModels.TaxiModel)
+            if (vehicle.Model == RentModels.TaxiModel)
             {
                 vehicle.Character = null;
                 vehicle.RentTime = 0;
             }
             ContextFactory.Instance.SaveChanges();
         }
+        private void RespawnStaticJobVehicle(int jobId)
+        {
+            var allStaticVehicles = ContextFactory.Instance.Vehicle.Where(x => x.JobId == jobId);
+            if (allStaticVehicles == null) return;
+
+            foreach (var vehicle in allStaticVehicles)
+            {
+                var vehicleController = EntityManager.GetVehicle(vehicle);
+                Vector3 vehiclePostition = new Vector3(vehicle.PosX, vehicle.PosY, vehicle.PosZ);
+
+                if (vehicleController.Vehicle.occupants.Length == 0 && 
+                    vehicleController.Vehicle.position != vehiclePostition)
+                {
+                    vehicleController.Vehicle.delete();
+
+                    vehicle.Fuel = FuelByType.GetFuel(vehicle.Model);
+                    VehicleController newVehicle = new VehicleController(vehicle,
+                            API.shared.createVehicle((VehicleHash)vehicle.Model,
+                            new Vector3(vehicle.PosX, vehicle.PosY, vehicle.PosZ),
+                            new Vector3(0.0f, 0.0f, vehicle.Rot), vehicle.Color1, vehicle.Color2));
+                }
+            }
+            ContextFactory.Instance.SaveChanges();
+        }
+        private void RespawnStaticGroupVehicle(int groupId)
+        {
+            var allStaticVehicles = ContextFactory.Instance.Vehicle.Where(x => x.GroupId == groupId);
+            if (allStaticVehicles == null) return;
+
+            foreach (var vehicle in allStaticVehicles)
+            {
+                var vehicleController = EntityManager.GetVehicle(vehicle);
+                Vector3 vehiclePostition = new Vector3(vehicle.PosX, vehicle.PosY, vehicle.PosZ);
+
+                if (vehicleController.Vehicle.occupants.Length == 0 &&
+                    vehicleController.Vehicle.position != vehiclePostition)
+                {
+                    vehicleController.Vehicle.delete();
+
+                    vehicle.Fuel = FuelByType.GetFuel(vehicle.Model);
+                    VehicleController newVehicle = new VehicleController(vehicle,
+                            API.shared.createVehicle((VehicleHash)vehicle.Model,
+                            new Vector3(vehicle.PosX, vehicle.PosY, vehicle.PosZ),
+                            new Vector3(0.0f, 0.0f, vehicle.Rot), vehicle.Color1, vehicle.Color2));
+                }
+            }
+            ContextFactory.Instance.SaveChanges();
+        }        
 
         public void ParkVehicle(Client player)
         {
@@ -268,15 +310,14 @@ namespace TheGodfatherGM.Server.Vehicles
             var VehicleGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == VehicleData.GroupId);
 
             // Rent vehicles (scooter, taxi)
-            if (vehicleController.VehicleData.Model == Data.Models.RentModels.ScooterModel ||
-                vehicleController.VehicleData.Model == Data.Models.RentModels.TaxiModel)      // Taxi
+            if (vehicleController.VehicleData.Model == Data.Models.RentModels.ScooterModel /*||
+                /*vehicleController.VehicleData.Model == Data.Models.RentModels.TaxiModel*/)      // Taxi
             {
                 API.sendNotificationToPlayer(player, "~r~Вы не можете парковать данный транспорт!");
                 return;
             }                
 
-            if (VehicleGroup.Type == CharacterGroup.Type ||
-                vehicleController.VehicleData.CharacterId == characterController.Character.Id)
+            if (vehicleController.VehicleData.CharacterId == characterController.Character.Id)
             {
                 if (player.velocity != new Vector3(0.0f, 0.0f, 0.0f))
                 {
@@ -325,8 +366,19 @@ namespace TheGodfatherGM.Server.Vehicles
                    case 3: return true;
                    case 4: return true;
                 }           
+            // Check for busDrivers:
+            if (VehicleData.JobId == 888)
+            {
+                switch (characterController.Character.JobId)
+                {
+                    case JobsIdNonDataBase.BusDriver1: return true;
+                    case JobsIdNonDataBase.BusDriver2: return true;
+                    case JobsIdNonDataBase.BusDriver3: return true;
+                    case JobsIdNonDataBase.BusDriver4: return true;
+                }                
+            }
 
-            if (VehicleData.Model == Data.Models.RentModels.ScooterModel) return true;
+            if (VehicleData.Model == RentModels.ScooterModel) return true;
 
             if (VehicleData.Character != null && 
                 VehicleData.Character == characterController.Character) return true;
@@ -338,6 +390,96 @@ namespace TheGodfatherGM.Server.Vehicles
                 VehicleGroup.Type == CharacterGroup.Type) return true;
             
             return false;
+        }
+
+        private void VehicleFuelEvent()
+        {
+            if (DateTime.Now.Subtract(OneSecond).TotalMilliseconds >= 500)
+            {
+                try
+                {
+                    var allVehicles = API.getAllVehicles();
+                    foreach (var vehicle in allVehicles)
+                    {
+                        if (API.getVehicleEngineStatus(vehicle) == true)
+                        {
+                            var vehicleController = EntityManager.GetVehicle(vehicle);
+                            
+                            if (vehicleController != null)
+                            {
+                                currentFuel = vehicleController.VehicleData.Fuel;
+                                vehicleController.VehicleData.Fuel -= vehRPM * FuelByType.GetConsumption(vehicleController.VehicleData.Model);
+
+                                if (currentFuel - vehicleController.VehicleData.Fuel > 0.2)
+                                {
+                                    currentFuel = vehicleController.VehicleData.Fuel;
+                                    ContextFactory.Instance.SaveChanges();
+                                }
+                                if (currentFuel < 0)
+                                {
+                                    currentFuel = 0.0;
+                                    vehicleController.VehicleData.Fuel = 0.0;
+                                    ContextFactory.Instance.SaveChanges();
+                                    vehicleController.Vehicle.engineStatus = false;
+                                    return;
+                                }                                
+                            }                                
+                        }
+                    }
+                }
+                catch (Exception e) { }
+
+                OneSecond = DateTime.Now;
+            }            
+        }
+        private void RentVehicleEvent()
+        {
+            if (DateTime.Now.Subtract(OneMinute).TotalMinutes >= 1)
+            {
+                // Прокат транспорта (каждую минуту вычитается 1 ед. RentTime):
+                try
+                {
+                    RentVehicle(RentModels.ScooterModel);
+                    RentVehicle(RentModels.TaxiModel);
+                }
+                catch (Exception e) { }
+
+                OneMinute = DateTime.Now;
+            }
+            
+        }
+        private void RespawnStaticVehicle()
+        {
+            if (DateTime.Now.Subtract(HourAnnounce).TotalMinutes >= 60)
+            {
+                try
+                {
+                    RespawnStaticJobVehicle(JobsIdNonDataBase.BusDriver);
+
+                    
+                    foreach (var group in GroupsConst.GroupsIndexes)
+                    {
+                        RespawnStaticGroupVehicle(group);
+                    }
+                    API.shared.sendChatMessageToAll("~g~[СЕРВЕР]: ~s~Ежечаcный респавн статичного транспорта.");
+                }
+                catch (Exception e) { }
+
+                HourAnnounce = DateTime.Now;
+            }
+        }
+        private void OnClientEventTrigger(Client player, string eventName, object[] args)
+        {
+            /*
+            CharacterController characterController = player.getData("CHARACTER");
+            if (characterController == null) return;
+            Character character = characterController.Character;
+            var FormatName = character.Name.Replace("_", " ");
+            */
+            if (eventName == "ask_fuel_in_car")
+                if (player.isInVehicle) API.triggerClientEvent(player, "update_fuel_display", currentFuel);
+
+            if (eventName == "fuel_consumption") vehRPM = Convert.ToDouble(args[0]); 
         }
     }
 }

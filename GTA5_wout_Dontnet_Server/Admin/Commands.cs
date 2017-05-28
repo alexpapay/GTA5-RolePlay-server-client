@@ -144,8 +144,10 @@ namespace TheGodfatherGM.Server.Admin
                 else if (id == 74) API.setEntityPosition(player, new Vector3(-163.145, -940.611, 29.3)); // 1st work
                 else if (id == 75) API.setEntityPosition(player, new Vector3(853.3, -2927.611, 6.1)); // 2nd work
                 else if (id == 76) API.setEntityPosition(player, new Vector3(-1869.72, 2998.29, 32.8105)); // Army 2
-                else if (id == 77) API.setEntityPosition(player, new Vector3(-831.386, -2350.93, 14.5706)); // Army 2
-
+                else if (id == 77) API.setEntityPosition(player, new Vector3(-831.386, -2350.93, 14.5706)); // BusStation
+                else if (id == 78) API.setEntityPosition(player, new Vector3(-765.6371, -2058.967, 9.5706)); // Taxi station
+                else if (id == 79) API.setEntityPosition(player, new Vector3(-49.0201, -1757.64, 29.421)); // Ballas GasStation
+                else if (id == 80) API.setEntityPosition(player, new Vector3(840.3792, -2118.969, 28.85884)); // Army 1
             }
         }
 

@@ -3,6 +3,7 @@ using GTANetworkShared;
 
 using TheGodfatherGM.Data;
 using TheGodfatherGM.Data.Enums;
+using TheGodfatherGM.Data.Models;
 using TheGodfatherGM.Server.Groups;
 using TheGodfatherGM.Server.Vehicles;
 using TheGodfatherGM.Server.DBManager;
@@ -15,6 +16,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
+using TheGodfatherGM.Server.Jobs;
 
 namespace TheGodfatherGM.Server.Menu
 {
@@ -145,6 +147,10 @@ namespace TheGodfatherGM.Server.Menu
         private void onClientEventTrigger(Client player, string eventName, object[] args)
         {
             VehicleController vehicleController = EntityManager.GetVehicle(player.vehicle);
+
+            double currentFuel = 0.0;
+            if (vehicleController != null) currentFuel = vehicleController.VehicleData.Fuel;
+
             CharacterController characterController = player.getData("CHARACTER");
             if (characterController == null) return;
             Character character = characterController.Character;            
@@ -295,7 +301,7 @@ namespace TheGodfatherGM.Server.Menu
                 VehicleController VehicleController = null;
 
                 if (player.isInVehicle) VehicleController = EntityManager.GetVehicle(player.vehicle);
-                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
+                else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.5f);
 
                 if (VehicleController == null)
                 {
@@ -325,7 +331,7 @@ namespace TheGodfatherGM.Server.Menu
                 if (player.isInVehicle) VehicleController = EntityManager.GetVehicle(player.vehicle);
                 else VehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
 
-                if (character.DriverLicense == 0 && vehicleController.VehicleData.Model != Data.Models.RentModels.ScooterModel)
+                if (character.DriverLicense == 0 && vehicleController.VehicleData.Model != RentModels.ScooterModel)
                 {
                     API.sendNotificationToPlayer(player, "У вас нет прав на управление данным транспортом.");
                     return;
@@ -338,7 +344,7 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 else
                 {
-                    if (vehicleController.VehicleData.Fuel != 0)
+                    if (vehicleController.VehicleData.Fuel > 0)
                     {
                         vehicleController.Vehicle.engineStatus = true;
                         ChatController.sendProxMessage(player, 15.0f, "~#C2A2DA~", FormatName + " вставил ключ в зажигание и запустил мотор.");
@@ -400,30 +406,31 @@ namespace TheGodfatherGM.Server.Menu
             {
                 // Delete 30$ from cash
                 if (character == null) return;
-                if (character.Cash - Data.Models.Prices.ScooterRentPrice < 0)
+                if (character.Cash - Prices.ScooterRentPrice < 0)
                 {
                     API.shared.sendNotificationToPlayer(player, "У вас недостаточно средств для аренды!");
                     return;
                 }
                 else
                 {
-                    character.Cash -= Data.Models.Prices.ScooterRentPrice;
+                    character.Cash -= Prices.ScooterRentPrice;
                     API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
                     
                     Data.Vehicle VehicleData = new Data.Vehicle();
                     VehicleData.Character = character;
+                    VehicleData.Type = 1;
                     VehicleController VehicleController = new VehicleController(VehicleData, API.createVehicle(VehicleHash.Faggio, player.position, player.rotation, 0, 0, 0));
 
-                    VehicleData.Model = Data.Models.RentModels.ScooterModel;
+                    VehicleData.Model = RentModels.ScooterModel;
                     VehicleData.PosX = player.position.X;
                     VehicleData.PosY = player.position.Y;
                     VehicleData.PosZ = player.position.Z;
                     VehicleData.Rot = player.rotation.Z;
                     VehicleData.Color1 = 0;
                     VehicleData.Color2 = 0;
-                    VehicleData.RentTime = Data.Models.Time.ScooterRentTime;
+                    VehicleData.RentTime = Time.ScooterRentTime;
                     VehicleData.Fuel = 10;
-                    VehicleData.Type = 1;
+                    VehicleData.Respawnable = true;
                     VehicleData.GroupId = character.ActiveGroupID;
 
                     ContextFactory.Instance.Vehicle.Add(VehicleData);
@@ -444,16 +451,16 @@ namespace TheGodfatherGM.Server.Menu
                 if (callback == 1)
                 {
                     // Checking money for prolongate
-                    if (vehicleModel == Data.Models.RentModels.ScooterModel)
+                    if (vehicleModel ==RentModels.ScooterModel)
                     {
-                        if (character.Cash - Data.Models.Prices.ScooterRentPrice < 0)
+                        if (character.Cash - Prices.ScooterRentPrice < 0)
                         {
                             API.shared.sendNotificationToPlayer(player, "У вас недостаточно средств для продления аренды!");                            
                         }
                     }   // Scooter
-                    if (vehicleModel == Data.Models.RentModels.TaxiModel)
+                    if (vehicleModel == RentModels.TaxiModel)
                     {
-                        if (character.Cash - Data.Models.Prices.TaxiRentPrice < 0)
+                        if (character.Cash - Prices.TaxiRentPrice < 0)
                         {
                                 API.shared.sendNotificationToPlayer(player, "У вас недостаточно средств для продления аренды!");                      
                         }
@@ -461,28 +468,28 @@ namespace TheGodfatherGM.Server.Menu
                     else
                     {
                         // Adding additional time for using and take money
-                        if (vehicleModel == Data.Models.RentModels.ScooterModel)
+                        if (vehicleModel == RentModels.ScooterModel)
                         {
-                            vehicle.RentTime = Data.Models.Time.ScooterRentTime;
-                            character.Cash -= Data.Models.Prices.ScooterRentPrice;
+                            vehicle.RentTime = Time.ScooterRentTime;
+                            character.Cash -= Prices.ScooterRentPrice;
                         }   // Scooter
-                        if (vehicleModel == Data.Models.RentModels.TaxiModel)
+                        if (vehicleModel == RentModels.TaxiModel)
                         {
-                            vehicle.RentTime = Data.Models.Time.TaxiRentTime;
-                            character.Cash -= Data.Models.Prices.TaxiRentPrice;
+                            vehicle.RentTime = Time.TaxiRentTime;
+                            character.Cash -= Prices.TaxiRentPrice;
                         }    // Taxi 
                         ContextFactory.Instance.SaveChanges();
                     }                    
                 }
                 if (callback == 0)
                 {
-                    if (vehicleModel == Data.Models.RentModels.ScooterModel)
+                    if (vehicleModel == RentModels.ScooterModel)
                     {
                         VehicleController _VehicleController = EntityManager.GetVehicle(vehicle);
                         _VehicleController.UnloadVehicle(character);
                         ContextFactory.Instance.Vehicle.Remove(vehicle);
                     }  // Scooter deleting
-                    if (vehicleModel == Data.Models.RentModels.TaxiModel) VehicleController.RespawnWorkVehicle(vehicle, vehicleModel, 126, 126);
+                    if (vehicleModel == RentModels.TaxiModel) VehicleController.RespawnWorkVehicle(vehicle, vehicleModel, 126, 126);
 
                     ContextFactory.Instance.SaveChanges();
                 }
@@ -491,7 +498,7 @@ namespace TheGodfatherGM.Server.Menu
             // WORK MENU
             if (eventName == "work_unemployers")
             {
-                character.JobId = 888;
+                character.JobId = JobsIdNonDataBase.Unemployer;
                 ContextFactory.Instance.SaveChanges();
             }
             if (eventName == "work_loader")
@@ -527,39 +534,144 @@ namespace TheGodfatherGM.Server.Menu
             {
                 if (character == null) return;
                 int callback = (int)args[0];
-                int jobId = (int)args[1];
-                var firstPosX = (float)args[2];
-                var firstPosY = (float)args[3];
-                var firstPosZ = (float)args[4];
 
-                if (callback == 1)
+                // BusOne trace
+                switch (callback)
                 {
-                    if (character.Level < 2)
-                    {
-                        API.sendNotificationToPlayer(player, "Вы не можете работать на этой работе. Она доступна со 2 уровня");
-                        return;
-                    }
-                    if (!player.hasData("FIRSTBUS_1"))
-                    {
-                        character.JobId = jobId;
-                        ContextFactory.Instance.SaveChanges();
-                        API.shared.triggerClientEvent(player, "bus_marker", firstPosX, firstPosY, firstPosZ);
-                        API.shared.triggerClientEvent(player, "markonmap", firstPosX, firstPosY);
-                        player.setData("FIRSTBUS_1", null);
-                        ClothesManager.SetPlayerSkinClothes(player, 1, characterController.Character, 1);
-                    }
-                    else API.sendNotificationToPlayer(player, "Вы уже выбрали свой маршрут! Садитесь в автобус.");
+                    case 1: JobController.BusDriverStart(player, character, "BUSONE_1", callback, (float)args[1], (float)args[2], (float)args[3]); break;
+                    case 2: JobController.BusDriverStart(player, character, "BUSTWO_1", callback, (float)args[1], (float)args[2], (float)args[3]); break;
+                    case 3: JobController.BusDriverStart(player, character, "BUSTHREE_1", callback, (float)args[1], (float)args[2], (float)args[3]); break;
+                    case 4: JobController.BusDriverStart(player, character, "BUSFOUR_1", callback, (float)args[1], (float)args[2], (float)args[3]); break;
                 }
 
+                // BusDriver finish work
                 if (callback == 0)
                 {
-                    character.JobId = 0;
+                    character.JobId = JobsIdNonDataBase.Unemployer;
                     ContextFactory.Instance.SaveChanges();
                     API.shared.triggerClientEvent(player, "bus_end");
                     ClothesManager.SetPlayerSkinClothes(player, 0, characterController.Character, 1);
-                    player.resetData("FIRSTBUS_1"); player.resetData("SECONDBUS_1");
-                    player.resetData("THIRDBUS_1"); player.resetData("FOURTHBUS_1");
-                    player.resetData("FIFTHBUS_1");
+                    for (var i = 1; i < 6; i++) player.resetData(string.Format("BUSONE_" + i));
+                    for (var i = 1; i < 6; i++) player.resetData(string.Format("BUSTWO_" + i));
+                    for (var i = 1; i < 6; i++) player.resetData(string.Format("BUSTHREE_" + i));
+                    for (var i = 1; i < 6; i++) player.resetData(string.Format("BUSFOUR_" + i));
+                }
+            }
+            if (eventName == "work_gasstation")
+            {
+                var trigger = args[0];
+                var jobId = (int)args[1];
+
+                var currentJob = ContextFactory.Instance.Job.First(x => x.Id == jobId);
+
+                switch (trigger)
+                {
+                    // Buy GasStation:
+                    case 0:
+                        var cost = (int)args[2];
+                        if (character.Cash - cost < 0)
+                        {
+                            API.sendNotificationToPlayer(player, "~r~У вас недостаточно средств для покупки!");
+                            break;
+                        }
+                        else
+                        {
+                            currentJob.OwnerName = character.Name;
+
+                            var listBlips = API.getAllBlips();
+                            foreach (var blip in listBlips)
+                            {
+                                var blipPos = API.getBlipPosition(blip);
+                                if (blipPos.X == currentJob.PosX && blipPos.Y == currentJob.PosY && blipPos.Z == currentJob.PosZ)
+                                    API.setBlipColor(blip, 2);
+                            }
+                            var labels = API.getAllLabels();
+                            foreach (var label in labels)
+                            {
+                                var labelText = API.getTextLabelText(label);
+                                if (labelText.ToString().Contains("~w~Бизнес: заправка\n(свободен): " + currentJob.Id))
+                                    API.setTextLabelText(label, "~w~Бизнес: заправка\nВладелец: " + currentJob.OwnerName);
+                            }
+                            currentJob.CharacterId = character.Id;
+                            
+                            character.Cash -= cost;
+                            ContextFactory.Instance.SaveChanges();
+                            API.sendNotificationToPlayer(player, "Вы купили заправку за " + cost + "$");
+                            API.triggerClientEvent(player, "update_money_display", character.Cash);
+                            break;
+                        }                        
+                    
+                    // 24/7 menu:
+                    case 1:
+                        var command = (string)args[2];
+
+                        switch (command)
+                        {
+                            case "canister": break;
+                            case "phone": break;
+                            case "food": break;
+                            case "getmoney":
+                                character.Cash += (int)args[3];
+                                currentJob.Money = 0;
+                                ContextFactory.Instance.SaveChanges();
+                                API.sendNotificationToPlayer(player, "Вы сняли с кассы ~g~" + (int)args[3] + "$");
+                                API.triggerClientEvent(player, "update_money_display", character.Cash); break;
+                            case "sell":
+                                if (currentJob.CharacterId == character.Id)
+                                {
+                                    var listBlips = API.getAllBlips();
+                                    foreach (var blip in listBlips)
+                                    {
+                                        var blipPos = API.getBlipPosition(blip);
+                                        if (blipPos.X == currentJob.PosX && blipPos.Y == currentJob.PosY && blipPos.Z == currentJob.PosZ)
+                                            API.setBlipColor(blip, 1);
+                                    }
+                                    var labels = API.getAllLabels();
+                                    foreach (var label in labels)
+                                    {
+                                        var labelText = API.getTextLabelText(label);
+                                        if (labelText.ToString().Contains("~w~Бизнес: заправка\nВладелец: " + currentJob.OwnerName))
+                                            API.setTextLabelText(label, "~w~Бизнес: заправка\n(свободен): " + currentJob.Id);
+                                    }
+                                    character.Cash += currentJob.Cost;
+                                    currentJob.CharacterId = 0;
+                                    currentJob.OwnerName = "";
+                                    ContextFactory.Instance.SaveChanges();
+                                    API.sendNotificationToPlayer(player, "Вы продали заправку за ~g~" + currentJob.Cost + "$");
+                                    API.triggerClientEvent(player, "update_money_display", character.Cash); break;
+                                }
+                                else
+                                {
+                                    API.sendNotificationToPlayer(player, "~r~Вы не можете продать данную заправку!");
+                                }
+                                break;
+                        }
+                        break;
+                }
+            }
+            if (eventName == "get_petrolium")
+            {
+                var jobId = (int)args[0];
+                var fuel = (int)args[1];
+                var currentJob = ContextFactory.Instance.Job.First(x => x.Id == jobId);
+
+                if (character.Cash - fuel < 0)
+                {
+                    API.sendNotificationToPlayer(player, "~r~У вас недостаточно средств для заправки!");
+                    return;
+                }
+                else
+                {
+                    VehicleController currentVehicleController = null;
+                    if (player.isInVehicle) currentVehicleController = EntityManager.GetVehicle(player.vehicle);
+
+                    currentVehicleController.VehicleData.Fuel += fuel;
+                    character.Cash -= fuel;
+                    currentJob.Money += fuel;
+                    
+                    ContextFactory.Instance.SaveChanges();
+                    API.sendNotificationToPlayer(player, "Вы купили " + fuel + " литров бензина");
+                    API.triggerClientEvent(player, "update_money_display", character.Cash);
                 }
             }
             if (eventName == "work_taxi")
@@ -568,7 +680,7 @@ namespace TheGodfatherGM.Server.Menu
 
                 if (callback == 1) // Начало работы 
                 {
-                    var playerVehicles = ContextFactory.Instance.Vehicle.Where(x => x.JobId == Data.Models.JobsIdNonDataBase.TaxiDriver);
+                    var playerVehicles = ContextFactory.Instance.Vehicle.Where(x => x.JobId == JobsIdNonDataBase.TaxiDriver);
 
                     bool isPlayerInTaxi = false;
 
@@ -579,13 +691,13 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (isPlayerInTaxi == true)
                     {
-                        if (character.Cash - Data.Models.Prices.TaxiRentPrice < 0)
+                        if (character.Cash - Prices.TaxiRentPrice < 0)
                         {
-                            API.sendNotificationToPlayer(player, "~r~Вы не можете работать таксистом!\nУ вас нет " + Data.Models.Prices.TaxiRentPrice + "$ на аренду авто!");
+                            API.sendNotificationToPlayer(player, "~r~Вы не можете работать таксистом!\nУ вас нет " + Prices.TaxiRentPrice + "$ на аренду авто!");
                         }
                         else
                         {
-                            var taxiVehicles = ContextFactory.Instance.Vehicle.Where(x => x.JobId == Data.Models.JobsIdNonDataBase.TaxiDriver);
+                            var taxiVehicles = ContextFactory.Instance.Vehicle.Where(x => x.JobId == JobsIdNonDataBase.TaxiDriver);
                             bool hasPlayerTaxi = false;
 
                             foreach (var taxi in taxiVehicles)
@@ -596,8 +708,8 @@ namespace TheGodfatherGM.Server.Menu
                             else
                             {
                                 vehicleController.VehicleData.Character = characterController.Character;
-                                vehicleController.VehicleData.RentTime += Data.Models.Time.TaxiRentTime;
-                                character.Cash -= Data.Models.Prices.TaxiRentPrice;
+                                vehicleController.VehicleData.RentTime += Time.TaxiRentTime;
+                                character.Cash -= Prices.TaxiRentPrice;
                                 character.TempVar = character.JobId;
                                 ContextFactory.Instance.SaveChanges();
 
@@ -628,7 +740,7 @@ namespace TheGodfatherGM.Server.Menu
                 }
                 if (callback == 4)
                 {
-                    if (character.Cash - Data.Models.Prices.TaxiRentPrice < 0)
+                    if (character.Cash - Prices.TaxiRentPrice < 0)
                     {
                         if (character.DriverLicense == 0)
                         {
@@ -639,16 +751,16 @@ namespace TheGodfatherGM.Server.Menu
                     }
                     else
                     {
-                        if (character.JobId != 777 && character.Level >= 2)
+                        if (character.JobId != JobsIdNonDataBase.TaxiDriver && character.Level >= 2)
                         {
                             API.sendChatMessageToPlayer(player, "~g~Поздравляем! Вы устроились на работу таксистом!\nПроследуйте в ближайщий таксопарк для аренды такси.");
-                            character.JobId = 777;
+                            character.JobId = JobsIdNonDataBase.TaxiDriver;
                             ContextFactory.Instance.SaveChanges();
                             API.shared.triggerClientEvent(player, "markonmap", -1024, -2728);
                         }
-                        else if (character.JobId == 777 && character.Level == 2)
+                        else if (character.JobId == JobsIdNonDataBase.TaxiDriver && character.Level >= 2)
                             API.sendChatMessageToPlayer(player, "~r~Вы уже работаете таксистом.");
-                        else /*(character.JobId != 777 && character.Level < 2)*/ API.sendChatMessageToPlayer(player, "~r~Вы не можете работать таксистом!");
+                        else API.sendChatMessageToPlayer(player, "~r~Вы не можете работать таксистом!");
                     }
                 }
                 if (callback == 0) // Уволиться с работы
@@ -660,7 +772,7 @@ namespace TheGodfatherGM.Server.Menu
                     else
                     {
                         API.sendChatMessageToPlayer(player, "~r~Вы уволились с работы таксиста.\n~s~Для получения пособия пройдите в мэрию");
-                        character.JobId = 0; //character.TempVar;
+                        character.JobId = 0;
                         character.TempVar = 0;
 
                         var playerTaxiVehicle = ContextFactory.Instance.Vehicle.FirstOrDefault(x => x.CharacterId.ToString() == character.Id.ToString());
@@ -668,7 +780,7 @@ namespace TheGodfatherGM.Server.Menu
                         playerTaxiVehicle.RentTime = 0;
                         ContextFactory.Instance.SaveChanges();
 
-                        VehicleController.RespawnWorkVehicle(playerTaxiVehicle, Data.Models.RentModels.TaxiModel, 126, 126);
+                        VehicleController.RespawnWorkVehicle(playerTaxiVehicle, RentModels.TaxiModel, 126, 126);
                         
                     }                    
                 }
@@ -1117,49 +1229,21 @@ namespace TheGodfatherGM.Server.Menu
             }
 
             // ARMY MENU
-            if (eventName == "army_two_menu")
+            if (eventName == "armys_menu")
             {
                 if (character == null) return;
                 int trigger = (int)args[0];
-                string propertyName = (string)args[1];
-                string propertyDestName = (string)args[2];
 
-                var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyName);
-                if (propertyData == null) return;
-
-                // Change clothes for officers
-                if (trigger == 4)
-                {
-                    var type = 0;
-
-                    if (propertyDestName == "Cloth_up" &&
-                        character.ActiveGroupID >= 2103 &&
-                        character.ActiveGroupID <= 2114) type = 3;
-                    if (propertyDestName == "Cloth_up" &&
-                        character.ActiveGroupID == 2115) type = 4;
-
-                    if (propertyDestName == "Cloth_up" &&
-                        character.ActiveGroupID >= 2003 &&
-                        character.ActiveGroupID <= 2014) type = 3;
-                    if (propertyDestName == "Cloth_up" &&
-                        character.ActiveGroupID == 2015) type = 4;
-
-                    if (propertyDestName == "Cloth_down") type = 101;
-                    
-                    if (CharacterController.IsCharacterArmyInAllOfficers(character))
-                    {
-                        ClothesManager.SetPlayerSkinClothes(player, type, characterController.Character, 1);
-                        characterController.Character.ActiveClothes = type;
-                    }                     
-                }
-
-                var propertyDestData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyDestName);
-                if (propertyDestData == null) return;
-
-                // Load in Army 2 Stock
+                // ARMY 2, loading in his stock
                 if (trigger == 1)
                 {
+                    var propertyName = (string)args[1];
+                    var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyName);
+                    if (propertyData == null) return;
                     VehicleController vehicleControllerLoad = null;
+                    var propertyDestName = (string)args[2];
+                    var propertyDestData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyDestName);
+                    if (propertyDestData == null) return;
 
                     if (player.isInVehicle)
                         vehicleControllerLoad = EntityManager.GetVehicle(player.vehicle);
@@ -1172,17 +1256,21 @@ namespace TheGodfatherGM.Server.Menu
                         {
                             propertyData.Stock -= 20000;
                             vehicleControllerLoad.VehicleData.Material += 20000;
-                            API.sendChatMessageToPlayer(player, "~g~Вы загрузили " + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов в машину.");
+                            API.sendNotificationToPlayer(player, "~g~Вы загрузили " + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов в машину.");
                             API.triggerClientEvent(player, "markonmap", propertyDestData.ExtPosX, propertyDestData.ExtPosY);
                         }
-                        else API.sendChatMessageToPlayer(player, "~r~Ваша машина заполнена!");
+                        else API.sendNotificationToPlayer(player, "~r~Ваша машина заполнена!");
                     }
-                    else API.sendChatMessageToPlayer(player, "~r~На вашем складе недостаточно материалов!");
+                    else API.sendNotificationToPlayer(player, "~r~На вашем складе недостаточно материалов!");
                     ContextFactory.Instance.SaveChanges();
-                }                
+                }
+
                 // Unload to Police/FBI/ARMY 1/ARMY 2
                 if (trigger == 2)
                 {
+                    var propertyName = (string)args[1];
+                    var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyName);
+                    if (propertyData == null) return;
                     VehicleController vehicleControllerLoad = null;
 
                     if (player.isInVehicle)
@@ -1192,33 +1280,65 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (vehicleControllerLoad.VehicleData.Material != 0)
                     {
-                        propertyData.Stock += vehicleControllerLoad.VehicleData.Material;
-
-                        API.sendChatMessageToPlayer(player, "~g~Вы разгрузили " + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов с машины.\nНа склад: " + propertyData.Name);
-                        vehicleControllerLoad.VehicleData.Material = 0;
+                        if (propertyData.Stock + vehicleControllerLoad.VehicleData.Material > Stocks.GetStockCapacity(propertyName))
+                        {
+                            var difStocks = Stocks.GetStockCapacity(propertyName) - propertyData.Stock;
+                            propertyData.Stock += difStocks;
+                            API.sendNotificationToPlayer(player, "~g~Вы разгрузили " + difStocks.ToString() + " материалов. На склад: " + propertyData.Name);                       
+                        }
+                        else
+                        {
+                            propertyData.Stock += vehicleControllerLoad.VehicleData.Material;
+                            API.sendNotificationToPlayer(player, "~g~Вы разгрузили " + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов. На склад: " + propertyData.Name);
+                        }
+                        vehicleControllerLoad.VehicleData.Material = 0; 
                     }
-                    else API.sendChatMessageToPlayer(player, "~r~В вашей машине нет материалов!");
+                    else API.sendNotificationToPlayer(player, "~r~В вашей машине нет материалов!");
                     ContextFactory.Instance.SaveChanges();
                 }
-                // Load in Army 1 Source
+
+                // ARMY 1, loading from carrier:
                 if (trigger == 3)
                 {
                     VehicleController vehicleControllerLoad = null;
+                    var propertyDestData = ContextFactory.Instance.Property.First(x => x.Name == "Army2_stock");
 
                     if (player.isInVehicle)
                         vehicleControllerLoad = EntityManager.GetVehicle(player.vehicle);
                     else API.sendNotificationToPlayer(player, "Вы не в транспорте!");
                     if (vehicleControllerLoad == null) return;
 
-                    if (vehicleController.VehicleData.Material == 0)
+                    if (vehicleController.VehicleData.Material < 100000)
                     {
-                        vehicleControllerLoad.VehicleData.Material += 100000;
-                        API.sendChatMessageToPlayer(player, "~g~Вы загрузили " + vehicleControllerLoad.VehicleData.Material.ToString() + " материалов в машину.");
+                        var factMaterial = 100000 - vehicleControllerLoad.VehicleData.Material;
+                        API.sendNotificationToPlayer(player, "~g~Вы загрузили " + factMaterial.ToString() + " материалов в машину.");
+                        vehicleControllerLoad.VehicleData.Material = 100000;
                         API.triggerClientEvent(player, "markonmap", propertyDestData.ExtPosX, propertyDestData.ExtPosY);
                     }
-                    else API.sendChatMessageToPlayer(player, "~r~Ваша машина заполнена!");                    
+                    else API.sendNotificationToPlayer(player, "~r~Ваша машина заполнена!");                    
                     ContextFactory.Instance.SaveChanges();
-                }                
+                }
+
+                // Change clothes for officers
+                if (trigger == 4)
+                {
+                    var clothDo = (string)args[2];
+
+                    var type = 0;
+
+                    if (clothDo == "Cloth_up" && 
+                        CharacterController.IsCharacterArmyInAllOfficers(character)) type = 3;
+                    if (clothDo == "Cloth_up" && 
+                        CharacterController.IsCharacterArmyGeneral(character)) type = 4;
+                    if (clothDo == "Cloth_down") type = 101;
+
+                    if (CharacterController.IsCharacterArmyInAllOfficers(character) || 
+                        CharacterController.IsCharacterArmyGeneral(character))
+                    {
+                        ClothesManager.SetPlayerSkinClothes(player, type, characterController.Character, 1);
+                        characterController.Character.ActiveClothes = type;
+                    }
+                }
             }
             if (eventName == "army_add_to_group")
             {
@@ -1236,7 +1356,7 @@ namespace TheGodfatherGM.Server.Menu
                         var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
                         if (targetCharacter == null)
                         {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                             return;
                         }
 
@@ -1244,7 +1364,7 @@ namespace TheGodfatherGM.Server.Menu
                         if (target == null) return;
                         if (player.position.DistanceTo(target.position) < 3.0F)
                         {
-                            API.sendChatMessageToPlayer(player, "~y~[ПРЕДУПРЕЖДЕНИЕ]: ~w~Вы находитесь далеко от пользователя!");
+                            API.sendNotificationToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
                             return;
                         }
 
@@ -1278,7 +1398,7 @@ namespace TheGodfatherGM.Server.Menu
                         var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
                         if (targetCharacter == null)
                         {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                             return;
                         }
 
@@ -1326,7 +1446,7 @@ namespace TheGodfatherGM.Server.Menu
                         var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == userID);
                         if (targetCharacter == null)
                         {
-                            API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                            API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                             return;
                         }
 
@@ -1384,7 +1504,7 @@ namespace TheGodfatherGM.Server.Menu
                     }
                     catch (Exception e)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
                 }
@@ -1403,7 +1523,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1411,7 +1531,7 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (player.position.DistanceTo(target.position) > 3.0F)
                     {
-                        API.sendChatMessageToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
+                        API.sendNotificationToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
                         return;
                     }
 
@@ -1431,7 +1551,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1439,7 +1559,7 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (player.position.DistanceTo(target.position) > 3.0F)
                     {
-                        API.sendChatMessageToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
+                        API.sendNotificationToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
                         return;
                     }
 
@@ -1465,7 +1585,7 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (selectedSectorData == sellerGangType * 10 || selectedSectorData != sellerGangType)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы не можете продать данный сектор!");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы не можете продать данный сектор!");
                         return;
                     }
 
@@ -1473,7 +1593,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.ActiveGroupID == targetGangBoss);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный номер банды!");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный номер банды!");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1500,7 +1620,7 @@ namespace TheGodfatherGM.Server.Menu
                         .First(x => x.Name == gangStockName);
                     if (gangStockProperty.Stock - material < 0)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~В банке банды недостаточно материалов для продажи!");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~В банке банды недостаточно материалов!");
                         return;
                     }                                      
 
@@ -1508,7 +1628,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.ActiveGroupID == targetMafiaBoss);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный номер мафии!");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный номер мафии!");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1529,7 +1649,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1606,7 +1726,7 @@ namespace TheGodfatherGM.Server.Menu
 
                     if (player.position.DistanceTo(target.position) > 3.0F)
                     {
-                        API.sendChatMessageToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
+                        API.sendNotificationToPlayer(player, "~y~[ПРЕД]: ~w~Вы находитесь далеко от пользователя!");
                         return;
                     }
 
@@ -1625,7 +1745,7 @@ namespace TheGodfatherGM.Server.Menu
                     var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.OID == targetUserId);
                     if (targetCharacter == null)
                     {
-                        API.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
+                        API.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~Вы ввели неверный пользовательский ID.");
                         return;
                     }
                     Client target = API.shared.getAllPlayers().FirstOrDefault(x => x.socialClubName == targetCharacter.SocialClub);
@@ -1664,76 +1784,86 @@ namespace TheGodfatherGM.Server.Menu
 
                 var weaponData = ContextFactory.Instance.Weapon.FirstOrDefault(x => x.CharacterId == character.Id);
                 var propertyData = ContextFactory.Instance.Property.FirstOrDefault(x => x.Name == propertyName);
+                // GANG weapons:
+                bool inGang = false;
+                if (CharacterController.IsCharacterInGang(character) && character.Material - cost >= 0) inGang = true;
+                else
+                {
+                    API.sendNotificationToPlayer(player, "~r~Вы не можете это сделать!Недостаточно материалов!");
+                    return;
+                }
+                // ARMY weapons:
                 if (propertyData.Stock - cost < 0)
                 {
-                    API.sendChatMessageToPlayer(player, "~r~Вы не можете получить данное оружие!\nНедостаточно материалов!");
+                    API.sendNotificationToPlayer(player, "~r~Вы не можете это сделать!Недостаточно материалов!");
+                    return;
                 }
                 else
                 {
                     switch (callback)
                     {
                         case 1:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.Revolver, 50, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.Revolver, weaponTint);
                             weaponData.Revolver = 1; weaponData.RevolverPt = 50; break;
                         case 2:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.CarbineRifle, 250, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.CarbineRifle, weaponTint);
                             weaponData.CarbineRifle = 1; weaponData.CarbineRiflePt = 250; break;
                         case 3:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.SniperRifle, 50, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.SniperRifle, weaponTint);
                             weaponData.SniperRifle = 1; weaponData.SniperRiflePt = 50; break;
                         case 4:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.SmokeGrenade, 10, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.SmokeGrenade, weaponTint);
                             weaponData.SmokeGrenade = 1; weaponData.SmokeGrenadePt = 10; break;
                         case 5:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.FlareGun, 50, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.FlareGun, weaponTint);
                             weaponData.FlareGun = 1; weaponData.FlareGunPt = 50; break;
                         case 6:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.CompactRifle, 250, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.CompactRifle, weaponTint);
                             weaponData.CompactRifle = 1; weaponData.CompactRiflePt = 250; break;
                         case 7:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.PumpShotgun, 100, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.PumpShotgun, weaponTint);
                             weaponData.PumpShotgun = 1; weaponData.PumpShotgunPt = 100; break;
                         case 8:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.BZGas, 100, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.BZGas, weaponTint);
                             weaponData.BZGas = 1; weaponData.BZGasPt = 100; break;
                         case 9:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.Nightstick, 1, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.Nightstick, weaponTint);
                             weaponData.Nightstick = 1; break;
                         case 10:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.StunGun, 120, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.StunGun, weaponTint);
                             weaponData.StunGun = 1; weaponData.StunGunPt = 120; break;
                         case 11:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.HeavyPistol, 100, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.HeavyPistol, weaponTint);
                             weaponData.HeavyPistol = 1; weaponData.HeavyPistolPt = 100; break;
                         case 12:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.BullpupRifle, 200, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.BullpupRifle, weaponTint);
                             weaponData.BullpupRifle = 1; weaponData.BullpupRiflePt = 200; break;
                         case 13:
-                            propertyData.Stock -= cost;
+                            if (inGang) character.Material -= cost; else propertyData.Stock -= cost;
                             API.givePlayerWeapon(player, WeaponHash.HeavyShotgun, 100, true, true);
                             API.setPlayerWeaponTint(player, WeaponHash.HeavyShotgun, weaponTint);
                             weaponData.HeavyShotgun = 1; weaponData.HeavyShotgunPt = 100; break;
@@ -2004,9 +2134,9 @@ namespace TheGodfatherGM.Server.Menu
             if (eventName == "buy_driver_license")
             {
                 if (character == null) return;
-                if (character.Cash - Data.Models.Prices.DriverLicensePrice < 0)
+                if (character.Cash - Prices.DriverLicensePrice < 0)
                 {
-                    API.shared.sendNotificationToPlayer(player, "У вас нет " + Data.Models.Prices.DriverLicensePrice + "$ для покупки прав!");
+                    API.shared.sendNotificationToPlayer(player, "У вас нет " + Prices.DriverLicensePrice + "$ для покупки прав!");
                     return;
                 }
                 else
@@ -2015,7 +2145,7 @@ namespace TheGodfatherGM.Server.Menu
                         API.shared.sendNotificationToPlayer(player, "У вас уже есть права!");
                     else
                     {
-                        character.Cash -= Data.Models.Prices.DriverLicensePrice;
+                        character.Cash -= Prices.DriverLicensePrice;
                         character.DriverLicense = 1;
                         API.shared.triggerClientEvent(player, "update_money_display", character.Cash);
                         ContextFactory.Instance.SaveChanges();

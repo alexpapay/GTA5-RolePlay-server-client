@@ -36,6 +36,7 @@ namespace TheGodfatherGM.Data
         // Type == 2  : Army_Soldier
         // Type == 3  : Army_Officer
         // Type == 4  : Army_General
+        // Type == 5  : BusDriver
 
         // Type == 10 : Police
 

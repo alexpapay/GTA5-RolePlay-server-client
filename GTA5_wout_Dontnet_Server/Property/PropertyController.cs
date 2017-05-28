@@ -50,16 +50,10 @@ namespace TheGodfatherGM.Server.Property
         //Armys place fileds
         public Marker ArmysMarker { get; private set; }
         public TextLabel ArmysTextLabel { get; private set; }
-        public ColShape ArmysColshape { get; private set; }
-        public ColShape ArmysSourceColshape { get; private set; }
-
-        //ArmyOne place fileds
-        public ColShape ArmyOneColshape { get; private set; }
+        public ColShape ArmysColshapes { get; private set; }
+        public ColShape ArmysGangColshape { get; private set; }
         public ColShape ArmyOneSourceColshape { get; private set; }
-
-        //ArmyTwo place fileds
-        public ColShape ArmyTwoColshape { get; private set; }
-        public ColShape ArmyTwoStockColshape { get; private set; }
+        public ColShape ArmysStocksColshape { get; private set; }
 
         //Gangs place fileds
         public Marker GangsMarker           { get; private set; }
@@ -228,32 +222,29 @@ namespace TheGodfatherGM.Server.Property
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 1\nГлавный маркер", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 60;
-                    Blip.name = "Армия 1";
                 }
                 if (PropertyData.Name == "Army1_source")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(15f, 15f, 15f), 250, 50, 90, 0);
+                                                        new Vector3(15f, 15f, 15f), 250, 20, 20, 50);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 1\nМатериалы", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 60;
-                    Blip.name = "Армия 1 : Материалы";
+                    Blip.sprite = 481;
+                    Blip.name = "Армия 1 : Исходные материалы";
                 }
                 if (PropertyData.Name == "Army1_stock")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
+                                                        new Vector3(10f, 10f, 10f), 100, 0, 80, 0);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 1\nГлавный склад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 60;
+                    Blip.sprite = 421;
                     Blip.name = "Армия 1 : Главный склад";
                 }
                 if (PropertyData.Name == "Army1_weapon")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(2f, 2f, 2f), 255, 255, 50, 200);
+                                                        new Vector3(2f, 2f, 2f), 125, 0, 100, 0);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 1\nОружие", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
                     Blip.sprite = 150;
@@ -262,7 +253,7 @@ namespace TheGodfatherGM.Server.Property
                 if (PropertyData.Name == "Army1_gang")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(1f, 1f, 1f), 255, 255, 0, 0);
+                                                        new Vector3(1f, 1f, 1f), 60, 255, 0, 0);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 1\nЛичка бандита", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                 }
             }
@@ -273,23 +264,20 @@ namespace TheGodfatherGM.Server.Property
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 2\nГлавный маркер", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 60;
-                    Blip.name = "Армия 2";
                 }
                 if (PropertyData.Name == "Army2_stock")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(3f, 3f, 3f), 250, 25, 50, 200);
-                    ArmysTextLabel = API.createTextLabel("~w~Армия 2\nГлавный склад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                                                        new Vector3(10f, 10f, 10f), 100, 0, 80, 0);
+                    ArmysTextLabel = API.createTextLabel("~w~Армия 2\nГлавный склад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 1.5f), 15.0f, 1.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
-                    Blip.sprite = 60;
+                    Blip.sprite = 421;
                     Blip.name = "Армия 2 : Главный склад";
                 }
                 if (PropertyData.Name == "Army2_weapon")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(2f, 2f, 2f), 255, 255, 50, 200);
+                                                        new Vector3(2f, 2f, 2f), 125, 0, 100, 0);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 2\nОружие", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                     Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
                     Blip.sprite = 150;
@@ -298,7 +286,7 @@ namespace TheGodfatherGM.Server.Property
                 if (PropertyData.Name == "Army2_gang")
                 {
                     ArmysMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
-                                                        new Vector3(1f, 1f, 1f), 255, 255, 0, 0);
+                                                        new Vector3(1f, 1f, 1f), 60, 255, 0, 0);
                     ArmysTextLabel = API.createTextLabel("~w~Армия 2\nЛичка бандита", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                 }
             }
@@ -647,7 +635,45 @@ namespace TheGodfatherGM.Server.Property
                 }
             };
 
-            // ARMY ONE:
+            // ARMY Stocks both (10.0f):
+            ArmysStocksColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 10f, 5f);
+            ArmysStocksColshape.onEntityEnterColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    CharacterController characterController = player.getData("CHARACTER");
+                    Character character = characterController.Character;
+
+                    if (PropertyData.Type == PropertyType.ArmyOne || PropertyData.Type == PropertyType.ArmyTwo)
+                    {
+                        if (PropertyData.Name == "Army1_stock" && character.GroupType == 21 && player.isInVehicle)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType, PropertyData.Stock);
+
+                        if (PropertyData.Name == "Army2_stock" && character.GroupType == 20 && player.isInVehicle)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType, PropertyData.Stock);
+
+                        if (PropertyData.Name == "Army2_stock" && character.GroupType == 21 && player.isInVehicle)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType, PropertyData.Stock);
+
+                        if (PropertyData.Name == "Army1_stock" || PropertyData.Name == "Army2_stock")
+                            if (CharacterController.IsCharacterInGang(characterController) && !player.isInVehicle)
+                                API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, PropertyData.Name);
+                    }
+                }
+            };
+            ArmysStocksColshape.onEntityExitColShape += (shape, entity) =>
+            {
+                if (API.getPlayerFromHandle(entity) != null)
+                {
+                    if (PropertyData.Name == "Army2_stock" || PropertyData.Name == "Army1_stock")
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0, 0);
+                    if (PropertyData.Name == "Army1_stock" || PropertyData.Name == "Army2_stock")
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, PropertyData.Name);
+                }
+            };
+
+            // ARMY ONE Source loading (10.0f):
             ArmyOneSourceColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 10f, 5f);
             ArmyOneSourceColshape.onEntityEnterColShape += (shape, entity) =>
             {
@@ -658,9 +684,10 @@ namespace TheGodfatherGM.Server.Property
                     {
                         CharacterController characterController = player.getData("CHARACTER");
                         Character character = characterController.Character;
+
                         if (PropertyData.Name == "Army1_source" && character.GroupType == 20 && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
-                    }
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType);
+                    } 
                 }
             };
             ArmyOneSourceColshape.onEntityExitColShape += (shape, entity) =>
@@ -668,153 +695,84 @@ namespace TheGodfatherGM.Server.Property
                 if (API.getPlayerFromHandle(entity) != null)
                 {
                     if (PropertyData.Name == "Army1_source")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
+                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);                    
                 }
             };
 
-            ArmyOneColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
-            ArmyOneColshape.onEntityEnterColShape += (shape, entity) =>
+            // ARMYs all colshapes (2.0f):
+            ArmysColshapes = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 2f);
+            ArmysColshapes.onEntityEnterColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
-                    if (PropertyData.Type == PropertyType.ArmyOne)
+                    if (PropertyData.Type == PropertyType.ArmyOne || PropertyData.Type == PropertyType.ArmyTwo)
                     {
                         CharacterController characterController = player.getData("CHARACTER");
                         Character character = characterController.Character;
-                                                
-                        if (PropertyData.Name == "Army1_weapon" && character.GroupType == 20)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
 
                         if (PropertyData.Name == "Army1_main" && character.ActiveGroupID > 2002 && character.ActiveGroupID <= 2015)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
-
-                        if (PropertyData.Name == "Army1_stock" && character.GroupType == 20 && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 2);
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType);
+                        if (PropertyData.Name == "Army2_main" && character.ActiveGroupID > 2102 && character.ActiveGroupID <= 2115)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType);
                         
-                        // GANG STEaLING:
-                        if (PropertyData.Name == "Army1_gang" && CharacterController.IsCharacterInGang(characterController))
-                            if (PropertyData.Stock - 500 < 0)
-                                API.sendNotificationToPlayer(player, "~r~Вы не можете украсть с данного склада!\nНа складе нет материалов!");
+                        if (PropertyData.Name == "Army1_weapon" && character.GroupType == 20)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType);
+                        if (PropertyData.Name == "Army2_weapon" && character.GroupType == 21)
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, character.GroupType);
+                    }
+                }
+            };
+            ArmysColshapes.onEntityExitColShape += (shape, entity) =>
+            {
+                if (API.getPlayerFromHandle(entity) != null)
+                {
+                    if (PropertyData.Type == PropertyType.ArmyOne || PropertyData.Type == PropertyType.ArmyTwo)
+                    {
+                        if (PropertyData.Name == "Army1_main" || PropertyData.Name == "Army2_main")
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
+                        if (PropertyData.Name == "Army1_weapon" || PropertyData.Name == "Army2_weapon")
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
+                    }
+                }
+            };
+
+            // Army One shapes:
+            ArmysGangColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 1f, 2f);
+            ArmysGangColshape.onEntityEnterColShape += (shape, entity) =>
+            {
+                Client player;
+                if ((player = API.getPlayerFromHandle(entity)) != null)
+                {
+                    CharacterController characterController = player.getData("CHARACTER");
+                    Character character = characterController.Character;
+
+                    // GANG STEaLING:
+                    if (PropertyData.Name == "Army1_gang" || PropertyData.Name == "Army2_gang")
+                        if (CharacterController.IsCharacterInGang(characterController))
+                        {
+                            Data.Property currentStock = new Data.Property();
+                            switch (PropertyData.Name)
+                            {
+                                case "Army1_gang": currentStock = ContextFactory.Instance.Property.First(x => x.Name == "Army1_stock"); break;
+                                case "Army2_gang": currentStock = ContextFactory.Instance.Property.First(x => x.Name == "Army2_stock"); break;
+                            }
+                            
+                            if (currentStock.Stock - 500 < 0)
+                                API.sendNotificationToPlayer(player, "~r~Вы не можете украсть! На данном складе нет материалов!");
                             else
                             {
                                 if (characterController.Character.Material >= 500)
-                                    API.sendNotificationToPlayer(player, "~r~Вы не можете украсть с данного склада!\nВы перегружены у вас уже: " + characterController.Character.Material + " материалов");
+                                    API.sendNotificationToPlayer(player, "~r~Вы не можете украсть! Вы перегружены у вас: " + characterController.Character.Material + " материалов");
                                 else
                                 {
-                                    PropertyData.Stock -= 500;
+                                    currentStock.Stock -= 500;
                                     characterController.Character.Material = 500;
                                     ContextFactory.Instance.SaveChanges();
-                                    API.sendNotificationToPlayer(player, "~g~Вы украли 500 материалов со склада Армии 2!");
+                                    API.sendNotificationToPlayer(player, "~g~Вы украли 500 материалов со склада!");
                                 }
                             }
-
-                        if (PropertyData.Name == "Army1_stock" &&
-                            CharacterController.IsCharacterInGang(characterController) && !player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, PropertyData.Name);
-                    }
-                }
-            };
-            ArmyOneColshape.onEntityExitColShape += (shape, entity) =>
-            {
-                if (API.getPlayerFromHandle(entity) != null)
-                {
-                    if (PropertyData.Name == "Army1_weapon" ||
-                        PropertyData.Name == "Army1_main" ||
-                        PropertyData.Name == "Army1_stock")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
-                    if (PropertyData.Name == "Army1_gang")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, PropertyData.Name);
-                }
-            };
-
-            // ARMY TWO:
-            ArmyTwoStockColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 10f, 5f);
-            ArmyTwoStockColshape.onEntityEnterColShape += (shape, entity) =>
-            {
-                Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
-                {
-                    if (PropertyData.Type == PropertyType.ArmyTwo)
-                    {
-                        CharacterController characterController = player.getData("CHARACTER");
-                        Character character = characterController.Character; 
-                        if (PropertyData.Name == "Army2_stock" && character.GroupType == 20 && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 2);
-                    }
-                }
-            };
-            ArmyTwoStockColshape.onEntityExitColShape += (shape, entity) =>
-            {
-                if (API.getPlayerFromHandle(entity) != null)
-                {
-                    if (PropertyData.Name == "Army2_stock")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
-                }
-            };
-
-            ArmyTwoColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
-            ArmyTwoColshape.onEntityEnterColShape += (shape, entity) =>
-            {
-                Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
-                {
-                    if (PropertyData.Type == PropertyType.ArmyTwo)
-                    {
-                        CharacterController characterController = player.getData("CHARACTER");
-                        Character character = characterController.Character;
-
-                        if (PropertyData.Name == "Army2_stock" && character.GroupType == 21 && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
-
-                        if (PropertyData.Name == "Army2_stock" && character.GroupType == 20 && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 2);
-
-                        if (PropertyData.Name == "Army2_weapon" && character.GroupType == 21)
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
-
-                        if (PropertyData.Name == "Army2_main" &&
-                        character.ActiveGroupID >= 2103 && character.ActiveGroupID <= 2115)                        
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
-                        
-                        // GANG STEaLING:
-                        if (PropertyData.Name == "Army2_gang" && CharacterController.IsCharacterInGang(character) && !player.isInVehicle)                        
-                        {
-                            if (PropertyData.Stock - 500 < 0)
-                                API.sendNotificationToPlayer(player, "~r~Вы не можете украсть с данного склада!\nНа складе нет материалов!");
-                            else
-                            {
-                                if (character.Material >= 500)
-                                    API.sendNotificationToPlayer(player, "~r~Вы не можете украсть с данного склада!\nВы перегружены у вас уже: " + characterController.Character.Material + " материалов");
-                                else
-                                {
-                                    PropertyData.Stock -= 500;
-                                    character.Material = 500;
-                                    ContextFactory.Instance.SaveChanges();
-                                    API.sendNotificationToPlayer(player, "~g~Вы украли 500 материалов со склада Армии 2!");
-                                }
-                            }
-                        }
-
-                        if (PropertyData.Name == "Army2_stock" &&
-                        CharacterController.IsCharacterInGang(characterController) && !player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 1, PropertyData.Name);
-                        
-                        ContextFactory.Instance.SaveChanges();
-                    }
-                }
-            };
-            ArmyTwoColshape.onEntityExitColShape += (shape, entity) =>
-            {
-                if (API.getPlayerFromHandle(entity) != null)
-                {
-                    if (PropertyData.Name == "Army2_stock" || 
-                        PropertyData.Name == "Army2_weapon" || 
-                        PropertyData.Name == "Army2_main")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 0, PropertyData.Name, 0);
-                  
-                    if (PropertyData.Name == "Army2_gang")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "gang_menu", 0, PropertyData.Name);
+                        }                        
                 }
             };
 
@@ -1061,7 +1019,7 @@ namespace TheGodfatherGM.Server.Property
 
                         if (PropertyData.Name == "Police_stock" &&
                         CharacterController.IsCharacterInArmy(characterController) && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, characterController.Character.GroupType);
                     }
                 }
             };
@@ -1115,7 +1073,7 @@ namespace TheGodfatherGM.Server.Property
 
                         if (PropertyData.Name == "FBI_stock" && 
                         CharacterController.IsCharacterInArmy(characterController) && player.isInVehicle)
-                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, 1);                        
+                            API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "army_menu", 1, PropertyData.Name, characterController.Character.GroupType);                        
                     }
                 }
             };

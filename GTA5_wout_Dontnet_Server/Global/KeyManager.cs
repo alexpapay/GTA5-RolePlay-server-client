@@ -10,6 +10,7 @@ using TheGodfatherGM.Server.Vehicles;
 using System.Collections.Generic;
 using TheGodfatherGM.Server.Groups;
 using Newtonsoft.Json;
+using TheGodfatherGM.Data.Models;
 
 namespace TheGodfatherGM.Server.Global
 {
@@ -67,10 +68,17 @@ namespace TheGodfatherGM.Server.Global
                 {                    
                     if (character == null) return;
                     var job = "";
-                    if (character.JobId == 0) job = "Бомж";
-                    if (character.JobId == 777) job = "Таксист";
-                    if (character.JobId == 888) job = "Безработный";
-                    if (character.JobId == 1 || character.JobId == 2) job = "Грузчик";
+                    switch (character.JobId)
+                    {
+                        case JobsIdNonDataBase.Homeless: job = "Бомж"; break;
+                        case JobsIdNonDataBase.Loader1: job = "Грузчик: С1"; break;
+                        case JobsIdNonDataBase.Loader2: job = "Грузчик: С2"; break;
+                        case JobsIdNonDataBase.TaxiDriver: job = "Таксист"; break;
+                        case JobsIdNonDataBase.BusDriver1: job = "Водитель автобуса: М1"; break;
+                        case JobsIdNonDataBase.BusDriver2: job = "Водитель автобуса: М2"; break;
+                        case JobsIdNonDataBase.BusDriver3: job = "Водитель автобуса: М3"; break;
+                        case JobsIdNonDataBase.BusDriver4: job = "Водитель автобуса: М4"; break;
+                    }
 
                     var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
@@ -91,12 +99,14 @@ namespace TheGodfatherGM.Server.Global
                         EntityManager.GetDisplayName(groupType),            // 9
                         EntityManager.GetDisplayName(groupExtraType),       // 10
                         character.Material,                                 // 11
-                        CharacterController.IsCharacterInMafia(character)); // 12
+                        CharacterController.IsCharacterInMafia(character),  // 12
+                        CharacterController.IsCharacterInGang(character));  // 13
                 }
                 // GET info about car
                 else if ((int)args[0] == 10)
                 {
                     VehicleController vehicleController = null;
+                    
                     bool inVehicleCheck;
                     if (player.isInVehicle)
                     {
@@ -105,7 +115,7 @@ namespace TheGodfatherGM.Server.Global
                     }
                     else
                     {
-                        vehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.0f);
+                        vehicleController = EntityManager.GetVehicleControllers().Find(x => x.Vehicle.position.DistanceTo(player.position) < 2.5f);
                         inVehicleCheck = false;
                     }
                     if (vehicleController == null)
@@ -119,7 +129,7 @@ namespace TheGodfatherGM.Server.Global
 
                     int driverDoorStatus = 1;
                     if (API.getVehicleLocked(vehicleController.Vehicle)) driverDoorStatus = 0;
-                    var fuel = vehicleController.VehicleData.Fuel;
+                    var fuel = vehicleController.VehicleData.FuelTank;
 
                     var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
@@ -128,7 +138,7 @@ namespace TheGodfatherGM.Server.Global
                     if (vehicleController.VehicleData.GroupId == null) owner = "Владелец: " + FormatName;
                     else owner = "Владелец: " + EntityManager.GetDisplayName(groupType);
 
-                    API.shared.triggerClientEvent(player, "vehicle_menu", 
+                    API.shared.triggerClientEvent(player, "vehicle_menu",
                         2,                                          // 0
                         "Меню транспорта",                          // 1
                         owner,                                      // 2
@@ -136,8 +146,8 @@ namespace TheGodfatherGM.Server.Global
                         fuel.ToString(),                            // 4
                         inVehicleCheck,                             // 5
                         driverDoorStatus,                           // 6
-                        vehicleController.VehicleData.Material);    // 7                    
-                }
+                        vehicleController.VehicleData.Material);    // 7    
+                        }
                 // Get info about work possibilities:
                 else if ((int)args[0] == 12)
                 {

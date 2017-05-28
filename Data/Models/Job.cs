@@ -14,13 +14,18 @@ namespace TheGodfatherGM.Data
         public int? GroupId { get; set; }
         public Group Group { get; set; }
         public int CharacterId { get; set; }
+        public string OwnerName { get; set; }
 
         public float PosX { get; set; }
         public float PosY { get; set; }
         public float PosZ { get; set; }
 
-        [DefaultValue(1)]
         public int Level { get; set; }
+        public int Money { get; set; }
+        public int Cost { get; set; }
+
+        public int MafiaRoofId { get; set; }
+        public int mafiaRoofMoney { get; set; }
 
         public ICollection<Vehicle> Vehicles { get; set; }
     }

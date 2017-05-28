@@ -46,6 +46,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         var myRangFraction = args[10];
         var myMaterials = args[11];
         var IsCharacterInMafia = args[12];
+        var IsCharacterInGang = args[13];
 
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
@@ -177,7 +178,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         mainWindow.AddItem(getTaxi); 
 
         if (myDebt != 0) {
-            var takeDebt = API.createMenuItem("~y~Вернуть~s~ долг", "");
+            var takeDebt = API.createMenuItem("~y~Вернуть~s~ долг", "~r~Мой долг:~s~ " + myDebt);
             takeDebt.Activated.connect(function (menu, item) {
                 mainWindow.Visible = false;
                 API.displaySubtitle("Введите сумму для возврата", 5000);
@@ -188,58 +189,54 @@ API.onServerEventTrigger.connect(function (name, args) {
         }        
 
         var age = API.createMenuItem("Ваш возраст:~s~ " + myAge, "");
-            age.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
+        age.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
         });
-            mainWindow.AddItem(age);
+        mainWindow.AddItem(age);
 
-            var level = API.createMenuItem("Ваш уровень:~s~ " + myLevel, "");
-            level.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
+        var level = API.createMenuItem("Ваш уровень:~s~ " + myLevel, "");
+        level.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
         });
-            mainWindow.AddItem(level);
+        mainWindow.AddItem(level);
 
         var job = API.createMenuItem("Ваша работа:~s~ " + myJob, "");
-            job.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
+        job.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
         });
-            mainWindow.AddItem(job);   
+        mainWindow.AddItem(job);   
 
-            var fraction = API.createMenuItem("Ваша фракция:~s~ " + myFraction, "");
-            fraction.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-            });
-            mainWindow.AddItem(fraction);  
+        var fraction = API.createMenuItem("Ваша фракция:~s~ " + myFraction, "");
+        fraction.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(fraction);  
 
-            var job = API.createMenuItem("Ваша должность:~s~ " + myRangFraction, "");
-            job.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-            });
-            mainWindow.AddItem(job); 
+        var job = API.createMenuItem("Ваша должность:~s~ " + myRangFraction, "");
+        job.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(job); 
 
-            var driverLicense = API.createMenuItem("Наличие прав:~s~ " + myDriverLicense, "");
-            driverLicense.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-            });
-            mainWindow.AddItem(driverLicense);  
+        var driverLicense = API.createMenuItem("Наличие прав:~s~ " + myDriverLicense, "");
+        driverLicense.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(driverLicense);  
 
-            var bank = API.createMenuItem("Денег в банке:~s~ " + moneyInBank, "");
-            bank.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-            });
-            mainWindow.AddItem(bank);  
-
-            var debt = API.createMenuItem("Мой долг:~s~ " + myDebt, "");
-            debt.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-            });
-            mainWindow.AddItem(debt); 
-
+        if (IsCharacterInGang == true) {
             var material = API.createMenuItem("Ваши материалы:~s~ " + myMaterials, "");
             material.Activated.connect(function (menu, item) {
                 mainWindow.Visible = false;
             });
             mainWindow.AddItem(material); 
+        }
+
+        var bank = API.createMenuItem("Денег в банке:~s~ " + moneyInBank, "");
+        bank.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(bank);
 
         var close = API.createMenuItem("~r~Закрыть", "");
         close.Activated.connect(function (menu, item) {
@@ -639,94 +636,15 @@ API.onServerEventTrigger.connect(function (name, args) {
         }            
 
         // Gangs:
-        if (isGangBoss == true) {
-
-            var gangMenu = API.createMenuItem("~g~Управление ~s~своей фракцией", "");
-            gangMenu.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-
-                mainWindow2 = API.createMenu("Моя фракция", "~s~" + groupType + " : " + groupExtraType, 0, 0, 6);
-                menuPool2.Add(mainWindow2);
-                mainWindow2.Visible = true;
-
-                if (gangRank == 9 || gangRank == 10) {
-                    var gangAdd = API.createMenuItem("~g~Принять~s~ пользователя в банду", "");
-                    gangAdd.Activated.connect(function (menu, item) {
-                        mainWindow2.Visible = false;
-                        API.displaySubtitle("Введите ID игрока", 5000);
-                        var userId = parseInt(API.getUserInput("", 40));
-                        API.triggerServerEvent("gang_add_to_group", userId, intGroupType * 100 + 1, 1);
-                    });
-                    mainWindow2.AddItem(gangAdd);
-                }
-                if (gangRank >= 7 && gangRank <= 10) {
-                    var gangChange = API.createMenuItem("~y~Изменить~s~ ранг пользователя в банде", "Ваш ранг в банде: " + gangRank);
-                    gangChange.Activated.connect(function (menu, item) {
-                        mainWindow2.Visible = false;
-                        API.displaySubtitle("Введите ID игрока", 5000);
-                        var userId = parseInt(API.getUserInput("", 40));
-
-                        API.displaySubtitle("Введите требуемый ранг", 5000);
-                        var rangId = parseInt(API.getUserInput("", 40));
-                        API.triggerServerEvent("gang_add_to_group", userId, rangId, 3, groupId);
-                    });
-                    mainWindow2.AddItem(gangChange);
-                }
-                if (gangRank >= 8 && gangRank <= 10) {
-                    var gangDel = API.createMenuItem("~r~Выгнать~s~ пользователя из банды", "");
-                    gangDel.Activated.connect(function (menu, item) {
-                        mainWindow2.Visible = false;
-                        API.displaySubtitle("Введите ID игрока", 5000);
-                        var userId = parseInt(API.getUserInput("", 40));
-                        API.triggerServerEvent("gang_add_to_group", userId, gangId, 2);
-                    });
-                    mainWindow2.AddItem(gangDel);
-
-                    var sellMafia = API.createMenuItem("~r~Продать~s~ материалы Мафии", "");
-                    sellMafia.Activated.connect(function (menu, item) {
-                        mainWindow2.Visible = false;
-                        API.displaySubtitle("Введите ID мафии", 5000);
-                        var mafiaId = parseInt(API.getUserInput("", 40));
-                        API.displaySubtitle("Введите количество материалов", 5000);
-                        var material = parseInt(API.getUserInput("", 40));
-                        API.displaySubtitle("Введите стоиомсть", 5000);
-                        var cost = parseInt(API.getUserInput("", 40));
-                        API.triggerServerEvent("yes_no_menu", "gang_material_mafia", 0, material, mafiaId, initUserId, cost, intGroupType);
-                    });
-                    mainWindow2.AddItem(sellMafia);
-                }
-
-                var gangGetMoney = API.createMenuItem("~y~Снять~s~ деньги со счета банды.", "Денег на счету: " + moneyBank + "$");
-                gangGetMoney.Activated.connect(function (menu, item) {
+        if (isInGang == true) {
+            if (material != 0) {
+                var materialLoad = API.createMenuItem("~g~Загрузить материалы~s~ в машину", "");
+                materialLoad.Activated.connect(function (menu, item) {
                     mainWindow.Visible = false;
-                    API.displaySubtitle("Введите сумму", 5000);
-                    var money = parseInt(API.getUserInput("", 40));
-                    API.triggerServerEvent("gang_get_money", money);
+                    API.triggerServerEvent("load_unload_material", 1);
                 });
-                mainWindow2.AddItem(gangGetMoney);
-
-                var sellSector = API.createMenuItem("~r~Продать~s~ территорию банды.", "");
-                sellSector.Activated.connect(function (menu, item) {
-                    mainWindow.Visible = false;
-                    API.displaySubtitle("Введите номер квадрата в формате N_N", 5000);
-                    var sector = API.getUserInput("", 40);
-                    API.displaySubtitle("Введите номер банды", 5000);
-                    var gangNum = parseInt(API.getUserInput("", 40));
-                    API.displaySubtitle("Введите сумму", 5000);
-                    var cost = parseInt(API.getUserInput("", 40));
-                    API.triggerServerEvent("yes_no_menu", "gang_sector", 0, sector, gangNum, initUserId, cost, intGroupType);
-                });
-                mainWindow2.AddItem(sellSector);
-
-                var back = API.createMenuItem("~g~Назад", "");
-                back.Activated.connect(function (menu, item) {
-                    mainWindow2.Visible = false;
-                    mainWindow.Visible = true;
-                });
-                mainWindow2.AddItem(back);
-                mainWindow2.RefreshIndex();
-            });
-            mainWindow.AddItem(gangMenu);
+                mainWindow.AddItem(materialLoad);
+            }
         }
         if (isInGang == true) {
 
@@ -753,13 +671,6 @@ API.onServerEventTrigger.connect(function (name, args) {
             });
 
             if (material != 0) {
-                var materialLoad = API.createMenuItem("~g~Загрузить материалы~s~ в машину", "");
-                materialLoad.Activated.connect(function (menu, item) {
-                    mainWindow.Visible = false;
-                    API.triggerServerEvent("load_unload_material", 1);
-                });
-                mainWindow.AddItem(materialLoad);
-
                 if (isInGhetto == true) {
                     var gangWeaponMenu = API.createMenuItem("~g~Создание ~s~оружия из материалов", "");
                     gangWeaponMenu.Activated.connect(function (menu, item) {
@@ -905,6 +816,95 @@ API.onServerEventTrigger.connect(function (name, args) {
                 API.triggerServerEvent("gang_add_money", money);
             });
             mainWindow.AddItem(gangAdd); 
+        }
+        if (isGangBoss == true) {
+
+            var gangMenu = API.createMenuItem("~g~Управление ~s~своей фракцией", "");
+            gangMenu.Activated.connect(function (menu, item) {
+                mainWindow.Visible = false;
+
+                mainWindow2 = API.createMenu("Моя фракция", "~s~" + groupType + " : " + groupExtraType, 0, 0, 6);
+                menuPool2.Add(mainWindow2);
+                mainWindow2.Visible = true;
+
+                if (gangRank == 9 || gangRank == 10) {
+                    var gangAdd = API.createMenuItem("~g~Принять~s~ пользователя в банду", "");
+                    gangAdd.Activated.connect(function (menu, item) {
+                        mainWindow2.Visible = false;
+                        API.displaySubtitle("Введите ID игрока", 5000);
+                        var userId = parseInt(API.getUserInput("", 40));
+                        API.triggerServerEvent("gang_add_to_group", userId, intGroupType * 100 + 1, 1);
+                    });
+                    mainWindow2.AddItem(gangAdd);
+                }
+                if (gangRank >= 7 && gangRank <= 10) {
+                    var gangChange = API.createMenuItem("~y~Изменить~s~ ранг пользователя в банде", "Ваш ранг в банде: " + gangRank);
+                    gangChange.Activated.connect(function (menu, item) {
+                        mainWindow2.Visible = false;
+                        API.displaySubtitle("Введите ID игрока", 5000);
+                        var userId = parseInt(API.getUserInput("", 40));
+
+                        API.displaySubtitle("Введите требуемый ранг", 5000);
+                        var rangId = parseInt(API.getUserInput("", 40));
+                        API.triggerServerEvent("gang_add_to_group", userId, rangId, 3, groupId);
+                    });
+                    mainWindow2.AddItem(gangChange);
+                }
+                if (gangRank >= 8 && gangRank <= 10) {
+                    var gangDel = API.createMenuItem("~r~Выгнать~s~ пользователя из банды", "");
+                    gangDel.Activated.connect(function (menu, item) {
+                        mainWindow2.Visible = false;
+                        API.displaySubtitle("Введите ID игрока", 5000);
+                        var userId = parseInt(API.getUserInput("", 40));
+                        API.triggerServerEvent("gang_add_to_group", userId, gangId, 2);
+                    });
+                    mainWindow2.AddItem(gangDel);
+
+                    var sellMafia = API.createMenuItem("~r~Продать~s~ материалы Мафии", "");
+                    sellMafia.Activated.connect(function (menu, item) {
+                        mainWindow2.Visible = false;
+                        API.displaySubtitle("Введите ID мафии", 5000);
+                        var mafiaId = parseInt(API.getUserInput("", 40));
+                        API.displaySubtitle("Введите количество материалов", 5000);
+                        var material = parseInt(API.getUserInput("", 40));
+                        API.displaySubtitle("Введите стоиомсть", 5000);
+                        var cost = parseInt(API.getUserInput("", 40));
+                        API.triggerServerEvent("yes_no_menu", "gang_material_mafia", 0, material, mafiaId, initUserId, cost, intGroupType);
+                    });
+                    mainWindow2.AddItem(sellMafia);
+                }
+
+                var gangGetMoney = API.createMenuItem("~y~Снять~s~ деньги со счета банды.", "Денег на счету: " + moneyBank + "$");
+                gangGetMoney.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.displaySubtitle("Введите сумму", 5000);
+                    var money = parseInt(API.getUserInput("", 40));
+                    API.triggerServerEvent("gang_get_money", money);
+                });
+                mainWindow2.AddItem(gangGetMoney);
+
+                var sellSector = API.createMenuItem("~r~Продать~s~ территорию банды.", "");
+                sellSector.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.displaySubtitle("Введите номер квадрата в формате N_N", 5000);
+                    var sector = API.getUserInput("", 40);
+                    API.displaySubtitle("Введите номер банды", 5000);
+                    var gangNum = parseInt(API.getUserInput("", 40));
+                    API.displaySubtitle("Введите сумму", 5000);
+                    var cost = parseInt(API.getUserInput("", 40));
+                    API.triggerServerEvent("yes_no_menu", "gang_sector", 0, sector, gangNum, initUserId, cost, intGroupType);
+                });
+                mainWindow2.AddItem(sellSector);
+
+                var back = API.createMenuItem("~g~Назад", "");
+                back.Activated.connect(function (menu, item) {
+                    mainWindow2.Visible = false;
+                    mainWindow.Visible = true;
+                });
+                mainWindow2.AddItem(back);
+                mainWindow2.RefreshIndex();
+            });
+            mainWindow.AddItem(gangMenu);
         }
 
         // Mafia:
@@ -1258,7 +1258,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
         menuPool.Add(mainWindow);
-        
+
         if (engineStatus == 0) {
             var engine = API.createMenuItem("~g~Завести~s~ двигатель", "");
             engine.Activated.connect(function (menu, item) {
@@ -1312,7 +1312,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         });
         mainWindow.AddItem(trunk);
 
-        var fuel = API.createMenuItem("Топливо", "Топлива в баке: ~g~" + fuelTank);
+        var fuel = API.createMenuItem("Объем бака", "Объем бака: ~g~" + fuelTank);
         if (inVehicleNear == true) mainWindow.AddItem(fuel);
 
         var material = API.createMenuItem("Материал", "Материалов: ~g~" + materialCount);
@@ -1786,7 +1786,7 @@ API.onServerEventTrigger.connect(function (name, args) {
         resetMainMenu();
         var callbackId = args[0];
         var propertyName = args[1];
-        var access = args[2];
+        var characterGroup = args[2];
 
         var banner = "";
         var subtitle = "";
@@ -1797,7 +1797,7 @@ API.onServerEventTrigger.connect(function (name, args) {
             case "Army1_weapon": banner = "Армия 1: оружие"; subtitle = "Выберите нужное вам оружие:"; break;
             case "Army1_main": banner = "Армия 1: главная"; subtitle = "Ваша база:"; break;
             case "Army1_stock": banner = "Армия 1: склад"; subtitle = "Загрузка/разгрузка на складе Армии 1"; break;
-            case "Army1_source": banner = "Материалы для армий"; subtitle = "Загружайте побольше!"; break;
+            case "Army1_source": banner = "Материалы для армий"; subtitle = "Загружайте материалы с авианосца"; break;
             case "Army2_weapon": banner = "Армия 2: оружие"; subtitle = "Выберите нужное вам оружие:"; break;
             case "FBI_stock": banner = "FBI склад"; subtitle = "Разгрузка на складе FBI:"; break;
             case "Police_stock": banner = "Police склад"; subtitle = "Разгрузка на складе Police:"; break;
@@ -1805,94 +1805,103 @@ API.onServerEventTrigger.connect(function (name, args) {
 
         if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
-        menuPool.Add(mainWindow);       
+        menuPool.Add(mainWindow);   
 
-        if (propertyName == "Army1_source" && access == 1) {
-            var loadFromStock = API.createMenuItem("~g~Загрузить ~s~материалы", "");
-            loadFromStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 3, propertyName, "Army2_stock");
-            });
-            mainWindow.AddItem(loadFromStock);            
-        }
-        if (propertyName == "Army1_stock" && access == 2) {
-            var loadToStock = API.createMenuItem("~g~Разгрузить ~s~материалы для ~y~Армии 1", "");
-            loadToStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 2, propertyName, "Police_stock");
-            });
-            mainWindow.AddItem(loadToStock);
-        }
-        if (access == 1) {
-            if (propertyName == "Army2_main" || propertyName == "Army1_main") {
-                var cloth = API.createMenuItem("~g~Одеть ~s~военную форму", "");
-                cloth.Activated.connect(function (menu, item) {
+        // Loading from carrier to Army 1 vehicle.
+        // Unloading from Army 1 vehicle to Army 2 stock.
+        if (characterGroup == 20) {        
+            if (propertyName == "Army1_source") {
+                var loadFromStock = API.createMenuItem("~g~Загрузить ~s~материалы", "");
+                loadFromStock.Activated.connect(function (menu, item) {
                     mainWindow.Visible = false;
-                    API.triggerServerEvent("army_two_menu", 4, propertyName, "Cloth_up");
+                    API.triggerServerEvent("armys_menu", 3);
                 });
-                mainWindow.AddItem(cloth);
+                mainWindow.AddItem(loadFromStock);
+            }
+        
+            if (propertyName == "Army2_stock") {
+                var loadToStock = API.createMenuItem("~g~Разгрузить ~s~материалы у ~y~Армии 2", "");
+                loadToStock.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 2, propertyName);
+                });
+                mainWindow.AddItem(loadToStock);
             }
         }
-        if (access == 1) {
-            if (propertyName == "Army2_main" || propertyName == "Army1_main") {
-                var cloth = API.createMenuItem("~r~Снять ~s~военную форму", "");
-                cloth.Activated.connect(function (menu, item) {
+        // Loading from stock by Army 2 vehicle.
+        // Unloading from Army 2 vehicle to stocks (Army 1, FBI, Poloce).
+        if (characterGroup == 21) {            
+            if (propertyName == "Army2_stock") {
+                var loadForArmy = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~Армии 1", "На складе " + args[3] + " материалов");
+                loadForArmy.Activated.connect(function (menu, item) {
                     mainWindow.Visible = false;
-                    API.triggerServerEvent("army_two_menu", 4, propertyName, "Cloth_down");
+                    API.triggerServerEvent("armys_menu", 1, propertyName, "Army1_stock");
                 });
-                mainWindow.AddItem(cloth);
+                mainWindow.AddItem(loadForArmy);
+
+                var loadForPolice = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~Полиции", "На складе " + args[3] + " материалов");
+                loadForPolice.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 1, propertyName, "Police_stock");
+                });
+                mainWindow.AddItem(loadForPolice);
+
+                var loadForFBI = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~FBI", "На складе " + args[3] + " материалов");
+                loadForFBI.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 1, propertyName, "FBI_stock");
+                });
+                mainWindow.AddItem(loadForFBI);
+            }            
+            if (propertyName == "Army1_stock") {
+                var loadToStock = API.createMenuItem("~g~Разгрузить ~s~материалы в ~y~Армии 1", "");
+                loadToStock.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 2, propertyName);
+                });
+                mainWindow.AddItem(loadToStock);
             }
-        } 
-        if (propertyName == "Army2_stock" && access == 1) {
-            var loadFromStock = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~Полиции", "");
-            loadFromStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 1, propertyName, "Police_stock");
-            });
-            mainWindow.AddItem(loadFromStock);
-
-            var loadFromStock = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~ФБР", "");
-            loadFromStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 1, propertyName, "FBI_stock");
-            });
-            mainWindow.AddItem(loadFromStock);
-
-            var loadFromStock = API.createMenuItem("~g~Загрузить ~s~материалы для ~y~Армии 1", "");
-            loadFromStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 1, propertyName, "Army1_stock");
-            });
-            mainWindow.AddItem(loadFromStock);
+            if (propertyName == "Police_stock") {
+                var unloadPolice = API.createMenuItem("~g~Разгрузить ~s~материалы в ~y~Полиции", "");
+                unloadPolice.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 2, propertyName);
+                });
+                mainWindow.AddItem(unloadPolice);
+            }
+            if (propertyName == "FBI_stock") {
+                var unloadPolice = API.createMenuItem("~g~Разгрузить ~s~материалы в ~y~FBI", "");
+                unloadPolice.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 2, propertyName);
+                });
+                mainWindow.AddItem(unloadPolice);
+            }
         }
-        if (propertyName == "Army2_stock" && access == 2) {
-            var loadToStock = API.createMenuItem("~g~Разгрузить ~s~материалы для ~y~Армии 2", "");
-            loadToStock.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 2, propertyName, "Police_stock");
-            });
-            mainWindow.AddItem(loadToStock);
-        }
+        // Change clothes.
+        if (characterGroup == 20 || characterGroup == 21) {
+            if (propertyName == "Army2_main" || propertyName == "Army1_main") {
+                var clothUp = API.createMenuItem("~g~Одеть ~s~военную форму", "");
+                clothUp.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 4, propertyName, "Cloth_up");
+                });
+                mainWindow.AddItem(clothUp);
 
-        if (propertyName == "Police_stock" && access == 1) {
-            var unloadPolice = API.createMenuItem("~g~Разгрузить ~s~материалы на склад", "");
-            unloadPolice.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 2, propertyName, "Police_stock");
-            });
-            mainWindow.AddItem(unloadPolice);
+                var clothDown = API.createMenuItem("~r~Снять ~s~военную форму", "");
+                clothDown.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("armys_menu", 4, propertyName, "Cloth_down");
+                });
+                mainWindow.AddItem(clothDown);
+            }
         }
-
-        if (propertyName == "FBI_stock" && access == 1) {
-            var unloadPolice = API.createMenuItem("~g~Разгрузить ~s~материалы на склад", "");
-            unloadPolice.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("army_two_menu", 2, propertyName, "FBI_stock");
-            });
-            mainWindow.AddItem(unloadPolice);
-        }
-
+        // Weapon creating.
         if (propertyName == "Army2_weapon" || propertyName == "Army1_weapon") {
+
+            if (propertyName == "Army1_weapon") propertyName = "Army1_stock";
+            else                                propertyName = "Army2_stock";
+
             var Revolver = API.createMenuItem("~s~ Взять Revolver : 100 мат.", "");
             Revolver.Activated.connect(function (menu, item) {
                 API.triggerServerEvent("get_weapon", 1, 100, propertyName);
@@ -1990,12 +1999,12 @@ API.onServerEventTrigger.connect(function (name, args) {
         else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
         menuPool.Add(mainWindow);
 
-        var start = API.createMenuItem("~g~Первый~s~ маршрут", "Станция - Больница - Мэрия - Стройка - Аэропорт - Станция");
+        var start = API.createMenuItem("~g~Первый~s~ маршрут", "Больница - Мэрия - Стройка - Аэропорт");
         start.Activated.connect(function (menu, item) {
             mainWindow.Visible = false;
-            API.triggerServerEvent("work_busdriver", 1, jobId, posX, posY, posZ);
+            API.triggerServerEvent("work_busdriver", 1, posX, posY, posZ);
         });
-        mainWindow.AddItem(start);
+        mainWindow.AddItem(start);        
 
         var close = API.createMenuItem("~r~Закончить~s~ работу", "Переодеться в свою одежду");
         close.Activated.connect(function (menu, item) {
@@ -2007,6 +2016,129 @@ API.onServerEventTrigger.connect(function (name, args) {
         if (callbackId == 0) {
             close.Activated.connect(function (menu, item) {
                 API.triggerServerEvent("work_busdriver", 0);
+                mainWindow.Visible = false;
+            });
+        }
+        else mainWindow.Visible = true;
+        mainWindow.RefreshIndex();
+    }
+    if (name == "work_gasstation_menu") {
+        resetMainMenu();
+        var callbackId = args[0];
+        var banner = args[1];
+        var subtitle = args[2];
+        var jobId = args[3];
+        var trigger = args[4];
+        var cost = args[5];
+
+        if (banner == null) mainWindow = API.createMenu(subtitle, 0, 0, 6);
+        else mainWindow = API.createMenu(banner, subtitle, 0, 0, 6);
+        menuPool.Add(mainWindow);
+
+        switch (trigger) {
+            case 1:
+                var buyGasStation = API.createMenuItem("~g~Купить~s~ канистру", "");
+                buyGasStation.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("work_gasstation", 1, jobId, "canister");
+                });
+                mainWindow.AddItem(buyGasStation);
+
+                var buyPhone = API.createMenuItem("~g~Купить~s~ телефон", "");
+                buyPhone.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("work_gasstation", 1, jobId, "phone");
+                });
+                mainWindow.AddItem(buyPhone);
+
+                var buyFood = API.createMenuItem("~g~Купить~s~ еды", "");
+                buyFood.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("work_gasstation", 1, jobId, "food");
+                });
+                mainWindow.AddItem(buyFood);
+
+                if (args[6] == true) {
+                    var money = args[7];
+                    var getMoney = API.createMenuItem("~y~Снять~s~ кассу", "В кассе: " + money);
+                    getMoney.Activated.connect(function (menu, item) {
+                        mainWindow.Visible = false;
+                        API.triggerServerEvent("work_gasstation", 1, jobId, "getmoney", money);
+                    });
+                    mainWindow.AddItem(getMoney);
+
+                    var sellGasStation = API.createMenuItem("~r~Продать~s~ заправку", "Стоимость: " + cost);
+                    sellGasStation.Activated.connect(function (menu, item) {
+                        mainWindow.Visible = false;
+                        API.triggerServerEvent("work_gasstation", 1, jobId, "sell");
+                    });
+                    mainWindow.AddItem(sellGasStation);
+                }                
+                break;
+
+            case 2:
+                var buyGasStation = API.createMenuItem("~g~Купить~s~ заправку", "Стоимость: " + cost);
+                buyGasStation.Activated.connect(function (menu, item) {
+                    mainWindow.Visible = false;
+                    API.triggerServerEvent("work_gasstation", 0, jobId, cost);
+                });
+                mainWindow.AddItem(buyGasStation);
+                break;
+        }
+
+        var close = API.createMenuItem("~r~Закрыть", "");
+        close.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(close);
+
+        if (callbackId == 0) {
+            close.Activated.connect(function (menu, item) {
+                API.triggerServerEvent("work_busdriver", 0);
+                mainWindow.Visible = false;
+            });
+        }
+        else mainWindow.Visible = true;
+        mainWindow.RefreshIndex();
+    }
+    if (name == "get_petrolium") {
+        resetMainMenu();
+        var callbackId = args[0];
+        var jobId = args[1];
+
+        mainWindow = API.createMenu("Заправить топливо", "У нас всего ~g~1$ за литр!", 0, 0, 6);
+        menuPool.Add(mainWindow);
+
+        var list = new List(String);
+        list.Add("5");
+        list.Add("10");
+        list.Add("15");
+        list.Add("20");
+        var list_item = API.createListItem("Заправить литров: ", "", list, 0);
+
+        var fuel = 5;
+        list_item.OnListChanged.connect(function (sender, new_index) {
+            switch (new_index) {
+                case 0: fuel = 5; break;
+                case 1: fuel = 10; break;
+                case 2: fuel = 15; break;
+                case 3: fuel = 20; break;
+            }
+        });
+        list_item.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+            API.triggerServerEvent("get_petrolium", jobId, fuel);
+        });
+        mainWindow.AddItem(list_item);
+
+        var close = API.createMenuItem("~r~Закрыть", "");
+        close.Activated.connect(function (menu, item) {
+            mainWindow.Visible = false;
+        });
+        mainWindow.AddItem(close);
+
+        if (callbackId == 0) {
+            close.Activated.connect(function (menu, item) {
                 mainWindow.Visible = false;
             });
         }
@@ -2049,7 +2181,7 @@ API.onServerEventTrigger.connect(function (name, args) {
 
                 mainWindow3.Visible = true;
 
-                var loader1 = API.createMenuItem("Грузчик 1: Уровень 0", "");
+                var loader1 = API.createMenuItem("Грузчик 1", "Требуется уровень 0");
                 loader1.Activated.connect(function (menu, item) {
                     mainWindow3.Visible = false;
                     API.displaySubtitle("Метка первой работы на карте установлена", 5000);
@@ -2057,7 +2189,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                 });
                 mainWindow3.AddItem(loader1);
 
-                var loader2 = API.createMenuItem("Грузчик 2: Уровень 0", "");
+                var loader2 = API.createMenuItem("Грузчик 2", "Требуется уровень 0");
                 loader2.Activated.connect(function (menu, item) {
                     mainWindow3.Visible = false;
                     API.displaySubtitle("Метка первой работы на карте установлена", 5000);
@@ -2065,12 +2197,20 @@ API.onServerEventTrigger.connect(function (name, args) {
                 });
                 mainWindow3.AddItem(loader2);
 
-                var loader = API.createMenuItem("Таксист : Уровень 2", "");
-                loader.Activated.connect(function (menu, item) {
+                var taxiDriver = API.createMenuItem("Таксист", "Требуется уровень 2");
+                taxiDriver.Activated.connect(function (menu, item) {
                     mainWindow3.Visible = false;
                     API.triggerServerEvent("work_taxi", 4);                  
                 });
-                mainWindow3.AddItem(loader);
+                mainWindow3.AddItem(taxiDriver);
+
+                var busDriver = API.createMenuItem("Водитель автобуса", "Требуется уровень 2");
+                busDriver.Activated.connect(function (menu, item) {
+                    mainWindow3.Visible = false;
+                    API.displaySubtitle("Метка первой работы на карте установлена", 5000);
+                    waypoint = API.setWaypoint(-831, -2351);
+                });
+                mainWindow3.AddItem(busDriver);
 
                 var back = API.createMenuItem("~g~Назад", "");
                 back.Activated.connect(function (menu, item) {
