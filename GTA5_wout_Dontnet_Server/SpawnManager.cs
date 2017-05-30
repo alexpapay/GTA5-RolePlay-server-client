@@ -11,11 +11,11 @@ namespace TheGodfatherGM.Server
 {
     public class SpawnManager : Script
     {
-        private static readonly Vector3 _newPlayerPosition = new Vector3(-1034.794, -2727.422, 13.75663); //
-        private static readonly Vector3 _newPlayerRotation = new Vector3(0.0, 0.0, -34.4588);
-        private static readonly Vector3 _firstPlayerPosition = new Vector3(-1042.2, -2772.6, 4.639); //
-        private static readonly Vector3 _firstPlayerRotation = new Vector3(0.0, 0.0, 58.7041);
-        private static readonly int _newPlayerDimension = 0;
+        private static readonly Vector3 NewPlayerPosition = new Vector3(-1034.794, -2727.422, 13.75663); //
+        private static readonly Vector3 NewPlayerRotation = new Vector3(0.0, 0.0, -34.4588);
+        private static readonly Vector3 FirstPlayerPosition = new Vector3(-1042.2, -2772.6, 4.639); //
+        private static readonly Vector3 FirstPlayerRotation = new Vector3(0.0, 0.0, 58.7041);
+        private static readonly int NewPlayerDimension = 0;
 
         public SpawnManager()
         {
@@ -31,8 +31,8 @@ namespace TheGodfatherGM.Server
                 SetCharacterFace (player, characterController.Character);
                 ClothesManager.SetPlayerSkinClothes(player, 0, characterController.Character, 0);
                 WeaponManager.SetPlayerWeapon(player, characterController.Character, 0);
-                API.shared.setEntityPosition(player, _firstPlayerPosition);
-                API.shared.setEntityRotation(player, _firstPlayerRotation);
+                API.shared.setEntityPosition(player, FirstPlayerPosition);
+                API.shared.setEntityRotation(player, FirstPlayerRotation);
                 characterController.Character.RegistrationStep = -1; // 'Tutorial Done'                               
             }
             else
@@ -40,13 +40,13 @@ namespace TheGodfatherGM.Server
                 SetCharacterFace(player, characterController.Character);
                 ClothesManager.SetPlayerSkinClothes(player, 0, characterController.Character, 1);
                 WeaponManager.SetPlayerWeapon(player, characterController.Character, 1);
-                API.shared.setEntityPosition(player, _newPlayerPosition);
-                API.shared.setEntityRotation(player, _newPlayerRotation);                
+                API.shared.setEntityPosition(player, NewPlayerPosition);
+                API.shared.setEntityRotation(player, NewPlayerRotation);                
             }
             
             if (CharacterController.IsCharacterArmySoldier(characterController))
             {                
-                Data.Property placeArmy = new Data.Property();
+                var placeArmy = new Data.Property();
 
                 if (characterController.Character.ActiveGroupID < 2003)
                      placeArmy = ContextFactory.Instance.Property.FirstOrDefault(x => x.GroupId == 2000);
@@ -55,12 +55,12 @@ namespace TheGodfatherGM.Server
                 if (placeArmy != null)
                 {
                     API.shared.setEntityPosition(player, new Vector3(placeArmy.ExtPosX, placeArmy.ExtPosY, placeArmy.ExtPosZ));
-                    API.shared.setEntityRotation(player, _newPlayerRotation);
+                    API.shared.setEntityRotation(player, NewPlayerRotation);
                 }      
             }
             if (CharacterController.IsCharacterInGang(characterController))
             {
-                Data.Property placeGangs = new Data.Property();
+                var placeGangs = new Data.Property();
 
                 if (characterController.Character.ActiveGroupID > 1300 &&
                     characterController.Character.ActiveGroupID <= 1310)
@@ -81,14 +81,14 @@ namespace TheGodfatherGM.Server
                 if (placeGangs != null)
                 {
                     API.shared.setEntityPosition(player, new Vector3(placeGangs.ExtPosX, placeGangs.ExtPosY, placeGangs.ExtPosZ));
-                    API.shared.setEntityRotation(player, _newPlayerRotation);
+                    API.shared.setEntityRotation(player, NewPlayerRotation);
                 }
             }
             var userHouse = ContextFactory.Instance.Property.FirstOrDefault(x => x.CharacterId == characterController.Character.Id);
             if (userHouse != null)
             {
                 API.shared.setEntityPosition(player, new Vector3(userHouse.ExtPosX, userHouse.ExtPosY, userHouse.ExtPosZ));
-                API.shared.setEntityRotation(player, _newPlayerRotation);
+                API.shared.setEntityRotation(player, NewPlayerRotation);
             }
             ContextFactory.Instance.SaveChanges();
         }
@@ -116,7 +116,7 @@ namespace TheGodfatherGM.Server
             //API.shared.exported.gtaocharacter.updatePlayerFace(player.handle);
         }
 
-        public static Vector3 GetSpawnPosition() { return _newPlayerPosition; }
-        public static int GetSpawnDimension() { return _newPlayerDimension; }
+        public static Vector3 GetSpawnPosition() { return NewPlayerPosition; }
+        public static int GetSpawnDimension() { return NewPlayerDimension; }
     }
 }

@@ -1,46 +1,74 @@
 using GTANetworkServer;
 using TheGodfatherGM.Data;
+using TheGodfatherGM.Server.Characters;
 
 namespace TheGodfatherGM.Server.Admin
 {
     public class AdminController
     {
         
-        public static bool AdminRankCheck(string cmd, Character character, Client player)
+        public static bool AdminRankCheck(Client player, string cmd)
         {
-            if (cmd == "makeadmin" && character.Admin > 4) return true;
-            else if (cmd == "createvehicle" && character.Admin > 4) return true;
-            else if (cmd == "creategroup" && character.Admin > 4) return true;
-            else if (cmd == "editgroup" && character.Admin > 4) return true;
-            else if (cmd == "createproperty" && character.Admin > 4) return true;
-            else if (cmd == "setproperty" && character.Admin > 4) return true;
-            else if (cmd == "editjob" && character.Admin > 4) return true;
-            else if (cmd == "setmoney" && character.Admin > 4) return true;
-            else if (cmd == "createnpc" && character.Admin > 4) return true;
-            else if (cmd == "givegun" && character.Admin > 1) return true;
-            else if (cmd == "createvehicle" && character.Admin > 1) return true;
-            else if (cmd == "goto" && character.Admin > 1) return true;
-            else if (cmd == "switchgroup" && character.Admin > 1) return true;
-            else if (cmd == "setskin" && character.Admin > 1) return true;
-            else if (cmd == "sethealth" && character.Admin > 1) return true;
-            else if (cmd == "setarmor" && character.Admin > 1) return true;
+            CharacterController characterController = player.getData("CHARACTER");
+            if (characterController == null) return false;
 
+            switch (characterController.Character.Admin)
+            {
+                case 1:
+                    break;
 
-            API.shared.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~У вас нет доступа к данной команде!");
+                case 5:
+                    switch (cmd)
+                    {
+                        case "createhome":
+                            return true;
+                        case "createpickup":
+                            return true;
+                        case "createvehicle":
+                            return true;
+                    }
+                    break;
+
+                case 10:
+                    switch (cmd)
+                    {
+                        case "createhome":
+                            return true;
+                        case "createjob":
+                            return true;
+                        case "createpickup":
+                            return true;
+                        case "createproperty":
+                            return true;
+                        case "createvehicle":
+                            return true;
+                        case "editjob":
+                            return true;
+                        case "invincible":
+                            return true;
+                        case "givemoney":
+                            return true;
+                    }
+                    break;
+            }
+            if (characterController.Character.Admin != 0)
+            {
+                if (cmd == "gocoo") return true;
+                if (cmd == "goto") return true;
+                if (cmd == "sethealth") return true;
+                if (cmd == "setarmor") return true;
+            }
+            API.shared.sendNotificationToPlayer(player, "~r~[ОШИБКА]: ~w~У вас нет доступа к данной команде!");
             return false;
         }
 
-        public static string GetAdminRank(int Level)
+        public static string GetAdminRank(int level)
         {
-            switch (Level)
+            switch (level)
             {
                 case 1: return "~g~Уровень 1 Админ~w~";
-                case 2: return "~g~Уровень 2 Админ~w~";
-                case 3: return "~g~Уровень 3 Админ~w~";
-                case 4: return "~o~Старший Админ~w~";
-                case 5: return "~r~Ведущий Админ~w~";
-                case 6: return "~r~Управление~w~";
-                case 9: return "~p~Root Доступ~w~";
+                case 5: return "~g~Уровень 5 Админ~w~";
+                case 10: return "~g~Уровень 10 Админ~w~";
                 default: return "";
             }
         }

@@ -16,8 +16,7 @@ namespace TheGodfatherGM.Server
             // First registration of character clothes
             if (check == 0)
             {
-                Weapon weapon = new Weapon();
-                weapon.CharacterId = character.Id;
+                var weapon = new Weapon {CharacterId = character.Id};
                 ContextFactory.Instance.Weapon.Add(weapon);
                 ContextFactory.Instance.SaveChanges();
             }
@@ -27,9 +26,9 @@ namespace TheGodfatherGM.Server
             // Respawn with weapons from DB
             if (check == 1)
             {
-                WeaponTint weaponTint = new WeaponTint();
+                var weaponTint = new WeaponTint();
                 if (CharacterController.IsCharacterInArmy(character)) weaponTint = WeaponTint.Army;
-                if (CharacterController.IsCharacterInFBI(character) ||
+                if (CharacterController.IsCharacterInFbi(character) ||
                     CharacterController.IsCharacterInPolice(character)) weaponTint = WeaponTint.LSPD;
                 if (CharacterController.IsCharacterInGang(character)) weaponTint = WeaponTint.Gold;
 

@@ -11,11 +11,8 @@ namespace TheGodfatherGM.Server
         {
             if (character == null) return;
 
-            ClothesTypes typeClothes = null;
-            Clothes playerClothes = null;
-
-            playerClothes = ContextFactory.Instance.Clothes.FirstOrDefault(x => x.CharacterId == character.Id);
-            typeClothes = ContextFactory.Instance.ClothesTypes.FirstOrDefault(x => x.Type == type);
+            var playerClothes = ContextFactory.Instance.Clothes.FirstOrDefault(x => x.CharacterId == character.Id);
+            var typeClothes = ContextFactory.Instance.ClothesTypes.FirstOrDefault(x => x.Type == type);
 
             playerClothes.MaskSlot = typeClothes.MaskSlot; playerClothes.MaskDraw = typeClothes.MaskDraw;
             playerClothes.TorsoSlot = typeClothes.TorsoSlot; playerClothes.TorsoDraw = typeClothes.TorsoDraw;
@@ -45,9 +42,8 @@ namespace TheGodfatherGM.Server
             // First registration of character clothes
             if (check == 0)
             {
-                ClothesTypes typeClothes = new ClothesTypes();
                 playerClothes = new Clothes();
-                typeClothes = ContextFactory.Instance.ClothesTypes.FirstOrDefault(x => x.Type == 101);
+                var typeClothes = ContextFactory.Instance.ClothesTypes.FirstOrDefault(x => x.Type == 101);
                 playerClothes.CharacterId = character.Id;
                 playerClothes.MaskSlot = typeClothes.MaskSlot;
                 playerClothes.MaskDraw = typeClothes.MaskDraw;
@@ -122,9 +118,9 @@ namespace TheGodfatherGM.Server
             }
         }
         // TODO: add another clothes for different gangs!
-        public static int SetFractionClothes(Client player, int fractionID, Character character)
+        public static int SetFractionClothes(Client player, int fractionId, Character character)
         {
-            switch (fractionID)
+            switch (fractionId)
             {
                 case 2: SetPlayerSkinClothesToDb(player, 2, character, 1); return 2;
                 case 1301: SetPlayerSkinClothesToDb(player, 131, character, 1); return 131;

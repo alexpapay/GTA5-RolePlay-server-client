@@ -43,10 +43,8 @@ namespace TheGodfatherGM.Server.Characters
                 Character.Online = true;
 
                 // Dynamic ID
-                var characters = ContextFactory.Instance.Character.
-                Where(x => x.OID != 0)
-                .OrderBy(x => x.OID);
-                Character firstCharacter = new Character();
+                var characters = ContextFactory.Instance.Character.Where(x => x.OID != 0).OrderBy(x => x.OID);
+                var firstCharacter = new Character();
 
                 if (characters == null) Character.OID = 1; // Alone on the server
                 else
@@ -63,7 +61,7 @@ namespace TheGodfatherGM.Server.Characters
                                     Character.OID = firstCharacter.OID + 1;
                                     goto OIDok;
                                 }
-                                else firstCharacter.OID = character.OID;
+                                firstCharacter.OID = character.OID;
                             }
                         }
                         Character.OID = characters.Count() + 1;
@@ -75,7 +73,6 @@ namespace TheGodfatherGM.Server.Characters
             else
             {
                 API.shared.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: characterData is null");
-                return;
             }
         }
 
@@ -113,10 +110,7 @@ namespace TheGodfatherGM.Server.Characters
             ContextFactory.Instance.Character.Add(Character);
             ContextFactory.Instance.SaveChanges();
             API.shared.setPlayerSkin(player, PedHash.FreemodeMale01);
-
             InitializePedFace(player.handle);
-            //API.shared.exported.gtaocharacter.initializePedFace(player.handle);
-
             API.shared.triggerClientEvent(player, "face_custom");
         }
 
@@ -128,33 +122,13 @@ namespace TheGodfatherGM.Server.Characters
             Character.Rot = player.rotation.Z;
             Character.Model = player.model.GetHashCode();
         }
-        private void OnPlayerDeathHandler(Client player, NetHandle entityKiller, int weapon)
-        {
-
-            API.shared.sendNativeToPlayer(player, Hash._RESET_LOCALPLAYER_STATE, player);
-            API.shared.sendNativeToPlayer(player, Hash.RESET_PLAYER_ARREST_STATE, player);
-
-            API.shared.sendNativeToPlayer(player, Hash.IGNORE_NEXT_RESTART, true);
-            API.shared.sendNativeToPlayer(player, Hash._DISABLE_AUTOMATIC_RESPAWN, true);
-
-            API.shared.sendNativeToPlayer(player, Hash.SET_FADE_IN_AFTER_DEATH_ARREST, true);
-            API.shared.sendNativeToPlayer(player, Hash.SET_FADE_OUT_AFTER_DEATH, false);
-            API.shared.sendNativeToPlayer(player, Hash.NETWORK_REQUEST_CONTROL_OF_ENTITY, player);
-
-            API.shared.sendNativeToPlayer(player, Hash.FREEZE_ENTITY_POSITION, player, false);
-            API.shared.sendNativeToPlayer(player, Hash.NETWORK_RESURRECT_LOCAL_PLAYER, player.position.X, player.position.Y, player.position.Z, player.rotation.Z, false, false);
-            API.shared.sendNativeToPlayer(player, Hash.RESURRECT_PED, player);
-
-            API.shared.sendNativeToPlayer(player, Hash.SET_PED_TO_RAGDOLL, player, true);
-        }
-
         public static void CreateCharacter(Client player)
         {
             API.shared.triggerClientEvent(player, "create_char_menu", 0);
         }
         public static void SelectCharacter(Client player, Character character)
         {
-            CharacterController characterController = new CharacterController(player, character);
+            var characterController = new CharacterController(player, character);
             SpawnManager.SpawnCharacter(player, characterController);
 
             API.shared.triggerClientEvent(player, "stopAudio");
@@ -165,16 +139,18 @@ namespace TheGodfatherGM.Server.Characters
             API.shared.triggerClientEvent(player, "CEF_DESTROY");
         }
 
-        public GroupMember GetGroupInfo(int GroupId)
+        public GroupMember GetGroupInfo(int groupId)
         {
-            return Character.GroupMember.FirstOrDefault(x => x.Group.Id == GroupId);
+            return Character.GroupMember.FirstOrDefault(x => x.Group.Id == groupId);
         }
         public void AddGroup(Data.Group group, bool leader)
         {
-            GroupMember memberEntry = new GroupMember();
-            memberEntry.Character = Character;
-            memberEntry.Group = group;
-            memberEntry.Leader = leader;
+            var memberEntry = new GroupMember
+            {
+                Character = Character,
+                Group = group,
+                Leader = leader
+            };
             Character.GroupMember.Add(memberEntry);
             ContextFactory.Instance.SaveChanges();
         }
@@ -183,16 +159,15 @@ namespace TheGodfatherGM.Server.Characters
         {
             if (group == null) return;
 
-            GroupMember GroupInfo = GetGroupInfo(group.Id);
-            if (GroupInfo != null)
+            var groupInfo = GetGroupInfo(group.Id);
+            if (groupInfo == null) return;
+            ActiveGroup = new GroupMember
             {
-                ActiveGroup = new GroupMember();
-                ActiveGroup.Group = group;
-                ActiveGroup.Leader = GroupInfo.Leader;
-                Character.ActiveGroupID = GroupInfo.Group.Id;
-                API.shared.consoleOutput("Вы переведены в группу: " + ActiveGroup.Group.Name);
-            }
-            //API.shared.consoleOutput("Вы переведены в группу: " + group.Name + "На должность: " + Enum.GetName(typeof(Data.Enums.GroupExtraType), group.Id));
+                Group = group,
+                Leader = groupInfo.Leader
+            };
+            Character.ActiveGroupID = groupInfo.Group.Id;
+            API.shared.consoleOutput("Вы переведены в группу: " + ActiveGroup.Group.Name);
         }
 
         public string ListGroups()
@@ -325,10 +300,13 @@ namespace TheGodfatherGM.Server.Characters
 
         public static bool IsCharacterInActiveArmyCloth(Character character)
         {
-            if (character.ActiveClothes == 2) return true;
-            if (character.ActiveClothes == 3) return true;
-            if (character.ActiveClothes == 4) return true;
-            return false;
+            switch (character.ActiveClothes)
+            {
+                case 2: return true;
+                case 3: return true;
+                case 4: return true;
+                default: return false;
+            }
         }
         public static bool IsCharacterInArmy(CharacterController characterController)
         {
@@ -372,9 +350,12 @@ namespace TheGodfatherGM.Server.Characters
         }
         public static bool IsCharacterArmyGeneral(CharacterController characterController)
         {
-            if (characterController.Character.ActiveGroupID == 2015) return true;
-            if (characterController.Character.ActiveGroupID == 2115) return true;
-            return false;
+            switch (characterController.Character.ActiveGroupID)
+            {
+                case 2015:return true;
+                case 2115:return true;
+                default: return false;
+            }
         }
         public static bool IsCharacterArmyGeneral(Character character)
         {
@@ -395,13 +376,13 @@ namespace TheGodfatherGM.Server.Characters
                 character.ActiveGroupID <= 114) return true;
             return false;
         }
-        public static bool IsCharacterInFBI(CharacterController characterController)
+        public static bool IsCharacterInFbi(CharacterController characterController)
         {
             if (characterController.Character.ActiveGroupID >= 300 &&
                 characterController.Character.ActiveGroupID <= 310) return true;
             return false;
         }
-        public static bool IsCharacterInFBI(Character character)
+        public static bool IsCharacterInFbi(Character character)
         {
             if (character.ActiveGroupID >= 300 &&
                 character.ActiveGroupID <= 310) return true;
@@ -455,13 +436,13 @@ namespace TheGodfatherGM.Server.Characters
         public static string InWhichSectorOfGhetto(Client player)
         {
             // START points:
-            var x1 = -468.0; var y1 = -2262.0;
-            var x3 = -338.0; var y3 = -2132.0;
+            var y1 = -2262.0;
+            var y3 = -2132.0;
 
             for (var i = 1; i < 14; i++)
             {
-                x1 = -468.0;
-                x3 = -338.0;
+                var x1 = -468.0;
+                var x3 = -338.0;
                 for (var j = 1; j < 14; j++)
                 {
                     if (x1 < player.position.X && player.position.X < x3)

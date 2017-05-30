@@ -28,6 +28,13 @@ namespace TheGodfatherGM.Server
             JobController.LoadJobs();            
         }
 
+        public static void Log(Exception log, string place)
+        {
+            Console.BackgroundColor = ConsoleColor.Red;
+            API.shared.consoleOutput("[ERROR in "+ place + "]:" + log);
+            Console.ResetColor();
+        }
+
         private static Dictionary<int, CharacterController> characterDictionary = new Dictionary<int, CharacterController>();
 
         public static CharacterController GetUserAccount(int id)
@@ -36,12 +43,12 @@ namespace TheGodfatherGM.Server
             return null;
         }
 
-        public static CharacterController GetUserAccount(Client player, string IDOrName)
+        public static CharacterController GetUserAccount(Client player, string idOrName)
         {
             int id;
             int count = 0;
             
-            if (int.TryParse(IDOrName, out id))
+            if (int.TryParse(idOrName, out id))
             {
                 return GetUserAccount(id);
             }
@@ -50,9 +57,9 @@ namespace TheGodfatherGM.Server
 
             foreach (KeyValuePair<int, CharacterController> account in characterDictionary)
             {
-                if (account.Value.Character.Name.ToLower().StartsWith(IDOrName.ToLower()))
+                if (account.Value.Character.Name.ToLower().StartsWith(idOrName.ToLower()))
                 {
-                    if ((account.Value.Character.Name.Equals(IDOrName, StringComparison.OrdinalIgnoreCase)))
+                    if ((account.Value.Character.Name.Equals(idOrName, StringComparison.OrdinalIgnoreCase)))
                     {
                         return account.Value;
                     }
@@ -68,12 +75,12 @@ namespace TheGodfatherGM.Server
             return null;
         }
 
-        public static void ListUserAccounts(Client player, string IDOrName)
+        public static void ListUserAccounts(Client player, string idOrName)
         {
             int count = 0;
             foreach (KeyValuePair<int, CharacterController> userAccount in characterDictionary)
             {
-                if (userAccount.Value.Character.Name.ToLower().Contains(IDOrName.ToLower()))
+                if (userAccount.Value.Character.Name.ToLower().Contains(idOrName.ToLower()))
                 {
                     API.shared.sendChatMessageToPlayer(player, "" + userAccount.Value.FormatName + " (ID: " + userAccount.Value.Character.Id + ") - (Level: " + userAccount.Value.Character.Level + ") - (Ping: " + API.shared.getPlayerPing(player /*FIX!!!*/) + ")");
                     count++;

@@ -106,8 +106,8 @@ namespace TheGodfatherGM.Data.Models
                 case -956048545: return 40;
                 case 782665360:  return 200;
                 case 630371791:  return 120;
+                default: return 0;
             }
-            return 0;
         }
         public static double GetConsumption(int model)
         {

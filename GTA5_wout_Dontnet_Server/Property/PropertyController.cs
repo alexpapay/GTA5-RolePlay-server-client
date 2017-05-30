@@ -74,10 +74,10 @@ namespace TheGodfatherGM.Server.Property
         public ColShape PoliceStockColshape { get; private set; }
 
         //FBI place fileds
-        public Marker FBIMarker { get; private set; }
-        public TextLabel FBITextLabel { get; private set; }
-        public ColShape FBIMainColshape { get; private set; }
-        public ColShape FBIStockColshape { get; private set; }
+        public Marker FbiMarker { get; private set; }
+        public TextLabel FbiTextLabel { get; private set; }
+        public ColShape FbiMainColshape { get; private set; }
+        public ColShape FbiStockColshape { get; private set; }
 
         //Emergency place fileds
         public Marker EmergencyMarker { get; private set; }
@@ -438,7 +438,7 @@ namespace TheGodfatherGM.Server.Property
                     MafiaMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(2f, 2f, 2f), 250, 0, 100, 100);
                     MafiaTextLabel = API.createTextLabel("~w~Mafia Armeny\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ));
                     Blip.sprite = 78;
                     Blip.name = "Mafia Armeny : Главная";
                 }
@@ -456,7 +456,7 @@ namespace TheGodfatherGM.Server.Property
                     PoliceMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(3f, 3f, 3f), 250, 0, 255, 255);
                     PoliceTextLabel = API.createTextLabel("~w~Полиция\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ));
                     Blip.sprite = 56;
                     Blip.name = "Полиция : Склад";
                 }
@@ -477,24 +477,24 @@ namespace TheGodfatherGM.Server.Property
             {
                 if (PropertyData.Name == "FBI_main")
                 {
-                    FBIMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                    FbiMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(2f, 2f, 2f), 250, 0, 255, 255);
-                    FBITextLabel = API.createTextLabel("~w~FBI\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    FbiTextLabel = API.createTextLabel("~w~FBI\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ));
                     Blip.sprite = 60;
                     Blip.name = "FBI : Главная";
                 }
                 if (PropertyData.Name == "FBI_weapon")
                 {
-                    FBIMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                    FbiMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(1f, 1f, 1f), 250, 0, 255, 255);
-                    FBITextLabel = API.createTextLabel("~w~FBI\nОружие", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    FbiTextLabel = API.createTextLabel("~w~FBI\nОружие", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                 }
                 if (PropertyData.Name == "FBI_stock")
                 {
-                    FBIMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
+                    FbiMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(3f, 3f, 3f), 250, 0, 255, 255);
-                    FBITextLabel = API.createTextLabel("~w~FBI\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
+                    FbiTextLabel = API.createTextLabel("~w~FBI\nСклад", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
                 }
             }
             if (PropertyData.Type == PropertyType.Emergency)
@@ -504,7 +504,7 @@ namespace TheGodfatherGM.Server.Property
                     EmergencyMarker = API.shared.createMarker(1, new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) - new Vector3(0, 0, 1f), new Vector3(), new Vector3(),
                                                         new Vector3(2f, 2f, 2f), 250, 255, 10, 10);
                     EmergencyTextLabel = API.createTextLabel("~w~Emergency\nГлавная", new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ) + new Vector3(0.0f, 0.0f, 0.5f), 15.0f, 0.5f);
-                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 0);
+                    Blip = API.createBlip(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ));
                     Blip.sprite = 51;
                     Blip.name = "Emergency : Главная";
                 }
@@ -569,17 +569,14 @@ namespace TheGodfatherGM.Server.Property
             InteteriorColShape.onEntityExitColShape += (shape, entity) =>
             {
                 Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
-                {
-                    if (PropertyData.Enterable) player.resetData("AT_PROPERTY");
-                }
+                if ((player = API.getPlayerFromHandle(entity)) == null) return;
+                if (PropertyData.Enterable) player.resetData("AT_PROPERTY");
             };
 
             RentPlaceColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 3f);
             RentPlaceColshape.onEntityEnterColShape += (shape, entity) =>
             {
-                Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
+                if (API.getPlayerFromHandle(entity) != null)
                 {
                     if (PropertyData.Name == "Rent_scooter")                     
                         API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 1, PropertyData.Name);
@@ -587,18 +584,15 @@ namespace TheGodfatherGM.Server.Property
             };
             RentPlaceColshape.onEntityExitColShape += (shape, entity) =>
             {
-                if (API.getPlayerFromHandle(entity) != null)
-                {
-                    if (PropertyData.Name == "Rent_scooter")
-                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 0, PropertyData.Name); 
-                }
+                if (API.getPlayerFromHandle(entity) == null) return;
+                if (PropertyData.Name == "Rent_scooter")
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "scooter_rent_menu", 0, PropertyData.Name);
             };
             
             AutoschoolColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 3f);
             AutoschoolColshape.onEntityEnterColShape += (shape, entity) =>
             {
-                Client player;
-                if ((player = API.getPlayerFromHandle(entity)) != null)
+                if (API.getPlayerFromHandle(entity) != null)
                 {
                     if (PropertyData.Name == "Autoschool_main")
                         API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "autoschool_menu", 1, PropertyData.Name);
@@ -606,11 +600,9 @@ namespace TheGodfatherGM.Server.Property
             };
             AutoschoolColshape.onEntityExitColShape += (shape, entity) =>
             {
-                if (API.getPlayerFromHandle(entity) != null)
-                {
-                    if (PropertyData.Name == "Autoschool_main")
-                        API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "autoschool_menu", 0, PropertyData.Name);
-                }
+                if (API.getPlayerFromHandle(entity) == null) return;
+                if (PropertyData.Name == "Autoschool_main")
+                    API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "autoschool_menu", 0, PropertyData.Name);
             };
             
             MeriaColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 3f);
@@ -745,7 +737,6 @@ namespace TheGodfatherGM.Server.Property
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
                     CharacterController characterController = player.getData("CHARACTER");
-                    Character character = characterController.Character;
 
                     // GANG STEaLING:
                     if (PropertyData.Name == "Army1_gang" || PropertyData.Name == "Army2_gang")
@@ -784,12 +775,15 @@ namespace TheGodfatherGM.Server.Property
                 if ((player = API.getPlayerFromHandle(entity)) != null)
                 {
                     CharacterController characterController = player.getData("CHARACTER");
-                    Character character = characterController.Character;
+                    var character = characterController.Character;
                     var gangRank = characterController.Character.ActiveGroupID - characterController.Character.GroupType * 100;
-                    Group moneyInGang = new Group();
+                    var moneyInGang = new Group();
                     var moneyBankGroup = characterController.Character.GroupType * 100;
                     try { moneyInGang = ContextFactory.Instance.Group.First(x => x.Id == moneyBankGroup); }
-                    catch (Exception e) { }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
 
                     switch (PropertyData.Type)
                     {
@@ -1033,8 +1027,8 @@ namespace TheGodfatherGM.Server.Property
             };
 
             // FBI main (2f dimension)
-            FBIMainColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 2f);
-            FBIMainColshape.onEntityEnterColShape += (shape, entity) =>
+            FbiMainColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 2f, 2f);
+            FbiMainColshape.onEntityEnterColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
@@ -1043,15 +1037,15 @@ namespace TheGodfatherGM.Server.Property
                     {
                         CharacterController characterController = player.getData("CHARACTER");
 
-                        if (PropertyData.Name == "FBI_main" && CharacterController.IsCharacterInFBI(characterController))
+                        if (PropertyData.Name == "FBI_main" && CharacterController.IsCharacterInFbi(characterController))
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "fbi_menu", 0, PropertyData.Name, 0);
 
-                        if (PropertyData.Name == "FBI_weapon" && CharacterController.IsCharacterInFBI(characterController))
+                        if (PropertyData.Name == "FBI_weapon" && CharacterController.IsCharacterInFbi(characterController))
                             API.shared.triggerClientEvent(API.getPlayerFromHandle(entity), "fbi_menu", 0, PropertyData.Name, 0);
                     }
                 }
             };
-            FBIMainColshape.onEntityExitColShape += (shape, entity) =>
+            FbiMainColshape.onEntityExitColShape += (shape, entity) =>
             {
                 if (API.getPlayerFromHandle(entity) != null)
                 {
@@ -1061,8 +1055,8 @@ namespace TheGodfatherGM.Server.Property
             };
 
             // FBI stock (3f dimension)
-            FBIStockColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
-            FBIStockColshape.onEntityEnterColShape += (shape, entity) =>
+            FbiStockColshape = API.createCylinderColShape(new Vector3(PropertyData.ExtPosX, PropertyData.ExtPosY, PropertyData.ExtPosZ), 3f, 3f);
+            FbiStockColshape.onEntityEnterColShape += (shape, entity) =>
             {
                 Client player;
                 if ((player = API.getPlayerFromHandle(entity)) != null)
@@ -1077,7 +1071,7 @@ namespace TheGodfatherGM.Server.Property
                     }
                 }
             };
-            FBIStockColshape.onEntityExitColShape += (shape, entity) =>
+            FbiStockColshape.onEntityExitColShape += (shape, entity) =>
             {
                 if (API.getPlayerFromHandle(entity) != null)
                 {
@@ -1124,11 +1118,13 @@ namespace TheGodfatherGM.Server.Property
 
         public static void CreateHome(Client player, int cost)
         {
-            Data.Property propertyData = new Data.Property();
-            propertyData.CharacterId = null;
-            propertyData.GroupId = null;
+            var propertyData = new Data.Property
+            {
+                CharacterId = null,
+                GroupId = null
+            };
 
-            PropertyController propertyController = new PropertyController(propertyData);
+            var propertyController = new PropertyController(propertyData);
 
             propertyData.Name = "House";
 
@@ -1144,37 +1140,35 @@ namespace TheGodfatherGM.Server.Property
             propertyController.CreateWorldEntity();
             API.shared.sendChatMessageToPlayer(player, "~g~[СЕРВЕР]: ~w~ Добавлен новый дом!");
         }
-        public static void CreateProperty(Client player, string ownerType, PropertyType type, string Name, int cost)
+        public static void CreateProperty(Client player, string ownerType, PropertyType type, string name, int cost)
         {
-            Data.Property propertyData = new Data.Property();
+            var propertyData = new Data.Property();
             string ownerName;
-            if (ownerType == "player")
+            switch (ownerType)
             {
-                var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
-                if (targetCharacter == null) return;
-                propertyData.Character = targetCharacter;
-                ownerName = targetCharacter.Name;
-            }
-            else if (ownerType == "group")
-            {
-                Groups.GroupController groupController = EntityManager.GetGroup(player, Name);
-                if (groupController == null) return;
+                case "player":
+                    var targetCharacter = ContextFactory.Instance.Character.FirstOrDefault(x => x.SocialClub == player.socialClubName);
+                    if (targetCharacter == null) return;
+                    propertyData.Character = targetCharacter;
+                    ownerName = targetCharacter.Name;
+                    break;
+                case "group":
+                    var groupController = EntityManager.GetGroup(player, name);
+                    if (groupController == null) return;
 
-                propertyData.Group = groupController.Group;
-                ownerName = groupController.Group.Name;
-            }
-            else if (ownerType == "null")
-            {
-                propertyData.GroupId = null;
-                ownerName = null;
-            }
-            else
-            {
-                API.shared.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы указали неверный тип (player/group");
-                return;
+                    propertyData.Group = groupController.Group;
+                    ownerName = groupController.Group.Name;
+                    break;
+                case "null":
+                    propertyData.GroupId = null;
+                    ownerName = null;
+                    break;
+                default:
+                    API.shared.sendChatMessageToPlayer(player, "~r~[ОШИБКА]: ~w~Вы указали неверный тип (player/group");
+                    return;
             }
 
-            PropertyController propertyController = new PropertyController(propertyData);
+            var propertyController = new PropertyController(propertyData);
 
             if ((int)type == 100) propertyData.Name = "House";
 
@@ -1183,7 +1177,7 @@ namespace TheGodfatherGM.Server.Property
             propertyData.ExtPosX = player.position.X;
             propertyData.ExtPosY = player.position.Y;
             propertyData.ExtPosZ = player.position.Z;
-            propertyData.Enterable = false;
+            propertyData.Enterable = true;
             propertyController.ownername = ownerName;
 
             ContextFactory.Instance.Property.Add(propertyData);
@@ -1193,14 +1187,14 @@ namespace TheGodfatherGM.Server.Property
         }
         public int GetBlip()
         {
-            const int DefaultBlipId = 1;
+            const int defaultBlipId = 1;
 
             if (PropertyData.Character != null) return 40;
             if(GroupController.Group.ExtraType != 0)
             {
-                return GroupController.Group.ExtraType.GetAttributeOfType<BlipTypeAttribute>()?.BlipId ?? DefaultBlipId;
+                return GroupController.Group.ExtraType.GetAttributeOfType<BlipTypeAttribute>()?.BlipId ?? defaultBlipId;
             }
-            return GroupController.Group.Type.GetAttributeOfType<BlipTypeAttribute>()?.BlipId ?? DefaultBlipId;
+            return GroupController.Group.Type.GetAttributeOfType<BlipTypeAttribute>()?.BlipId ?? defaultBlipId;
         }
         public string Type()
         {
@@ -1235,7 +1229,7 @@ namespace TheGodfatherGM.Server.Property
         }
 
         [Command]
-        public void door(Client player)
+        public void Door(Client player)
         {
             PropertyDoor(player);
         }

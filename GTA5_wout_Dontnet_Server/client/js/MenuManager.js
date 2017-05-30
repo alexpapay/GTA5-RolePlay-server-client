@@ -869,7 +869,7 @@ API.onServerEventTrigger.connect(function (name, args) {
                         var material = parseInt(API.getUserInput("", 40));
                         API.displaySubtitle("Введите стоиомсть", 5000);
                         var cost = parseInt(API.getUserInput("", 40));
-                        API.triggerServerEvent("yes_no_menu", "gang_material_mafia", 0, material, mafiaId, initUserId, cost, intGroupType);
+                        API.triggerServerEvent("yes_no_menu", "gang_material_mafia", 0, material, mafiaId, initUserId, cost);
                     });
                     mainWindow2.AddItem(sellMafia);
                 }
@@ -1032,7 +1032,7 @@ API.onServerEventTrigger.connect(function (name, args) {
             mainWindow.AddItem(taxiStop);
         }   
         // Admin menu:
-        if (isAdmin == 5) {
+        if (isAdmin == 10) {
 
             var admin = API.createMenuItem("~g~Админка", "");
             admin.Activated.connect(function (menu, item) {
@@ -1482,14 +1482,7 @@ API.onServerEventTrigger.connect(function (name, args) {
             });
             mainWindow.AddItem(takeMaterial);
         }  
-        if (propertyName == "Army2_gang" || propertyName == "Army1_gang") {
-            var stealMySelf = API.createMenuItem("~s~Украсть 500 материалов", "");
-            stealMySelf.Activated.connect(function (menu, item) {
-                mainWindow.Visible = false;
-                API.triggerServerEvent("gang_menu", propertyName, 1);
-            });
-            mainWindow.AddItem(stealMySelf);
-        }   
+         
         if (propertyName == "Army2_stock" || propertyName == "Army1_stock") {
             var stealGroup = API.createMenuItem("~s~Украсть 1000 материалов", "");
             stealGroup.Activated.connect(function (menu, item) {

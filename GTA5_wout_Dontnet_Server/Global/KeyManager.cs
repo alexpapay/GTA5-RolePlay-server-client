@@ -1,16 +1,14 @@
-﻿using System;
+﻿using GTANetworkServer;
+using System;
 using System.Linq;
-using GTANetworkServer;
 using TheGodfatherGM.Data;
 using TheGodfatherGM.Data.Enums;
+using TheGodfatherGM.Data.Models;
 using TheGodfatherGM.Server.Characters;
 using TheGodfatherGM.Server.DBManager;
+using TheGodfatherGM.Server.Groups;
 using TheGodfatherGM.Server.Property;
 using TheGodfatherGM.Server.Vehicles;
-using System.Collections.Generic;
-using TheGodfatherGM.Server.Groups;
-using Newtonsoft.Json;
-using TheGodfatherGM.Data.Models;
 
 namespace TheGodfatherGM.Server.Global
 {
@@ -24,8 +22,8 @@ namespace TheGodfatherGM.Server.Global
         {
             CharacterController characterController = player.getData("CHARACTER");
             if (characterController == null) return;
-            Character character = characterController.Character;
-            string FormatName = character.Name.Replace("_", " ");
+            var character = characterController.Character;
+            var formatName = character.Name.Replace("_", " ");
 
             if (eventName == "onKeyDown")
             {
@@ -89,7 +87,7 @@ namespace TheGodfatherGM.Server.Global
                     API.shared.triggerClientEvent(player, "character_menu",
                         2,                                                  // 0
                         "Ваша статистика",                                  // 1
-                        "Ваше имя: " + FormatName,                          // 2
+                        "Ваше имя: " + formatName,                          // 2
                         character.Age,                                      // 3
                         character.Level.ToString(),                         // 4
                         job,                                                // 5
@@ -105,7 +103,7 @@ namespace TheGodfatherGM.Server.Global
                 // GET info about car
                 else if ((int)args[0] == 10)
                 {
-                    VehicleController vehicleController = null;
+                    VehicleController vehicleController;
                     
                     bool inVehicleCheck;
                     if (player.isInVehicle)
@@ -133,9 +131,8 @@ namespace TheGodfatherGM.Server.Global
 
                     var getGroup = ContextFactory.Instance.Group.FirstOrDefault(x => x.Id == character.ActiveGroupID);
                     var groupType = (GroupType)Enum.Parse(typeof(GroupType), getGroup.Type.ToString());
-                    var groupExtraType = (GroupExtraType)Enum.Parse(typeof(GroupExtraType), getGroup.ExtraType.ToString());
-                    var owner = "";
-                    if (vehicleController.VehicleData.GroupId == null) owner = "Владелец: " + FormatName;
+                    string owner;
+                    if (vehicleController.VehicleData.GroupId == null) owner = "Владелец: " + formatName;
                     else owner = "Владелец: " + EntityManager.GetDisplayName(groupType);
 
                     API.shared.triggerClientEvent(player, "vehicle_menu",
@@ -159,26 +156,32 @@ namespace TheGodfatherGM.Server.Global
                     var playerWeapons = API.getPlayerWeapons(player);
                     var weaponList = "";
                     for (var i = 0; i < playerWeapons.Length; i++)
-                        weaponList += playerWeapons[i].ToString() + "-";
+                        weaponList += playerWeapons[i] + "-";
 
-                    Data.Property materialProperty = new Data.Property();
+                    var materialProperty = new Data.Property();
 
-                    Group moneyStockGroup = new Group();
+                    var moneyStockGroup = new Group();
                     var groupStockName = GroupController.GetGroupStockName(character);                    
                     var moneyBankGroup = character.GroupType * 100;
 
                     var gangRank = (int)groupExtraType - (int)groupType * 100;
 
                     try { materialProperty = ContextFactory.Instance.Property.First(x => x.Name == groupStockName); }
-                    catch (Exception e) { }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
                     try { moneyStockGroup = ContextFactory.Instance.Group.First(x => x.Id == moneyBankGroup); }
-                    catch (Exception e) { }
+                    catch (Exception)
+                    {
+                        // ignored
+                    }
 
                     var gangsSectors = GroupController.GetGangsSectors();
                     var gangCurrentSector = CharacterController.InWhichSectorOfGhetto(player).Split(';');
                     var gangCurrentSectorData = GroupController.GetGangSectorData(Convert.ToInt32(gangCurrentSector[0]), Convert.ToInt32(gangCurrentSector[1]));
                     if (gangCurrentSectorData > 100) gangCurrentSectorData /= 10;
-                    var isSectorInYourGang = gangCurrentSectorData == (int)groupType ? true : false;
+                    var isSectorInYourGang = gangCurrentSectorData == (int)groupType;
                     if (gangCurrentSectorData > 100 && isSectorInYourGang == false)
                         isSectorInYourGang = true;
 
@@ -211,11 +214,9 @@ namespace TheGodfatherGM.Server.Global
                 }
                 else if ((int)args[0] == 13)
                 {
-                    API.shared.triggerClientEvent(player, "gang_map");
                 }
                 else if ((int)args[0] == 14)
                 {
-                    API.shared.triggerClientEvent(player, "face_custom");
                 }
             }
         }

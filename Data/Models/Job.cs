@@ -10,9 +10,7 @@ namespace TheGodfatherGM.Data
         [Key]
         public int Id { get; set; }
         public JobType Type { get; set; }
-
-        public int? GroupId { get; set; }
-        public Group Group { get; set; }
+        
         public int CharacterId { get; set; }
         public string OwnerName { get; set; }
 
@@ -25,7 +23,7 @@ namespace TheGodfatherGM.Data
         public int Cost { get; set; }
 
         public int MafiaRoofId { get; set; }
-        public int mafiaRoofMoney { get; set; }
+        public int MafiaRoofMoney { get; set; }
 
         public ICollection<Vehicle> Vehicles { get; set; }
     }

@@ -9,19 +9,13 @@ namespace TheGodfatherGM.Server.Groups
 {
     public class GroupController
     {
-
-        /*public string GetRankName(CharacterController Character)
-        {
-            return GroupData.Members.FirstOrDefault(x => x.CharacterID == Character.CharacterData.CharacterID).DivisionID.ToString();
-        }*/
-
         public Group Group;
 
         public GroupController() { }
 
-        public GroupController(Group GroupData)
+        public GroupController(Group groupData)
         {
-            Group = GroupData;
+            Group = groupData;
             EntityManager.Add(this);
         }
 
@@ -77,6 +71,7 @@ namespace TheGodfatherGM.Server.Groups
         public static void SetDefaultCaption (int id)
         {
             var caption = ContextFactory.Instance.Caption.FirstOrDefault(x => x.Id == id);
+            if (caption == null) return;
             caption.Time = DateTime.Now;
             caption.Sector = "0;0";
             caption.GangAttack = 0;
@@ -129,13 +124,16 @@ namespace TheGodfatherGM.Server.Groups
                     case 13: return selectedSector.Col13;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception)
+            {
+                // ignored
+            }
             return 0;
         }
         public static int [] GetCountOfGangsSectors()
         {
             var allSectors = GetGangsSectors();
-            var countOfSectors = new int[5] { 0,0,0,0,0 };
+            var countOfSectors = new[] { 0,0,0,0,0 };
 
             for (var i = 0; i < 169; i++)
             {
@@ -157,7 +155,7 @@ namespace TheGodfatherGM.Server.Groups
         }
         public static int [] GetGangsSectors ()
         {
-            int[] sectorsArray = new int [169];
+            var sectorsArray = new int [169];
             var inc = 0;
 
             for (var i = 0; i < 13; i++)

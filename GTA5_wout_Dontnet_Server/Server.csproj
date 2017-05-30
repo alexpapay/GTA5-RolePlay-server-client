@@ -82,9 +82,7 @@
     <Compile Include="Account\ChatController.cs" />
     <Compile Include="Account\ConnectionController.cs" />
     <Compile Include="Admin\AdminController.cs" />
-    <Compile Include="Admin\Commands.cs" />
     <Compile Include="Characters\CharacterController.cs" />
-    <Compile Include="Characters\Commands.cs" />
     <Compile Include="Clothes\ClothesManager.cs" />
     <Compile Include="Database\DatabaseManager.cs" />
     <Compile Include="Database\DefaultDbContext.cs" />
@@ -96,22 +94,22 @@
     <Compile Include="Global\KeyManager.cs" />
     <Compile Include="Global\MenuManager.cs" />
     <Compile Include="Global\UtilCommands.cs" />
-    <Compile Include="Groups\Commands.cs" />
     <Compile Include="Groups\GroupController.cs" />
     <Compile Include="Jobs\JobsPos.cs" />
-    <Compile Include="Jobs\Commands.cs" />
+    <Compile Include="Global\CreateCommands.cs" />
     <Compile Include="Jobs\JobController.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Property\PropertyController.cs" />
     <Compile Include="SpawnManager.cs" />
     <Compile Include="Global\Util.cs" />
-    <Compile Include="Vehicles\Commands.cs" />
     <Compile Include="Vehicles\VehicleController.cs" />
     <Compile Include="Weapon\WeaponManager.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="tsconfig.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
